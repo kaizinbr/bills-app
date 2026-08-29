@@ -1,4 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, useWindowDimensions } from "react-native";
+import {
+    View,
+    Text,
+    StyleSheet,
+    ScrollView,
+    useWindowDimensions,
+} from "react-native";
 import { useAuth } from "@/components/core/auth-provider";
 import { authClient } from "@/lib/auth-client";
 import Button from "@/components/core/button";
@@ -13,10 +19,12 @@ import Animated, {
     Extrapolation,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
+import Groups from "@/components/home/groups";
+import StatusBar from "@/components/core/status-bar";
 
 export default function Home() {
     const { session } = useAuth();
-    
+
     const { height } = useWindowDimensions();
     const HEADER_MAX_HEIGHT = height * 0.4;
 
@@ -39,41 +47,55 @@ export default function Home() {
     }));
 
     return (
-        <ScrollView style={styles.container}>
-            {/* <Animated.View
-                style={[
-                    styles.statusBarBg,
-                    {
-                        height: insets.top + 24,
-                    },
-                    // statusBarOpacityStyle,
-                ]}
-                pointerEvents="none"
+        <>
+            <StatusBar />
+            <ScrollView
+                style={styles.container}
+                contentContainerStyle={{
+                    paddingBottom: 64,
+                    alignItems: "flex-start",
+                    justifyContent: "flex-start",
+                    gap: 8,
+                }}
+                showsVerticalScrollIndicator={false}
             >
-                <LinearGradient
-                    colors={["#5E8C61", "transparent"]}
-                    style={StyleSheet.absoluteFill}
-                />
-            </Animated.View> */}
-            <Animated.View
-                style={[
-                    styles.statusBarBg,
-                    {
-                        height: HEADER_MAX_HEIGHT,
-                    },
-                    // statusBarOpacityStyle,
-                ]}
-                pointerEvents="none"
-            >
-                <LinearGradient
-                    colors={["#5E8C61", "transparent"]}
-                    style={StyleSheet.absoluteFill}
-                />
-            </Animated.View>
-            <Avatar />
-            <Text style={styles.title}>Olá, {session?.user.name}</Text>
-            <Button onPress={() => authClient.signOut()}>Sair</Button>
-        </ScrollView>
+            
+                {/* <Animated.View
+                    style={[
+                        styles.statusBarBg,
+                        {
+                            height: insets.top + 24,
+                        },
+                        // statusBarOpacityStyle,
+                    ]}
+                    pointerEvents="none"
+                >
+                    <LinearGradient
+                        colors={["#5E8C61", "transparent"]}
+                        style={StyleSheet.absoluteFill}
+                    />
+                </Animated.View> */}
+                {/* <Animated.View
+                    style={[
+                        styles.statusBarBg,
+                        {
+                            height: HEADER_MAX_HEIGHT,
+                        },
+                        // statusBarOpacityStyle,
+                    ]}
+                    pointerEvents="none"
+                >
+                    <LinearGradient
+                        colors={["#5E8C61", "transparent"]}
+                        style={StyleSheet.absoluteFill}
+                    />
+                </Animated.View> */}
+                <Avatar />
+                <Text style={styles.title}>Olá, {session?.user.name}</Text>
+                <Button onPress={() => authClient.signOut()}>Sair</Button>
+                <Groups />
+            </ScrollView>
+        </>
     );
 }
 
@@ -81,9 +103,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#161718",
-        gap: 16,
+        gap: 8,
         padding: 16,
         paddingTop: 64,
+        flexDirection: "column",
     },
     title: {
         color: "#eeeeee",

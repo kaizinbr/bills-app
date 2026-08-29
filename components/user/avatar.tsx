@@ -30,11 +30,6 @@ export default function Avatar({
             style={({ pressed }) => [
                 styles.main,
                 pressed && styles.mainPressed,
-                {
-                    width: size || 32,
-                    height: size || 32,
-                    borderRadius: 9999,
-                },
             ]}
         >
             {session?.user.image ? (
@@ -112,6 +107,10 @@ const styles = StyleSheet.create({
     main: {
         backgroundColor: "transparent",
         borderRadius: 8,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        gap: 8,
     },
     mainPressed: {
         backgroundColor: "#1e1e1e",

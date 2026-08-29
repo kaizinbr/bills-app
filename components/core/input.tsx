@@ -9,16 +9,18 @@ export default function Input({
     value,
     onChangeText,
     error,
+    style,
     ...props
 }: TextInputProps & {
     placeholder?: string;
-    value?: string;
+    value?: string | number | undefined | null | boolean | any;
     onChangeText?: (text: string) => void;
     error?: boolean;
+    style?: any;
 }) {
     return (
         <TextInput
-            style={[styles.input, error && styles.error]}
+            style={[styles.input, error && styles.error, style]}
             placeholder={placeholder}
             placeholderTextColor={"#BABABA"}
             value={value}
@@ -37,6 +39,8 @@ const styles = StyleSheet.create({
     },
     input: {
         width: "100%",
+        minWidth: "100%",
+        maxWidth: "100%",
         padding: 12,
         borderWidth: 1,
         borderColor: "#262626",
