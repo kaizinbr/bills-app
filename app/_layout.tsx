@@ -1,5 +1,6 @@
 import { Stack } from "expo-router";
 import { AuthProvider } from "@/components/core/auth-provider";
+import { AppQueryProvider } from "@/lib/query-client";
 
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "expo-router";
@@ -20,21 +21,23 @@ export default function RootLayout() {
             value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
             <SafeAreaProvider>
-                <AuthProvider>
-                    <SafeAreaView
-                        edges={["left", "right"]}
-                        style={{
-                            flex: 1,
-                        }}
-                    >
-                        <AnimatedSplashOverlay />
-                        <Stack screenOptions={{ headerShown: false }}>
-                            <Stack.Screen name="index" />
-                            <Stack.Screen name="sign-up" />
-                            <Stack.Screen name="(tabs)" />
-                        </Stack>
-                    </SafeAreaView>
-                </AuthProvider>
+                <AppQueryProvider>
+                    <AuthProvider>
+                        <SafeAreaView
+                            edges={["left", "right"]}
+                            style={{
+                                flex: 1,
+                            }}
+                        >
+                            <AnimatedSplashOverlay />
+                            <Stack screenOptions={{ headerShown: false }}>
+                                <Stack.Screen name="index" />
+                                <Stack.Screen name="sign-up" />
+                                <Stack.Screen name="(tabs)" />
+                            </Stack>
+                        </SafeAreaView>
+                    </AuthProvider>
+                </AppQueryProvider>
             </SafeAreaProvider>
         </ThemeProvider>
     );

@@ -1,11 +1,11 @@
-import { Text, View, StyleSheet, ScrollView, Pressable } from "react-native";
+import { Text, View, StyleSheet, ActivityIndicator, Pressable } from "react-native";
 import { authClient } from "@/lib/auth-client";
 import { useRouter, Href, Link } from "expo-router";
 import { Image } from "expo-image";
 import { UserProfile } from "@/lib/types";
 import { useAuth } from "@/components/core/auth-provider";
 import TextDefault from "@/components/core/text-core";
-
+import { useProfile } from "@/hooks/use-profile";
 
 export default function Avatar({
     data,
@@ -17,10 +17,15 @@ export default function Avatar({
     size?: number;
 }) {
     const router = useRouter();
-    const { session } = useAuth();
+
+    const { data: profile, isLoading } = useProfile();
+
 
     return (
-        <Pressable
+        <>
+            {isLoading ? (
+                <ActivityIndicator size="small" color="#0000ff" />
+            ) : (<Pressable
             onPress={() =>
                 router.push({
                     pathname: "/",
@@ -32,9 +37,9 @@ export default function Avatar({
                 pressed && styles.mainPressed,
             ]}
         >
-            {session?.user.image ? (
+            {profile.image ? (
                 <Image
-                    source={{ uri: session.user.image }}
+                    source={{ uri: profile.image }}
                     style={[
                         styles.cardImage,
                         style,
@@ -57,9 +62,10 @@ export default function Avatar({
                 ]} />
             )}
             <TextDefault style={{ color: "#eeeeee", fontSize: 12, marginTop: 4 }}>
-                {session?.user.name}
+                {profile.name}
             </TextDefault>
-        </Pressable>
+        </Pressable>)}
+        </>
     );
 }
 

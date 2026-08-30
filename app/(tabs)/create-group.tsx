@@ -22,8 +22,13 @@ import DateTimePicker, {
     DateType,
     useDefaultStyles,
 } from "react-native-ui-datepicker";
+import { useCreateGroup } from "@/hooks/use-create-group";
+import { useRouter } from "expo-router";
 
 export default function CreateGroup() {
+    const router = useRouter();
+    const { mutate: createGroup, isPending, isError, error } = useCreateGroup();
+
     const { session } = useAuth();
     const currentUserId = session?.user?.id;
     const insets = useSafeAreaInsets();
@@ -68,19 +73,19 @@ export default function CreateGroup() {
         fetchUsers();
     }, []);
 
-    const handleCreateGroup = async () => {
-        try {
-            const resolvedPayerId = iPay ? currentUserId : groupPayer;
-            const resolvedReceiverId = iReceive ? currentUserId : groupReceiver;
+    const handleCreateGroup = () => {
+        const resolvedPayerId = iPay ? currentUserId : groupPayer;
+        const resolvedReceiverId = iReceive ? currentUserId : groupReceiver;
 
-            if (!resolvedPayerId || !resolvedReceiverId) {
-                console.warn(
-                    "Selecione o pagador e o recebedor antes de criar o grupo.",
-                );
-                return;
-            }
+        if (!resolvedPayerId || !resolvedReceiverId) {
+            console.warn(
+                "Selecione o pagador e o recebedor antes de criar o grupo.",
+            );
+            return;
+        }
 
-            const response = await api.post("/groups", {
+        createGroup(
+            {
                 name: groupName,
                 payerId: resolvedPayerId,
                 receiverId: resolvedReceiverId,
@@ -89,11 +94,13 @@ export default function CreateGroup() {
                     : undefined,
                 archived: groupArchived,
                 cards: groupCards,
-            });
-            console.log("Group created:", response.data);
-        } catch (error) {
-            console.error("Error creating group:", error);
-        }
+            },
+            {
+                onSuccess: () => {
+                    router.back();
+                },
+            },
+        );
     };
 
     return (
@@ -288,17 +295,25 @@ export default function CreateGroup() {
                     </View>
                     <Pressable
                         onPress={handleCreateGroup}
+                        disabled={isPending}
                         style={{
                             padding: 12,
                             backgroundColor: "#282828",
                             borderRadius: 8,
                             marginTop: 16,
+                            opacity: isPending ? 0.6 : 1,
                         }}
                     >
                         <TextDefault style={{ color: "#fff" }}>
-                            Criar grupo
+                            {isPending ? "Criando..." : "Criar grupo"}
                         </TextDefault>
                     </Pressable>
+
+                    {isError && (
+                        <TextDefault style={{ color: "#FF6B6B", marginTop: 8 }}>
+                            Não foi possível criar o grupo. Tente novamente.
+                        </TextDefault>
+                    )}
                 </ScrollView>
             )}
         </View>
