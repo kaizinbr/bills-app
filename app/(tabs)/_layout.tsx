@@ -49,13 +49,6 @@ export default function TabsLayout() {
                     }}
                 />
 
-                <Tabs.Screen
-                    name="create-purchase/[groupId]"
-                    options={{
-                        title: "Create Purchase",
-                        href: null,
-                    }}
-                />
             </Tabs>
 
             <View style={styles.offlineContainer}>

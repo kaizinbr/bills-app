@@ -13,6 +13,8 @@ import { useGroups } from "@/hooks/use-group";
 import { useGroupPurchases } from "@/hooks/use-group-purchases";
 import { useGroupTotal } from "@/hooks/use-group-total";
 import { formatCurrency } from "@/lib/format-currency";
+import { groupPurchasesByDate } from "@/lib/group-purchases-by-date";
+import { PurchaseSection } from "@/components/home/purchase-section";
 
 import { CardIcon } from '@solar-icons/react-native/linear/card'
 import { WalletIcon } from '@solar-icons/react-native/linear/wallet'
@@ -64,29 +66,36 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(({ groupId }, ref) => {
         },
     }));
 
+    const sections = useMemo(
+    () => groupPurchasesByDate(purchases),
+    [purchases],
+);
+
     if (!group) return null;
 
     return (
         <View style={styles.container}>
-            <LinearGradient
-                colors={["#1DB954", "#0B3D22"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.groupCard}
-            >
-                <TextDefault style={styles.groupName}>{group.name}</TextDefault>
-                <TextDefault
-                    style={[
-                        styles.groupValue,
-                        { fontFamily: "Jersey25_400Regular" },
-                    ]}
+            <View style={{ paddingHorizontal: 16 }}>
+                <LinearGradient
+                    colors={["#1DB954", "#0B3D22"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.groupCard}
                 >
-                    {formatCurrency(totalData?.total)}
-                </TextDefault>
-                <TextDefault style={styles.groupClosing}>
-                    Fecha dia {group.closingDay}
-                </TextDefault>
-            </LinearGradient>
+                    <TextDefault style={styles.groupName}>{group.name}</TextDefault>
+                    <TextDefault
+                        style={[
+                            styles.groupValue,
+                            { fontFamily: "Jersey25_400Regular" },
+                        ]}
+                    >
+                        {formatCurrency(totalData?.total)}
+                    </TextDefault>
+                    <TextDefault style={styles.groupClosing}>
+                        Fecha dia {group.closingDay}
+                    </TextDefault>
+                </LinearGradient>
+            </View>
 
             <ScrollView
                 horizontal
@@ -113,7 +122,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(({ groupId }, ref) => {
                         ]}
                     >
                         <CardIcon size={24} color="white" />
-                        <TextDefault>{card.name}</TextDefault>
+                        <TextDefault style={styles.infoChipText}>{card.name}</TextDefault>
                     </View>
                 ))}
 
@@ -127,56 +136,52 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(({ groupId }, ref) => {
                     style={styles.infoChip}
                 >
                     <WalletIcon size={24} color="white" />
-                    <TextDefault>Criar cartão</TextDefault>
+                    <TextDefault style={styles.infoChipText}>Criar cartão</TextDefault>
                 </Pressable>
 
                 <Pressable
                     onPress={() =>
                         router.push({
-                            pathname: "/create-purchase/[groupId]",
+                            pathname: "/(out)/purchase-edit",
                             params: { groupId: group.id },
                         })
                     }
                     style={styles.infoChip}
                 >
                     <BagCheckIcon  size={24} color="white" />
-                    <TextDefault>Criar compra</TextDefault>
+                    <TextDefault style={styles.infoChipText}>Criar compra</TextDefault>
+                </Pressable>
+                <Pressable
+                    onPress={() =>
+                        router.push({
+                            pathname: "/create-group",
+                            params: { groupId: group.id },
+                        })
+                    }
+                    style={styles.infoChip}
+                >
+                    <BagCheckIcon  size={24} color="white" />
+                    <TextDefault style={styles.infoChipText}>Criar conta</TextDefault>
                 </Pressable>
             </ScrollView>
 
             <View style={styles.purchasesList}>
-                {purchasesLoading ? (
-                    <ActivityIndicator
-                        size="small"
-                        color="#B3B3B3"
-                        style={{ marginTop: 12 }}
-                    />
-                ) : (
-                    purchases.map((purchase) => (
-                        <View key={purchase.id} style={styles.purchaseItem}>
-                            <TextDefault style={styles.purchaseDescription}>
-                                {purchase.description || "Sem descrição"}
-                            </TextDefault>
-                            <TextDefault
-                                style={[
-                                    styles.purchaseAmount,
-                                    { fontFamily: "Jersey25_400Regular" },
-                                ]}
-                            >
-                                {formatCurrency(purchase.amount)}
-                            </TextDefault>
-                        </View>
-                    ))
-                )}
+    {purchasesLoading ? (
+        <ActivityIndicator size="small" color="#B3B3B3" style={{ marginTop: 12 }} />
+    ) : (
+        sections.map((section) => (
+            <PurchaseSection
+                key={section.date}
+                date={section.date}
+                purchases={section.purchases}
+            />
+        ))
+    )}
 
-                {isFetchingNextPage && (
-                    <ActivityIndicator
-                        size="small"
-                        color="#B3B3B3"
-                        style={{ marginVertical: 16 }}
-                    />
-                )}
-            </View>
+    {isFetchingNextPage && (
+        <ActivityIndicator size="small" color="#B3B3B3" style={{ marginVertical: 16 }} />
+    )}
+</View>
         </View>
     );
 });
@@ -187,6 +192,7 @@ const styles = StyleSheet.create({
     container: {
         width: "100%",
         gap: 16,
+        // minHeight: 1600,
     },
     groupCard: {
         padding: 16,
@@ -212,6 +218,7 @@ const styles = StyleSheet.create({
     infoRow: {
         flexDirection: "row",
         gap: 8,
+        paddingHorizontal: 16,
     },
     infoChip: {
         paddingHorizontal: 12,
@@ -220,7 +227,13 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         aspectRatio: 5/3,
     },
+    infoChipText: {
+        color: "#fff",
+        fontSize: 12,
+        marginTop: 4,
+    },
     purchasesList: {
+        paddingHorizontal: 16,
         width: "100%",
     },
     purchaseItem: {
@@ -240,4 +253,5 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#fff",
     },
+
 });

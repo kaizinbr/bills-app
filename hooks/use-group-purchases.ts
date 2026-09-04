@@ -2,7 +2,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 
-type Purchase = {
+export type Purchase = {
     id: string;
     description: string;
     amount: number;

@@ -6,21 +6,18 @@ import {
     Platform,
     Pressable,
     RefreshControl,
+    ScrollView,
     StyleSheet,
     Text,
     useWindowDimensions,
     View,
 } from "react-native";
-import Popover, {
-    PopoverMode,
-    PopoverPlacement,
-} from "react-native-popover-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import StatusBar from "@/components/core/status-bar";
 import Groups from "@/components/home/groups";
 import { useGroups } from "@/hooks/use-group";
-import { useQueryClient, useIsFetching } from "@tanstack/react-query";
+import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 
 import type { GroupsHandle } from "@/components/home/groups";
 import {
@@ -31,7 +28,10 @@ import {
     useSharedValue,
 } from "react-native-reanimated";
 
-import { AltArrowDownIcon } from "@solar-icons/react-native/linear/alt-arrow-down";
+import PopoverMenu from "@/components/home/popover-btn";
+import ScrollToTopBtn from "@/components/home/scroll-top-btn";
+import CreatePurchase from "@/components/home/float-btn";
+import FromTheStart from "@/components/home/start";
 
 const HEADER_HEIGHT = 64;
 
@@ -39,6 +39,7 @@ export default function Home() {
     const { session } = useAuth();
     const queryClient = useQueryClient();
     const { data, refetch, isFetching } = useGroups();
+    const [showHeader, setShowHeader] = useState(false);
 
     const groupsRef = useRef<GroupsHandle>(null);
     const [scrollViewHeight, setScrollViewHeight] = useState(0);
@@ -64,6 +65,8 @@ export default function Home() {
             Extrapolation.CLAMP,
         ),
     }));
+
+    const scrollRef = useRef<ScrollView>(null);
 
     const scrollY = useRef(new Animated.Value(0)).current;
     const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
@@ -96,7 +99,7 @@ export default function Home() {
 
         const timeout = setTimeout(() => {
             setMenuOpen(false);
-        }, 5000);
+        }, 10000);
 
         return () => clearTimeout(timeout);
     }, [menuOpen]);
@@ -111,6 +114,16 @@ export default function Home() {
         extrapolate: "clamp",
     });
 
+    const floatbBtnTranslateY = Animated.diffClamp(
+        scrollY,
+        0,
+        HEADER_HEIGHT,
+    ).interpolate({
+        inputRange: [0, HEADER_HEIGHT],
+        outputRange: [0, 100],
+        extrapolate: "clamp",
+    });
+
     const isFetchingGroupData = useIsFetching({
         predicate: (query) =>
             query.queryKey[0] === "groups" ||
@@ -118,7 +131,20 @@ export default function Home() {
                 query.queryKey[1] === selectedGroupId),
     });
 
+    useEffect(() => {
+        if (!selectedGroupId) return;
+
+        setShowHeader(false);
+        setMenuOpen(false);
+
+        requestAnimationFrame(() => {
+            scrollRef.current?.scrollTo({ y: 0, animated: false });
+            scrollY.setValue(0);
+        });
+    }, [selectedGroupId, scrollY]);
+
     const onRefresh = useCallback(() => {
+        setShowHeader(true);
         refetch();
         if (selectedGroupId) {
             queryClient.invalidateQueries({
@@ -141,7 +167,11 @@ export default function Home() {
                         height: HEADER_HEIGHT + insets.top,
                         transform: [
                             {
-                                translateY: headerTranslateY,
+                                translateY: menuOpen
+                                    ? 0
+                                    : showHeader
+                                      ? 0
+                                      : headerTranslateY,
                             },
                         ],
                     },
@@ -152,70 +182,15 @@ export default function Home() {
                         <Avatar />
                     </View>
 
-                    <View style={styles.headerCenter}>
-                        <Popover
-                            isVisible={menuOpen}
-                            onRequestClose={closeMenu}
-                            from={(sourceRef) => (
-                                <Pressable
-                                    ref={sourceRef}
-                                    style={[
-                                        styles.headerButton,
-                                        menuOpen && styles.headerButtonActive,
-                                    ]}
-                                    onPress={() => setMenuOpen((prev) => !prev)}
-                                >
-                                    <Text
-                                        style={styles.headerButtonTitle}
-                                        numberOfLines={1}
-                                    >
-                                        {selectedGroup?.name ??
-                                            "Selecionar conta"}
-                                    </Text>
-                                    <AltArrowDownIcon
-                                        size={14}
-                                        color="#fff"
-                                        style={{
-                                            transform: [
-                                                {
-                                                    rotate: menuOpen
-                                                        ? "180deg"
-                                                        : "0deg",
-                                                },
-                                            ],
-                                        }}
-                                    />
-                                </Pressable>
-                            )}
-                            placement={PopoverPlacement.BOTTOM}
-                            mode={PopoverMode.RN_MODAL}
-                            popoverStyle={styles.popover}
-                            backgroundStyle={{ backgroundColor: "transparent" }}
-                            arrowSize={{ width: 12, height: 8 }}
-                            offset={10}
-                        >
-                            <View style={styles.dropdownMenu}>
-                                {allGroups.map((group) => (
-                                    <Pressable
-                                        key={group.id}
-                                        style={[
-                                            styles.dropdownItem,
-                                            group.id === selectedGroupId &&
-                                                styles.dropdownItemSelected,
-                                        ]}
-                                        onPress={() => {
-                                            setSelectedGroupId(group.id);
-                                            setMenuOpen(false);
-                                        }}
-                                    >
-                                        <Text style={styles.dropdownItemText}>
-                                            {group.name}
-                                        </Text>
-                                    </Pressable>
-                                ))}
-                            </View>
-                        </Popover>
-                    </View>
+                    <PopoverMenu
+                        data={data}
+                        menuOpen={menuOpen}
+                        setMenuOpen={setMenuOpen}
+                        selectedGroupId={selectedGroupId}
+                        setSelectedGroupId={setSelectedGroupId}
+                        scrollRef={scrollRef}
+                        setShowHeader={setShowHeader}
+                    />
 
                     <View style={styles.headerActions}>
                         <Pressable style={styles.iconButton}>
@@ -224,8 +199,14 @@ export default function Home() {
                     </View>
                 </View>
             </Animated.View>
+            {/* <ScrollToTopBtn scrollRef={scrollRef} scrollY={scrollY} /> */}
+            <CreatePurchase
+                selectedGroupId={selectedGroupId}
+                floatbBtnTranslateY={floatbBtnTranslateY}
+            />
             <Animated.ScrollView
                 style={styles.container}
+                ref={scrollRef}
                 contentContainerStyle={{
                     paddingTop: HEADER_HEIGHT,
                     paddingBottom: 64,
@@ -282,6 +263,18 @@ export default function Home() {
                 }
             >
                 <Groups ref={groupsRef} groupId={selectedGroupId} />
+                {allGroups.length === 0 && (
+                    <View
+                        style={{
+                            width: "100%",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: 16,
+                        }}
+                    >
+                        <FromTheStart />
+                    </View>
+                )}
             </Animated.ScrollView>
         </View>
     );
@@ -296,7 +289,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#161718",
         gap: 8,
-        padding: 16,
+        // padding: 16,
         paddingTop: 64,
         flexDirection: "column",
     },

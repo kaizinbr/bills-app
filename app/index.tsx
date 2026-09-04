@@ -1,10 +1,16 @@
-import { useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { Redirect, Link } from "expo-router";
-import { authClient } from "@/lib/auth-client";
 import { useAuth } from "@/components/core/auth-provider";
-import Input from "@/components/core/input";
 import Button from "@/components/core/button";
+import Input from "@/components/core/input";
+import { authClient } from "@/lib/auth-client";
+import { Link, Redirect } from "expo-router";
+import { useState } from "react";
+import {
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text
+} from "react-native";
 
 export default function SignIn() {
     const { session, isPending } = useAuth();
@@ -29,35 +35,46 @@ export default function SignIn() {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Entrar</Text>
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+            <ScrollView
+                contentContainerStyle={styles.content}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+            >
+                <Text style={styles.title}>Entrar</Text>
 
-            <Input
-                placeholder="E-mail"
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                error={!!error}
-            />
-            <Input
-                placeholder="Senha"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                error={!!error}
-            />
+                <Input
+                    placeholder="E-mail"
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    error={!!error}
+                />
+                <Input
+                    placeholder="Senha"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                    error={!!error}
+                />
 
-            {error && <Text style={styles.errorText}>{error}</Text>}
+                {error && <Text style={styles.errorText}>{error}</Text>}
 
-            <Button onPress={handleSignIn} loading={loading}>
-                Entrar
-            </Button>
+                <Button onPress={handleSignIn} loading={loading}>
+                    Entrar
+                </Button>
 
-            <Link href="/sign-up" style={styles.link}>
-                <Text style={styles.linkText}>Não tem conta? Cadastre-se</Text>
-            </Link>
-        </View>
+                <Link href="/sign-up" style={styles.link}>
+                    <Text style={styles.linkText}>
+                        Não tem conta? Cadastre-se
+                    </Text>
+                </Link>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 }
 
@@ -65,6 +82,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#161718",
+    },
+    content: {
+        flexGrow: 1,
         justifyContent: "center",
         padding: 24,
         gap: 12,

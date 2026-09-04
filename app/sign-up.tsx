@@ -1,10 +1,16 @@
-import { useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { Redirect, Link } from "expo-router";
-import { authClient } from "@/lib/auth-client";
 import { useAuth } from "@/components/core/auth-provider";
-import Input from "@/components/core/input";
 import Button from "@/components/core/button";
+import Input from "@/components/core/input";
+import { authClient } from "@/lib/auth-client";
+import { Link, Redirect } from "expo-router";
+import { useState } from "react";
+import {
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text
+} from "react-native";
 
 export default function SignUp() {
     const { session, isPending } = useAuth();
@@ -20,7 +26,11 @@ export default function SignUp() {
     const handleSignUp = async () => {
         setError(null);
         setLoading(true);
-        const { error } = await authClient.signUp.email({ name, email, password });
+        const { error } = await authClient.signUp.email({
+            name,
+            email,
+            password,
+        });
         setLoading(false);
         if (error) {
             setError(error.message ?? "Não foi possível criar a conta");
@@ -28,41 +38,50 @@ export default function SignUp() {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Criar conta</Text>
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+            <ScrollView
+                contentContainerStyle={styles.content}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+            >
+                <Text style={styles.title}>Criar conta</Text>
 
-            <Input
-                placeholder="Nome"
-                value={name}
-                onChangeText={setName}
-                error={!!error}
-            />
-            <Input
-                placeholder="E-mail"
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                error={!!error}
-            />
-            <Input
-                placeholder="Senha"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                error={!!error}
-            />
+                <Input
+                    placeholder="Nome"
+                    value={name}
+                    onChangeText={setName}
+                    error={!!error}
+                />
+                <Input
+                    placeholder="E-mail"
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    error={!!error}
+                />
+                <Input
+                    placeholder="Senha"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                    error={!!error}
+                />
 
-            {error && <Text style={styles.errorText}>{error}</Text>}
+                {error && <Text style={styles.errorText}>{error}</Text>}
 
-            <Button onPress={handleSignUp} loading={loading}>
-                Criar conta
-            </Button>
+                <Button onPress={handleSignUp} loading={loading}>
+                    Criar conta
+                </Button>
 
-            <Link href="/" style={styles.link}>
-                <Text style={styles.linkText}>Já tem conta? Entrar</Text>
-            </Link>
-        </View>
+                <Link href="/" style={styles.link}>
+                    <Text style={styles.linkText}>Já tem conta? Entrar</Text>
+                </Link>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 }
 
@@ -70,6 +89,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#161718",
+    },
+    content: {
+        flexGrow: 1,
         justifyContent: "center",
         padding: 24,
         gap: 12,
