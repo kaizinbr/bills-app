@@ -149,6 +149,9 @@ export default function Home() {
         setShowHeader(true);
         refetch(); // groups
         groupsRef.current?.refreshInvoiceData(); // invoices + purchases + total da fatura selecionada
+        setTimeout(() => {
+            setShowHeader(false);
+        }, 1000);
     }, [refetch]);
 
     return (
@@ -208,6 +211,7 @@ export default function Home() {
                     alignItems: "flex-start",
                     justifyContent: "flex-start",
                     gap: 8,
+                    minHeight: height - HEADER_HEIGHT - insets.top - insets.bottom,
                 }}
                 showsVerticalScrollIndicator={false}
                 scrollEventThrottle={16}

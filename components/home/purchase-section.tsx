@@ -22,6 +22,7 @@ export function PurchaseSection({ date, purchases }: PurchaseSectionProps) {
                     description={purchase.description}
                     category={purchase.category}
                     amount={purchase.amount}
+                    id={purchase.id}
                 />
             ))}
         </View>
@@ -36,7 +37,8 @@ const styles = StyleSheet.create({
         textTransform: "uppercase",
         paddingTop: 20,
         paddingBottom: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: "#232323",
+        paddingHorizontal: 16,
+        // borderBottomWidth: 1,
+        // borderBottomColor: "#232323",
     },
 });

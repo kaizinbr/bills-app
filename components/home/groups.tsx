@@ -31,6 +31,7 @@ import { BagCheckIcon } from "@solar-icons/react-native/linear/bag-check";
 import { Bag3Icon } from "@solar-icons/react-native/linear/bag-3";
 import { UserCircleIcon } from "@solar-icons/react-native/linear/user-circle";
 import { RefreshCircleIcon } from "@solar-icons/react-native/linear/refresh-circle";
+import InvoicesCarousel from "@/components/home/invoices-carousel";
 
 type GroupsProps = {
     groupId: string | null;
@@ -155,6 +156,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(({ groupId }, ref) => {
 
     return (
         <View style={styles.container}>
+            {/* <InvoicesCarousel /> */}
             <View style={{ paddingHorizontal: 16 }}>
                 <LinearGradient
                     colors={["#00C89B", "#0B3D22"]}
@@ -200,6 +202,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(({ groupId }, ref) => {
                     );
                 })}
             </ScrollView>
+
 
             {/* credor, cartões e ações da conta */}
             <ScrollView
@@ -391,7 +394,7 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     purchasesList: {
-        paddingHorizontal: 16,
+        // paddingHorizontal: 16,
         width: "100%",
     },
 });

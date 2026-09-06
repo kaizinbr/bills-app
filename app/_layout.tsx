@@ -2,6 +2,9 @@ import { Stack } from "expo-router";
 import { AuthProvider } from "@/components/core/auth-provider";
 import { AppQueryProvider } from "@/lib/query-client";
 
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -23,19 +26,23 @@ export default function RootLayout() {
             <SafeAreaProvider>
                 <AppQueryProvider>
                     <AuthProvider>
-                        <SafeAreaView
-                            edges={["left", "right"]}
-                            style={{
-                                flex: 1,
-                            }}
-                        >
-                            <AnimatedSplashOverlay />
-                            <Stack screenOptions={{ headerShown: false }}>
-                                <Stack.Screen name="index" />
-                                <Stack.Screen name="sign-up" />
-                                <Stack.Screen name="(tabs)" />
-                            </Stack>
-                        </SafeAreaView>
+                        <GestureHandlerRootView style={{ flex: 1 }}>
+                            <BottomSheetModalProvider>
+                                <SafeAreaView
+                                    edges={["left", "right"]}
+                                    style={{
+                                        flex: 1,
+                                    }}
+                                >
+                                    <AnimatedSplashOverlay />
+                                    <Stack screenOptions={{ headerShown: false }}>
+                                        <Stack.Screen name="index" />
+                                        <Stack.Screen name="sign-up" />
+                                        <Stack.Screen name="(tabs)" />
+                                    </Stack>
+                                </SafeAreaView>
+                            </BottomSheetModalProvider>
+                        </GestureHandlerRootView>
                     </AuthProvider>
                 </AppQueryProvider>
             </SafeAreaProvider>

@@ -1,5 +1,6 @@
 import { StyleSheet, TextInput, TextInputProps } from "react-native";
 import React, { useState } from "react";
+import BottomSheet, { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 
 export default function Input({
     placeholder,
@@ -18,6 +19,42 @@ export default function Input({
     const [isFocused, setIsFocused] = useState(false);
     return (
         <TextInput
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            style={[
+                styles.input,
+                error && styles.error,
+                style,
+                isFocused && { borderBottomColor: "#00C89B" },
+            ]}
+            placeholder={placeholder}
+            placeholderTextColor={"#BABABA"}
+            value={value}
+            onChangeText={onChangeText}
+            
+            {...props}
+        />
+    );
+}
+
+
+export function BottomSheetInput({
+    placeholder,
+    value,
+    onChangeText,
+    error,
+    style,
+    ...props
+}: TextInputProps & {
+    placeholder?: string;
+    value?: string | number | undefined | null | boolean | any;
+    onChangeText?: (text: string) => void;
+    error?: boolean;
+    style?: any;
+}) {
+    const [isFocused, setIsFocused] = useState(false);
+    return (
+        <BottomSheetTextInput 
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             style={[

@@ -1,9 +1,11 @@
 import TextDefault from "@/components/core/text-core";
 import { formatCurrency } from "@/lib/format-currency";
-import { StyleSheet, View } from "react-native";
-import { PurchaseIcon } from "./purchase-icon";
+import { StyleSheet, View, Pressable } from "react-native";
+import { useRouter } from "expo-router";
+import { PurchaseIcon } from "@/components/home/purchase-icon";
 
 type PurchaseItemProps = {
+    id: string;
     description: string | null;
     amount: number;
     category: {
@@ -15,12 +17,28 @@ type PurchaseItemProps = {
 };
 
 export function PurchaseItem({
+    id,
     description,
     amount,
     category,
 }: PurchaseItemProps) {
+    const router = useRouter();
+
     return (
-        <View style={styles.item}>
+        <Pressable
+            style={({ pressed }) => [
+                {
+                    backgroundColor: pressed ? "#282828" : "#161718",
+                },
+                styles.item,
+            ]}
+            onPress={() => {
+                router.push({
+                    pathname: "/(out)/purchase/[id]",
+                    params: { id: id },
+                });
+            }}
+        >
             <View
                 style={{
                     flex: 1,
@@ -45,7 +63,7 @@ export function PurchaseItem({
             <TextDefault style={[styles.amount]}>
                 {formatCurrency(amount)}
             </TextDefault>
-        </View>
+        </Pressable>
     );
 }
 
@@ -55,7 +73,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
         paddingVertical: 16,
-        // paddingHorizontal: 4,
+        paddingHorizontal: 16,
         borderBottomWidth: 1,
         borderBottomColor: "#232323",
     },

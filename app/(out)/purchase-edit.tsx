@@ -7,7 +7,6 @@ import { useAuth } from "@/components/core/auth-provider";
 
 import StatusBar from "@/components/core/status-bar";
 import TextDefault from "@/components/core/text-core";
-import { AltArrowLeftIcon } from "@solar-icons/react-native/linear/alt-arrow-left";
 import {
     ActivityIndicator,
     KeyboardAvoidingView,
@@ -21,22 +20,20 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Input from "@/components/core/input";
-import PopoverCards from "@/components/purchases/popover-cards";
-import PopoverUsers from "@/components/purchases/popover-users";
-import PopoverCategories from "@/components/purchases/popover-categories";
 
 import { Host, Switch } from "@expo/ui/jetpack-compose";
 
+import BackBtn from "@/components/core/back-btn";
 import DateTimePicker, {
     DateType,
     useDefaultStyles,
 } from "react-native-ui-datepicker";
-import DropdownMenu from "@/components/core/dropdown-menu";
 
 function formatMoneyInput(digits: string) {
-    if (!digits) return "";
+    const cleanDigits = digits.replace(/\D/g, "");
+    if (!cleanDigits) return "";
 
-    const paddedDigits = digits.padStart(3, "0");
+    const paddedDigits = cleanDigits.padStart(3, "0");
     const integerPart = paddedDigits.slice(0, -2).replace(/^0+(?=\d)/, "");
     const decimalPart = paddedDigits.slice(-2);
 
@@ -48,6 +45,7 @@ export default function CreateCard() {
     const local = useLocalSearchParams();
     const groupId = local.groupId as string; // ainda usado pra buscar cartões do grupo
     const invoiceId = local.invoiceId as string; // fatura de destino, vem pronta da home
+    const purchaseId = local.purchaseId as string; // id da compra, se for edição
 
     const { session } = useAuth();
     const currentUserId = session?.user?.id;
@@ -116,6 +114,8 @@ export default function CreateCard() {
         fetchUsers();
     }, []);
 
+    const [error, setError] = useState<string | null>(null);
+
     const handleCreatePurchase = async () => {
         try {
             const resolvedOwner = myPurchase ? currentUserId : purchaseOwner;
@@ -138,6 +138,7 @@ export default function CreateCard() {
             });
             router.back();
         } catch (error) {
+            setError("Erro ao criar a compra.");
             console.error("Error creating purchase:", error);
         }
     };
@@ -167,20 +168,15 @@ export default function CreateCard() {
                             alignItems: "flex-start",
                             justifyContent: "flex-start",
                             gap: 8,
-                            paddingTop: insets.top + 24,
+                            paddingTop: insets.top + 64,
                         }}
                         showsVerticalScrollIndicator={false}
                         style={[styles.container]}
                     >
-                        <Pressable
-                            style={styles.backButton}
-                            onPress={() => router.back()}
-                        >
-                            <AltArrowLeftIcon size={24} color="#fff" />
-                        </Pressable>
-                                                <TextDefault style={styles.title}>
-                                                    Criar Compra
-                                                </TextDefault>
+                        <BackBtn />
+                        <TextDefault style={styles.title}>
+                            Criar Compra
+                        </TextDefault>
                         <View
                             style={{
                                 paddingHorizontal: 16,
@@ -217,6 +213,10 @@ export default function CreateCard() {
                             <Input
                                 placeholder="R$ 0,00"
                                 value={formatMoneyInput(amountCents)}
+                                selection={{
+                                    start: formatMoneyInput(amountCents).length,
+                                    end: formatMoneyInput(amountCents).length,
+                                }}
                                 onChangeText={(text) => {
                                     const digits = text
                                         .replace(/\D/g, "")
@@ -457,6 +457,58 @@ export default function CreateCard() {
                     Criar compra
                 </TextDefault>
             </Pressable>
+            {error && (
+                <View
+                    style={[
+                        styles.overlay,
+                        StyleSheet.absoluteFill,
+                        { zIndex: 10 },
+                    ]}
+                >
+                    <View style={styles.modalBox}>
+                        <TextDefault
+                            style={{
+                                color: "#fff",
+                                textAlign: "center",
+                                fontWeight: "700",
+                                fontSize: 16,
+                                width: "100%",
+                                marginBottom: 8,
+                            }}
+                        >
+                            {error}
+                        </TextDefault>
+                        <TextDefault
+                            style={{
+                                color: "#fff",
+                                textAlign: "center",
+                            }}
+                        >
+                            Verifique se todos os campos obrigatórios foram
+                            preenchidos corretamente e tente novamente. Caso a
+                            compra seja para outra data, verifique se está
+                            dentro do período atual da fatura.
+                        </TextDefault>
+                        <Pressable
+                            onPress={() => {
+                                setError(null);
+                            }}
+                            style={{
+                                padding: 12,
+                                backgroundColor: "#282828",
+                                borderRadius: 999,
+                                alignItems: "center",
+                                justifyContent: "center",
+                                marginVertical: 8,
+                            }}
+                        >
+                            <TextDefault style={{ color: "#fff" }}>
+                                Fechar
+                            </TextDefault>
+                        </Pressable>
+                    </View>
+                </View>
+            )}
             <Modal
                 visible={showDatePicker}
                 transparent
@@ -505,7 +557,7 @@ export default function CreateCard() {
                             style={{
                                 padding: 12,
                                 backgroundColor: "#282828",
-                                borderRadius: 8,
+                                borderRadius: 999,
                                 alignItems: "center",
                                 justifyContent: "center",
 
