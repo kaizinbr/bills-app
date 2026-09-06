@@ -31,7 +31,7 @@ import DateTimePicker, {
     DateType,
     useDefaultStyles,
 } from "react-native-ui-datepicker";
-import DropdownMenu  from "@/components/core/dropdown-menu";
+import DropdownMenu from "@/components/core/dropdown-menu";
 
 function formatMoneyInput(digits: string) {
     if (!digits) return "";
@@ -46,8 +46,8 @@ function formatMoneyInput(digits: string) {
 export default function CreateCard() {
     const router = useRouter();
     const local = useLocalSearchParams();
-    console.log("Local search params:", local.groupId, local.purchaseId);
-    const groupId = local.groupId as string;
+    const groupId = local.groupId as string; // ainda usado pra buscar cartões do grupo
+    const invoiceId = local.invoiceId as string; // fatura de destino, vem pronta da home
 
     const { session } = useAuth();
     const currentUserId = session?.user?.id;
@@ -68,7 +68,9 @@ export default function CreateCard() {
     const [purchaseDate, setPurchaseDate] = useState<DateType>(today);
 
     const [myPurchase, setMyPurchase] = useState<boolean>(true);
-    const [purchaseOwner, setPurchaseOwner] = useState<string | null>(currentUserId!);
+    const [purchaseOwner, setPurchaseOwner] = useState<string | null>(
+        currentUserId!,
+    );
 
     const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
     const [category, setCategory] = useState<string | null>(null);
@@ -77,6 +79,19 @@ export default function CreateCard() {
     const [cards, setCards] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
 
+    const [canSubmit, setCanSubmit] = useState(false);
+
+    useEffect(() => {
+        if (
+            cardName.trim() !== "" &&
+            amountCents.trim() !== "" &&
+            category !== null
+        ) {
+            setCanSubmit(true);
+        } else {
+            setCanSubmit(false);
+        }
+    }, [cardName, amountCents, selectedCardId, category]);
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -90,6 +105,7 @@ export default function CreateCard() {
 
                 const categoriesResponse = await api.get(`categories`);
                 setCategories(categoriesResponse.data.categories);
+                setCategory(categoriesResponse.data.categories[0].id);
 
                 setLoading(false);
             } catch (error) {
@@ -100,31 +116,31 @@ export default function CreateCard() {
         fetchUsers();
     }, []);
 
-    // const handleCreatePurchase = async () => {
-    //     try {
-    //         const resolvedOwner = myCard ? currentUserId : cardOwner;
+    const handleCreatePurchase = async () => {
+        try {
+            const resolvedOwner = myPurchase ? currentUserId : purchaseOwner;
 
-    //         if (!resolvedOwner) {
-    //             console.warn(
-    //                 "Selecione o proprietário do cartão antes de criar o cartão.",
-    //             );
-    //             return;
-    //         }
+            if (!resolvedOwner) {
+                console.warn(
+                    "Selecione o proprietário antes de criar a compra.",
+                );
+                return;
+            }
 
-    //         const response = await api.post("/cards", {
-    //             name: cardName,
-    //             color: cardColor,
-    //             ownerId: resolvedOwner,
-    //             groupId: groupId,
-    //             // closingDay: groupClosingDate
-    //             //     ? new Date(groupClosingDate as string).getUTCDate()
-    //             //     : undefined,
-    //         });
-    //         console.log("Group created:", response.data);
-    //     } catch (error) {
-    //         console.error("Error creating group:", error);
-    //     }
-    // };
+            const response = await api.post("/purchases", {
+                description: cardName,
+                amount: amountCents,
+                purchasedDate: purchasedToday ? new Date() : purchaseDate,
+                cardId: selectedCardId,
+                invoiceId: invoiceId,
+                groupId: groupId,
+                categoryId: category,
+            });
+            router.back();
+        } catch (error) {
+            console.error("Error creating purchase:", error);
+        }
+    };
 
     return (
         <View style={styles.main}>
@@ -151,18 +167,37 @@ export default function CreateCard() {
                             alignItems: "flex-start",
                             justifyContent: "flex-start",
                             gap: 8,
-                            paddingTop: insets.top + 32,
+                            paddingTop: insets.top + 24,
                         }}
+                        showsVerticalScrollIndicator={false}
                         style={[styles.container]}
                     >
-                        <Pressable onPress={() => router.back()}>
+                        <Pressable
+                            style={styles.backButton}
+                            onPress={() => router.back()}
+                        >
                             <AltArrowLeftIcon size={24} color="#fff" />
                         </Pressable>
-                        <View style={[styles.inputContainer]}>
-                            <TextDefault style={styles.label}>
-                                Grupo
+                                                <TextDefault style={styles.title}>
+                                                    Criar Compra
+                                                </TextDefault>
+                        <View
+                            style={{
+                                paddingHorizontal: 16,
+                            }}
+                        >
+                            <TextDefault
+                                style={{
+                                    paddingHorizontal: 16,
+                                    paddingVertical: 6,
+                                    fontWeight: "600",
+                                    color: "#eeeeee",
+                                    backgroundColor: "#009C7A",
+                                    borderRadius: 999,
+                                }}
+                            >
+                                {groupData?.name}
                             </TextDefault>
-                            <TextDefault>{groupData?.name}</TextDefault>
                         </View>
                         <View style={[styles.inputContainer]}>
                             <TextDefault style={styles.label}>
@@ -192,30 +227,133 @@ export default function CreateCard() {
                                 inputMode="numeric"
                             />
                         </View>
-
-                        <View style={[styles.inputContainer]}>
-                            <TextDefault style={styles.label}>
-                                Cartão
-                            </TextDefault>
-                            <PopoverCards
-                                items={cards}
-                                selectedId={selectedCardId}
-                                onSelect={setSelectedCardId}
-                                placeholder="Sem cartão"
-                            />
-                        </View>
-                        <View style={[styles.inputContainer]}>
-                            <TextDefault style={styles.label}>
+                        <View
+                            style={[
+                                styles.inputContainer,
+                                { paddingHorizontal: 0 },
+                            ]}
+                        >
+                            <TextDefault
+                                style={[
+                                    styles.label,
+                                    { paddingHorizontal: 16 },
+                                ]}
+                            >
                                 Categoria
                             </TextDefault>
-                            <PopoverCategories
+                            {/* <PopoverCategories
                                 items={categories}
                                 selectedId={category}
                                 onSelect={setCategory}
                                 placeholder="Sem categoria"
-                            />
+                            /> */}
+
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                style={{
+                                    width: "100%",
+                                    flexDirection: "row",
+                                    gap: 8,
+                                }}
+                                contentContainerStyle={{
+                                    flexDirection: "row",
+                                    gap: 8,
+                                    paddingHorizontal: 16,
+                                    justifyContent: "flex-start",
+                                    alignItems: "center",
+                                }}
+                            >
+                                {categories.map((cat) => (
+                                    <Pressable
+                                        key={cat.key}
+                                        onPress={() => {
+                                            setCategory(cat.id);
+                                        }}
+                                        style={[
+                                            styles.catButton,
+                                            category === cat.id &&
+                                                styles.catButtonSelected,
+                                        ]}
+                                    >
+                                        <TextDefault
+                                            style={styles.catButtonText}
+                                        >
+                                            {cat.label}
+                                        </TextDefault>
+                                    </Pressable>
+                                ))}
+                            </ScrollView>
                         </View>
 
+                        <View
+                            style={[
+                                styles.inputContainer,
+                                { paddingHorizontal: 0 },
+                            ]}
+                        >
+                            <TextDefault
+                                style={[
+                                    styles.label,
+                                    { paddingHorizontal: 16 },
+                                ]}
+                            >
+                                Cartão
+                            </TextDefault>
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                style={{
+                                    width: "100%",
+                                    flexDirection: "row",
+                                    gap: 8,
+                                }}
+                                contentContainerStyle={{
+                                    flexDirection: "row",
+                                    gap: 8,
+                                    paddingHorizontal: 16,
+                                    justifyContent: "flex-start",
+                                    alignItems: "center",
+                                }}
+                            >
+                                <Pressable
+                                    onPress={() => setSelectedCardId(null)}
+                                    style={[
+                                        styles.cardButton,
+                                        selectedCardId === null &&
+                                            styles.cardButtonSelected,
+                                    ]}
+                                >
+                                    <TextDefault style={styles.cardButtonText}>
+                                        Sem cartão
+                                    </TextDefault>
+                                </Pressable>
+                                {cards.map((card) => (
+                                    <Pressable
+                                        key={card.id}
+                                        onPress={() =>
+                                            setSelectedCardId(card.id)
+                                        }
+                                        style={[
+                                            styles.cardButton,
+                                            selectedCardId === card.id &&
+                                                styles.cardButtonSelected,
+
+                                            {
+                                                backgroundColor:
+                                                    card.color || "#282828",
+                                            },
+                                        ]}
+                                    >
+                                        <TextDefault
+                                            style={styles.cardButtonText}
+                                        >
+                                            {card.name}
+                                        </TextDefault>
+                                    </Pressable>
+                                ))}
+                            </ScrollView>
+                        </View>
 
                         <View style={[styles.inputContainer]}>
                             <View
@@ -228,6 +366,10 @@ export default function CreateCard() {
                                     <Switch
                                         value={purchasedToday}
                                         onCheckedChange={setPurchasedToday}
+                                        colors={{
+                                            checkedThumbColor: "#0B3D22",
+                                            checkedTrackColor: "#009C7A",
+                                        }}
                                     />
                                 </Host>
                                 <TextDefault style={{ marginLeft: 8 }}>
@@ -261,7 +403,7 @@ export default function CreateCard() {
                             </View>
                         )}
 
-                        <View style={[styles.inputContainer]}>
+                        {/* <View style={[styles.inputContainer]}>
                             <View
                                 style={{
                                     flexDirection: "row",
@@ -272,6 +414,10 @@ export default function CreateCard() {
                                     <Switch
                                         value={myPurchase}
                                         onCheckedChange={setMyPurchase}
+                                        colors={{
+                                            checkedThumbColor: "#0B3D22",
+                                            checkedTrackColor: "#009C7A",
+                                        }}
                                     />
                                 </Host>
                                 <TextDefault style={{ marginLeft: 8 }}>
@@ -285,17 +431,32 @@ export default function CreateCard() {
                                 <TextDefault style={styles.label}>
                                     Quem fez essa compra
                                 </TextDefault>
-                                <PopoverUsers 
+                                <PopoverUsers
                                     items={users}
                                     selectedId={purchaseOwner}
                                     onSelect={setPurchaseOwner}
                                     placeholder="Selecione o usuário"
                                 />
                             </View>
-                        )}
+                        )} */}
                     </ScrollView>
                 </KeyboardAvoidingView>
             )}
+            <Pressable
+                onPress={handleCreatePurchase}
+                style={[
+                    styles.submitBtn,
+                    {
+                        bottom: insets.bottom + 16,
+                        opacity: canSubmit ? 1 : 0.5,
+                    },
+                ]}
+                disabled={!canSubmit}
+            >
+                <TextDefault style={{ color: "#fff", fontWeight: "700" }}>
+                    Criar compra
+                </TextDefault>
+            </Pressable>
             <Modal
                 visible={showDatePicker}
                 transparent
@@ -369,17 +530,20 @@ const styles = StyleSheet.create({
     },
     keyboardContainer: {
         flex: 1,
-        paddingHorizontal: 16,
         zIndex: 1,
     },
     container: {
         flex: 1,
         zIndex: 1,
     },
+    backButton: {
+        paddingHorizontal: 16,
+    },
     title: {
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 16,
+        paddingHorizontal: 16,
     },
     description: {
         fontSize: 16,
@@ -390,6 +554,7 @@ const styles = StyleSheet.create({
         width: "100%",
         minWidth: "100%",
         // backgroundColor: "#fff",
+        paddingHorizontal: 16,
     },
     label: {
         color: "#eeeeee",
@@ -400,13 +565,13 @@ const styles = StyleSheet.create({
         width: "100%",
         minWidth: "100%",
         maxWidth: "100%",
-        padding: 12,
-        borderWidth: 1,
-        borderColor: "#262626",
-        backgroundColor: "#212223",
-        borderRadius: 12,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: "#212223",
+        // backgroundColor: "#212223",
+        // borderRadius: 12,
         color: "#eeeeee",
-        fontFamily: "Walsheim",
+        fontFamily: "ana",
         fontWeight: 400,
     },
     overlay: {
@@ -423,5 +588,59 @@ const styles = StyleSheet.create({
         width: "100%",
         maxWidth: 400,
         zIndex: 5,
+    },
+    cardButton: {
+        backgroundColor: "#212223",
+        borderWidth: 2,
+        borderColor: "transparent",
+        padding: 12,
+        borderRadius: 16,
+        height: 64,
+        aspectRatio: 5 / 3,
+        justifyContent: "flex-end",
+    },
+    cardButtonSelected: {
+        borderWidth: 2,
+        borderColor: "#009C7A",
+        backgroundColor: "#0B3D22",
+    },
+    cardButtonText: {
+        color: "#fff",
+        fontSize: 14,
+        fontWeight: "600",
+    },
+    catButton: {
+        backgroundColor: "#212223",
+        borderWidth: 2,
+        borderColor: "transparent",
+        padding: 12,
+        borderRadius: 16,
+        height: 86,
+        aspectRatio: 4 / 3,
+        justifyContent: "flex-end",
+    },
+    catButtonSelected: {
+        borderWidth: 2,
+        borderColor: "#009C7A",
+        backgroundColor: "#0B3D22",
+    },
+    catButtonText: {
+        color: "#fff",
+        fontSize: 14,
+        fontWeight: "600",
+    },
+    submitBtn: {
+        backgroundColor: "#009C7A",
+        borderWidth: 2,
+        borderColor: "transparent",
+        padding: 12,
+        borderRadius: 9999,
+        justifyContent: "flex-end",
+        position: "absolute",
+        bottom: 32,
+        left: 16,
+        right: 16,
+        zIndex: 10,
+        alignItems: "center",
     },
 });

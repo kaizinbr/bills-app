@@ -20,6 +20,7 @@ export function PurchaseSection({ date, purchases }: PurchaseSectionProps) {
                 <PurchaseItem
                     key={purchase.id}
                     description={purchase.description}
+                    category={purchase.category}
                     amount={purchase.amount}
                 />
             ))}

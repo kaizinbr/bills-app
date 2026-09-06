@@ -11,6 +11,7 @@ export default function TextDefault({ children, style, ...props }: TextDefaultPr
                 {
                     color: "#eee",
                     fontWeight: 400,
+                    fontFamily: "ana",
                 },
                 style,
             ]}

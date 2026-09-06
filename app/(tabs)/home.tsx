@@ -8,10 +8,10 @@ import {
     RefreshControl,
     ScrollView,
     StyleSheet,
-    Text,
     useWindowDimensions,
     View,
 } from "react-native";
+import TextDefault from "@/components/core/text-core";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import StatusBar from "@/components/core/status-bar";
@@ -39,6 +39,7 @@ export default function Home() {
     const { session } = useAuth();
     const queryClient = useQueryClient();
     const { data, refetch, isFetching } = useGroups();
+    // const {}
     const [showHeader, setShowHeader] = useState(false);
 
     const groupsRef = useRef<GroupsHandle>(null);
@@ -128,7 +129,8 @@ export default function Home() {
         predicate: (query) =>
             query.queryKey[0] === "groups" ||
             (query.queryKey[0] === "group" &&
-                query.queryKey[1] === selectedGroupId),
+                query.queryKey[1] === selectedGroupId) ||
+            query.queryKey[0] === "invoice",
     });
 
     useEffect(() => {
@@ -145,16 +147,9 @@ export default function Home() {
 
     const onRefresh = useCallback(() => {
         setShowHeader(true);
-        refetch();
-        if (selectedGroupId) {
-            queryClient.invalidateQueries({
-                queryKey: ["group", selectedGroupId, "purchases"],
-            });
-            queryClient.invalidateQueries({
-                queryKey: ["group", selectedGroupId, "total"],
-            });
-        }
-    }, [refetch, queryClient, selectedGroupId]);
+        refetch(); // groups
+        groupsRef.current?.refreshInvoiceData(); // invoices + purchases + total da fatura selecionada
+    }, [refetch]);
 
     return (
         <View style={styles.box}>
@@ -194,7 +189,7 @@ export default function Home() {
 
                     <View style={styles.headerActions}>
                         <Pressable style={styles.iconButton}>
-                            <Text style={styles.icon}>♧</Text>
+                            <TextDefault style={styles.icon}>♧</TextDefault>
                         </Pressable>
                     </View>
                 </View>

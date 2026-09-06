@@ -2,32 +2,42 @@ import { useQuery } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
 import api from "@/lib/api";
 
-type Group = {
+type Invoice = {
     id: string;
-    name: string;
-    closingDay: number;
-    archived: boolean;
-    cards: { id: string; name: string; color: string }[];
-    debtor?: { id: string; name: string; image: string | null };
-    invoices?: {
+    groupId: string;
+    cardId: string | null;
+    periodStart: string;
+    closingDate: string;
+    status: "OPEN" | "CLOSED" | "PAID";
+    paidAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    purchases: {
         id: string;
-    }
+        description: string;
+        amount: number;
+        purchasedAt: string;
+        categoryId: string;
+        invoiceId: string;
+        cardId: string | null;
+        subscriptionId: string | null;
+        createdAt: string;
+        updatedAt: string;
+    }[];
 };
 
-type GroupsResponse = {
-    creditorGroups: Group[];
-    debtorGroups: Group[];
-};
 
-async function fetchGroups(): Promise<GroupsResponse> {
-    const response = await api.get("/groups");
-    return response.data;
+
+async function fetchInvoices(invoiceId: string) {
+    const response = await api.get(`/invoices/${invoiceId}`);
+    return response.data as { invoices: Invoice[] };
 }
 
-export function useGroups() {
+export function useInvoice(invoiceId: string) {
     return useQuery({
-        queryKey: ["groups"],
-        queryFn: fetchGroups,
+        queryKey: ["invoice", invoiceId],
+        queryFn: () => fetchInvoices(invoiceId),
+        enabled: !!invoiceId,
     });
 }
 

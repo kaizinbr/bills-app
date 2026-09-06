@@ -40,9 +40,64 @@
                 {
                     "fonts": [
                         "node_modules/@expo-google-fonts/jersey-25/400Regular/Jersey25_400Regular.ttf"
-                    ]
+                    ],
+                    "android": {
+                        "fonts": [
+                            {
+                                "fontFamily": "ana",
+                                "fontDefinitions": [
+                                    {
+                                        "path": "./assets/fonts/ana-banana/AnaBanana-Hairline.otf",
+                                        "weight": 100,
+                                        "style": "normal"
+                                    },
+                                    {
+                                        "path": "./assets/fonts/ana-banana/AnaBanana-Extralight.otf",
+                                        "weight": 200,
+                                        "style": "normal"
+                                    },
+                                    {
+                                        "path": "./assets/fonts/ana-banana/AnaBanana-Light.otf",
+                                        "weight": 300,
+                                        "style": "normal"
+                                    },
+                                    {
+                                        "path": "./assets/fonts/ana-banana/AnaBanana-Regular.otf",
+                                        "weight": 400,
+                                        "style": "normal"
+                                    },
+                                    {
+                                        "path": "./assets/fonts/ana-banana/AnaBanana-Medium.otf",
+                                        "weight": 500,
+                                        "style": "normal"
+                                    },
+                                    {
+                                        "path": "./assets/fonts/ana-banana/AnaBanana-SemiBold.otf",
+                                        "weight": 600,
+                                        "style": "normal"
+                                    },
+                                    {
+                                        "path": "./assets/fonts/ana-banana/AnaBanana-Bold.otf",
+                                        "weight": 700,
+                                        "style": "normal"
+                                    },
+                                    {
+                                        "path": "./assets/fonts/ana-banana/AnaBanana-Bold.otf",
+                                        "weight": 800,
+                                        "style": "normal"
+                                    },
+                                    {
+                                        "path": "./assets/fonts/ana-banana/AnaBanana-Black.otf",
+                                        "weight": 900,
+                                        "style": "normal"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
                 }
-            ]
+            ],
+            "expo-image"
         ],
         "experiments": {
             "typedRoutes": true,

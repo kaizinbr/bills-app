@@ -1,8 +1,5 @@
-import {
-    StyleSheet,
-    TextInput,
-    TextInputProps
-} from "react-native";
+import { StyleSheet, TextInput, TextInputProps } from "react-native";
+import React, { useState } from "react";
 
 export default function Input({
     placeholder,
@@ -18,17 +15,27 @@ export default function Input({
     error?: boolean;
     style?: any;
 }) {
+    const [isFocused, setIsFocused] = useState(false);
     return (
         <TextInput
-            style={[styles.input, error && styles.error, style]}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            style={[
+                styles.input,
+                error && styles.error,
+                style,
+                isFocused && { borderBottomColor: "#00C89B" },
+            ]}
             placeholder={placeholder}
             placeholderTextColor={"#BABABA"}
             value={value}
             onChangeText={onChangeText}
+            
             {...props}
         />
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {
@@ -41,15 +48,14 @@ const styles = StyleSheet.create({
         width: "100%",
         minWidth: "100%",
         maxWidth: "100%",
-        padding: 12,
-        borderWidth: 1,
-        borderColor: "#262626",
-        backgroundColor: "#212223",
-        borderRadius: 12,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: "#212223",
+        // backgroundColor: "#212223",
+        // borderRadius: 12,
         color: "#eeeeee",
-        fontFamily: "Walsheim",
+        fontFamily: "ana",
         fontWeight: 400,
-        
     },
     error: {
         borderColor: "#ff4d4f",

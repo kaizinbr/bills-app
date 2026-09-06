@@ -1,4 +1,3 @@
-// components/core/dropdown-menu.tsx
 import { useRef, useState, useCallback, useMemo } from "react";
 import {
     View,
@@ -17,7 +16,7 @@ import Popover, {
     PopoverPlacement,
 } from "react-native-popover-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
+import { useRouter } from "expo-router";
 import StatusBar from "@/components/core/status-bar";
 import Groups from "@/components/home/groups";
 import { useGroups } from "@/hooks/use-group";
@@ -80,6 +79,8 @@ export default function DropdownMenu({
     scrollRef: React.RefObject<ScrollView> | any;
     setShowHeader: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+    const insets = useSafeAreaInsets();
+    const router = useRouter();
     const [internalOpen, setInternalOpen] = useState(false);
     const open = menuOpen ?? internalOpen;
     const setOpen = setMenuOpen ?? setInternalOpen;
@@ -185,6 +186,18 @@ export default function DropdownMenu({
                                     </Text>
                                 </Pressable>
                             ))}
+                            <Pressable
+                                style={styles.dropdownItem}
+                                onPress={() => {
+                                    router.push("/(tabs)/create-group");
+                                    setMenuOpen(false);
+                                }}
+                            >
+                                <Text style={styles.dropdownItemText}>
+                                    Criar nova conta
+                                </Text>
+                            </Pressable>
+
                         </ScrollView>
                     </Animated.View>
                 </Pressable>

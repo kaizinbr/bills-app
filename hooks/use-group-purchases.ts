@@ -1,40 +1,45 @@
-// hooks/use-group-purchases.ts
-import { useInfiniteQuery } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { useInfiniteQuery } from "@tanstack/react-query";
+import api from "@/lib/api";
 
 export type Purchase = {
     id: string;
-    description: string;
+    description: string | null;
     amount: number;
-    createdAt: string;
     purchasedAt: string;
-    groupId: string;
+    cardId: string | null;
+    invoiceId: string;
+    category: { id: string; key: string; label: string; icon: string | null };
 };
 
-type PurchasesResponse = {
+type PurchasesPage = {
     purchases: Purchase[];
     pagination: {
-        page: number;
-        limit: number;
         total: number;
-        totalPages: number;
+        page: number;
+        pageSize: number;
         hasNextPage: boolean;
-        hasPreviousPage: boolean;
     };
 };
 
-async function fetchGroupPurchases({ groupId, page }: { groupId: string; page: number }): Promise<PurchasesResponse> {
-    const response = await api.get(`/groups/${groupId}/purchases`, { params: { page } });
+async function fetchGroupPurchases(
+    groupId: string,
+    page: number,
+): Promise<PurchasesPage> {
+    const response = await api.get(`/groups/${groupId}/purchases`, {
+        params: { page },
+    });
     return response.data;
 }
 
 export function useGroupPurchases(groupId: string) {
     return useInfiniteQuery({
-        queryKey: ['group', groupId, 'purchases'],
-        queryFn: ({ pageParam }) => fetchGroupPurchases({ groupId, page: pageParam }),
+        queryKey: ["group", groupId, "purchases"],
+        queryFn: ({ pageParam }) => fetchGroupPurchases(groupId, pageParam),
         initialPageParam: 1,
         getNextPageParam: (lastPage) =>
-            lastPage.pagination.hasNextPage ? lastPage.pagination.page + 1 : undefined,
+            lastPage.pagination.hasNextPage
+                ? lastPage.pagination.page + 1
+                : undefined,
         enabled: !!groupId,
     });
 }
