@@ -1,8 +1,9 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, useWindowDimensions } from "react-native";
 import TextDefault from "@/components/core/text-core";
 import type { Purchase } from "@/hooks/use-group-purchases";
 import { formatSectionDate } from "@/lib/format-section-date";
 import { PurchaseItem } from "./purchase-item";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type PurchaseSectionProps = {
     date: string;
@@ -10,6 +11,9 @@ type PurchaseSectionProps = {
 };
 
 export function PurchaseSection({ date, purchases }: PurchaseSectionProps) {
+    const { width, height } = useWindowDimensions();
+    const insets = useSafeAreaInsets();
+    
     return (
         <View>
             <TextDefault style={styles.header}>

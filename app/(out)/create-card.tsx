@@ -244,46 +244,6 @@ export default function CreateCard() {
                                 maxLength={4}
                             />
                         </View>
-                        {/* <View style={[styles.inputContainer]}>
-                            <TextDefault style={styles.label}>
-                                Dono do cartão
-                            </TextDefault>
-                            <Host matchContents>
-                                <ToggleButton
-                                    checked={myCard}
-                                    onCheckedChange={setMyCard}
-                                >
-                                    <Text>O cartão é meu</Text>
-                                </ToggleButton>
-                            </Host>
-                            {!myCard &&
-                                users.length > 0 &&
-                                users.map((user) => (
-                                    <Pressable
-                                        key={user.id}
-                                        onPress={() =>
-                                            setCardOwner(
-                                                cardOwner === user.id
-                                                    ? ""
-                                                    : user.id,
-                                            )
-                                        }
-                                        style={{
-                                            padding: 8,
-                                            backgroundColor: "#212223",
-                                            borderRadius: 8,
-                                            marginBottom: 8,
-                                            borderWidth: 1,
-                                            borderColor:
-                                                cardOwner === user.id
-                                                    ? "#007AFF"
-                                                    : "#333333",
-                                        }}
-                                    >
-                                        <TextDefault>{user.name}</TextDefault>
-                                    </Pressable>
-                                ))}
-                        </View> */}
                         <View
                             style={[
                                 styles.inputContainer,

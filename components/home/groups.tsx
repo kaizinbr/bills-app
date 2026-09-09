@@ -12,7 +12,9 @@ import {
     ScrollView,
     StyleSheet,
     View,
+    useWindowDimensions,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
@@ -32,9 +34,11 @@ import { Bag3Icon } from "@solar-icons/react-native/linear/bag-3";
 import { UserCircleIcon } from "@solar-icons/react-native/linear/user-circle";
 import { RefreshCircleIcon } from "@solar-icons/react-native/linear/refresh-circle";
 import InvoicesCarousel from "@/components/home/invoices-carousel";
+import InvoiceSelectMenu from "@/components/home/invoice-select-menu";
 
 type GroupsProps = {
     groupId: string | null;
+    updatedAt: number | Date;
 };
 
 export type GroupsHandle = {
@@ -62,275 +66,283 @@ function formatFaturaLabel(invoice: Invoice): string {
     return `Fechada ${closingLabel}`;
 }
 
-const Groups = forwardRef<GroupsHandle, GroupsProps>(({ groupId }, ref) => {
-    const router = useRouter();
-    const queryClient = useQueryClient();
-    const { data } = useGroups();
+const Groups = forwardRef<GroupsHandle, GroupsProps>(
+    ({ groupId, updatedAt }, ref) => {
+        const router = useRouter();
+        const queryClient = useQueryClient();
+        const { data } = useGroups();
 
-    const group = useMemo(() => {
-        if (!data || !groupId) return null;
-        return (
-            [...data.creditorGroups, ...data.debtorGroups].find(
-                (g) => g.id === groupId,
-            ) ?? null
-        );
-    }, [data, groupId]);
+        const { width, height } = useWindowDimensions();
+        const insets = useSafeAreaInsets();
 
-    const { data: invoicesData } = useGroupInvoices(groupId ?? "");
-    const invoices = useMemo(
-        () => sortInvoicesDesc(invoicesData?.invoices ?? []),
-        [invoicesData],
-    );
-
-    const currentInvoice = useMemo(
-        () =>
-            invoices.find((inv) => inv.status === "OPEN") ??
-            invoices[0] ??
-            null,
-        [invoices],
-    );
-
-    const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(
-        null,
-    );
-
-    useEffect(() => {
-        setSelectedInvoiceId(null);
-    }, [groupId]);
-
-    const selectedInvoice = useMemo(() => {
-        if (selectedInvoiceId) {
+        const group = useMemo(() => {
+            if (!data || !groupId) return null;
             return (
-                invoices.find((inv) => inv.id === selectedInvoiceId) ??
-                currentInvoice
+                [...data.creditorGroups, ...data.debtorGroups].find(
+                    (g) => g.id === groupId,
+                ) ?? null
             );
-        }
-        return currentInvoice;
-    }, [invoices, selectedInvoiceId, currentInvoice]);
+        }, [data, groupId]);
+        // console.log(group)
 
-    const { data: totalData } = useInvoiceTotal(selectedInvoice?.id ?? null);
+        const { data: invoicesData } = useGroupInvoices(groupId ?? "");
+        const invoices = useMemo(
+            () => sortInvoicesDesc(invoicesData?.invoices ?? []),
+            [invoicesData],
+        );
 
-    const {
-        data: purchasesData,
-        fetchNextPage,
-        hasNextPage,
-        isFetchingNextPage,
-        isLoading: purchasesLoading,
-    } = useInvoicePurchases(selectedInvoice?.id ?? null);
+        const currentInvoice = useMemo(
+            () =>
+                invoices.find((inv) => inv.status === "OPEN") ??
+                invoices[0] ??
+                null,
+            [invoices],
+        );
 
-    const purchases = useMemo(
-        () => purchasesData?.pages.flatMap((page) => page.purchases) ?? [],
-        [purchasesData],
-    );
+        const [selectedInvoiceId, setSelectedInvoiceId] = useState<
+            string | null
+        >(null);
 
-    const totalPurchases = purchasesData?.pages[0]?.pagination.total ?? 0;
+        useEffect(() => {
+            setSelectedInvoiceId(null);
+        }, [groupId]);
 
-    const sections = useMemo(
-        () => groupPurchasesByDate(purchases),
-        [purchases],
-    );
-
-    useImperativeHandle(ref, () => ({
-        loadMoreIfNeeded: () => {
-            if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-        },
-        refreshInvoiceData: () => {
-            if (!groupId) return;
-            queryClient.invalidateQueries({
-                queryKey: ["group", groupId, "invoices"],
-            });
-            if (selectedInvoice?.id) {
-                queryClient.invalidateQueries({
-                    queryKey: ["invoice", selectedInvoice.id, "purchases"],
-                });
-                queryClient.invalidateQueries({
-                    queryKey: ["invoice", selectedInvoice.id, "total"],
-                });
+        const selectedInvoice = useMemo(() => {
+            if (selectedInvoiceId) {
+                return (
+                    invoices.find((inv) => inv.id === selectedInvoiceId) ??
+                    currentInvoice
+                );
             }
-        },
-    }));
+            return currentInvoice;
+        }, [invoices, selectedInvoiceId, currentInvoice]);
 
-    if (!group) return null;
+        const { data: totalData } = useInvoiceTotal(
+            selectedInvoice?.id ?? null,
+        );
 
-    const canCreateInSelected = selectedInvoice?.status === "OPEN";
+        const {
+            data: purchasesData,
+            fetchNextPage,
+            hasNextPage,
+            isFetchingNextPage,
+            isLoading: purchasesLoading,
+        } = useInvoicePurchases(selectedInvoice?.id ?? null);
 
-    return (
-        <View style={styles.container}>
-            {/* <InvoicesCarousel /> */}
-            <View style={{ paddingHorizontal: 16 }}>
-                <LinearGradient
-                    colors={["#00C89B", "#0B3D22"]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.groupCard}
-                >
-                    <TextDefault style={styles.groupName}>
-                        {group.name}
-                    </TextDefault>
-                    <TextDefault style={[styles.groupValue]}>
-                        {formatCurrency(totalData?.total)}
-                    </TextDefault>
-                    <TextDefault style={styles.groupClosing}>
-                        {selectedInvoice
-                            ? `Fecha ${new Date(selectedInvoice.closingDate).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}`
-                            : `Fecha dia ${group.closingDay}`}
-                    </TextDefault>
-                </LinearGradient>
-            </View>
+        const purchases = useMemo(
+            () => purchasesData?.pages.flatMap((page) => page.purchases) ?? [],
+            [purchasesData],
+        );
 
-            {/* seletor de fatura: atual + fechadas */}
-            <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.infoRow}
-            >
-                {invoices.map((invoice) => {
-                    const isSelected = selectedInvoice?.id === invoice.id;
-                    return (
-                        <Pressable
-                            key={invoice.id}
-                            onPress={() => setSelectedInvoiceId(invoice.id)}
-                            style={[
-                                styles.infoChip,
-                                isSelected && styles.infoChipSelected,
-                            ]}
-                        >
-                            <TextDefault style={styles.infoChipText}>
-                                {formatFaturaLabel(invoice)}
-                            </TextDefault>
-                        </Pressable>
-                    );
-                })}
-            </ScrollView>
+        const totalPurchases = purchasesData?.pages[0]?.pagination.total ?? 0;
 
+        const sections = useMemo(
+            () => groupPurchasesByDate(purchases),
+            [purchases],
+        );
 
-            {/* credor, cartões e ações da conta */}
-            <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.infoRow}
-            >
-                <View style={styles.buttons}>
-                    <UserCircleIcon size={24} color="white" />
-                    <TextDefault style={styles.infoChipText}>
-                        Pagar a: {group.debtor?.name}
-                    </TextDefault>
-                </View>
+        useImperativeHandle(ref, () => ({
+            loadMoreIfNeeded: () => {
+                if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+            },
+            refreshInvoiceData: () => {
+                if (!groupId) return;
+                queryClient.invalidateQueries({
+                    queryKey: ["group", groupId, "invoices"],
+                });
+                if (selectedInvoice?.id) {
+                    queryClient.invalidateQueries({
+                        queryKey: ["invoice", selectedInvoice.id, "purchases"],
+                    });
+                    queryClient.invalidateQueries({
+                        queryKey: ["invoice", selectedInvoice.id, "total"],
+                    });
+                }
+            },
+        }));
 
-                <View style={styles.buttons}>
-                    <Bag3Icon size={24} color="white" />
-                    <TextDefault style={styles.infoChipText}>
-                        {totalPurchases} compras
+        if (!group) return null;
+
+        const canCreateInSelected = selectedInvoice?.status === "OPEN";
+
+        return (
+            <View style={styles.container}>
+                <View style={styles.infoRow}>
+                    <InvoiceSelectMenu
+                        invoices={invoices}
+                        isSelected={!!selectedInvoice}
+                        selectedInvoice={selectedInvoice}
+                        setSelectedInvoiceId={setSelectedInvoiceId}
+                    />
+                    <TextDefault style={styles.updateText}>
+                        Atualizado:{" "}
+                        {new Date(updatedAt).toLocaleTimeString("pt-BR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        })}
                     </TextDefault>
                 </View>
-
-                {group.cards?.map((card: any) => (
-                    <View
-                        key={card.id}
-                        style={[
-                            styles.buttons,
-                            {
-                                backgroundColor: card.color || "#282828",
-                                aspectRatio: 5 / 3,
-                            },
-                        ]}
+                <View style={{ paddingHorizontal: 16 }}>
+                    <LinearGradient
+                        colors={["#00C89B", "#0B3D22"]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.groupCard}
                     >
-                        <CardIcon size={24} color="white" />
+                        <TextDefault style={styles.groupName}>
+                            Total da conta {group.name}:
+                        </TextDefault>
+                        <TextDefault style={[styles.groupValue]}>
+                            {formatCurrency(totalData?.total)}
+                        </TextDefault>
+                        <TextDefault style={styles.groupClosing}>
+                            {selectedInvoice
+                                ? `Fecha ${new Date(selectedInvoice.closingDate).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}`
+                                : `Fecha dia ${group.closingDay}`}
+                        </TextDefault>
+                    </LinearGradient>
+                </View>
+
+                {/* credor, cartões e ações da conta */}
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.infoRow}
+                >
+                    <View style={styles.buttons}>
+                        <UserCircleIcon size={24} color="white" />
                         <TextDefault style={styles.infoChipText}>
-                            {card.name}
+                            Pagar a: {group.debtor?.name}
                         </TextDefault>
                     </View>
-                ))}
 
-                <Pressable
-                    onPress={() =>
-                        
-                        router.push(
-                            `/create-card?groupId=${group.id}&invoiceId=${selectedInvoice?.id}&purchaseId=null`,
-                        )
-                    }
-                    style={styles.buttons}
-                >
-                    <WalletIcon size={24} color="white" />
-                    <TextDefault style={styles.infoChipText}>
-                        Criar cartão
-                    </TextDefault>
-                </Pressable>
+                    <View style={styles.buttons}>
+                        <Bag3Icon size={24} color="white" />
+                        <TextDefault style={styles.infoChipText}>
+                            {totalPurchases} compras
+                        </TextDefault>
+                    </View>
 
-                <Pressable
-                    disabled={!selectedInvoice || !canCreateInSelected}
-                    onPress={() =>
-                        router.push(
-                            `/purchase-edit?groupId=${group.id}&invoiceId=${selectedInvoice?.id}&purchaseId=null`,
-                        )
-                    }
+                    {group.cards?.map((card: any) => (
+                        <Pressable
+                            key={card.id}
+                            style={[
+                                styles.buttons,
+                                {
+                                    backgroundColor: card.color || "#282828",
+                                    aspectRatio: 5 / 3,
+                                },
+                            ]}
+                            onPress={() =>
+                                router.push({
+                                    pathname: `/card/[id]`,
+                                    params: { id: card.id },
+                                })
+                            }
+                        >
+                            <CardIcon size={24} color="white" />
+                            <TextDefault style={styles.infoChipText}>
+                                {card.name}
+                            </TextDefault>
+                        </Pressable>
+                    ))}
+
+                    <Pressable
+                        onPress={() =>
+                            router.push(
+                                `/create-card?groupId=${group.id}&invoiceId=${selectedInvoice?.id}&purchaseId=null`,
+                            )
+                        }
+                        style={styles.buttons}
+                    >
+                        <WalletIcon size={24} color="white" />
+                        <TextDefault style={styles.infoChipText}>
+                            Criar cartão
+                        </TextDefault>
+                    </Pressable>
+
+                    <Pressable
+                        disabled={!selectedInvoice || !canCreateInSelected}
+                        onPress={() =>
+                            router.push(
+                                `/purchase-edit?groupId=${group.id}&invoiceId=${selectedInvoice?.id}&purchaseId=null`,
+                            )
+                        }
+                        style={[
+                            styles.buttons,
+                            !canCreateInSelected && styles.infoChipDisabled,
+                        ]}
+                    >
+                        <BagCheckIcon size={24} color="white" />
+                        <TextDefault style={styles.infoChipText}>
+                            Criar compra
+                        </TextDefault>
+                    </Pressable>
+
+                    <Pressable
+                        onPress={() =>
+                            router.push(
+                                `/create-subscription?groupId=${group.id}`,
+                            )
+                        }
+                        style={styles.buttons}
+                    >
+                        <RefreshCircleIcon size={24} color="white" />
+                        <TextDefault style={styles.infoChipText}>
+                            Criar assinatura
+                        </TextDefault>
+                    </Pressable>
+
+                    <Pressable
+                        onPress={() =>
+                            router.push({
+                                pathname: "/create-group",
+                                params: { groupId: group.id },
+                            })
+                        }
+                        style={styles.buttons}
+                    >
+                        <BagCheckIcon size={24} color="white" />
+                        <TextDefault style={styles.infoChipText}>
+                            Editar conta
+                        </TextDefault>
+                    </Pressable>
+                </ScrollView>
+
+                <View
                     style={[
-                        styles.buttons,
-                        !canCreateInSelected && styles.infoChipDisabled,
+                        styles.purchasesList,
+                        { minHeight: height - insets.top - insets.bottom - 32 },
                     ]}
                 >
-                    <BagCheckIcon size={24} color="white" />
-                    <TextDefault style={styles.infoChipText}>
-                        Criar compra
-                    </TextDefault>
-                </Pressable>
-
-                <Pressable
-                    onPress={() =>
-                        router.push(`/create-subscription?groupId=${group.id}`)
-                    }
-                    style={styles.buttons}
-                >
-                    <RefreshCircleIcon size={24} color="white" />
-                    <TextDefault style={styles.infoChipText}>
-                        Criar assinatura
-                    </TextDefault>
-                </Pressable>
-
-                <Pressable
-                    onPress={() =>
-                        router.push({
-                            pathname: "/create-group",
-                            params: { groupId: group.id },
-                        })
-                    }
-                    style={styles.buttons}
-                >
-                    <BagCheckIcon size={24} color="white" />
-                    <TextDefault style={styles.infoChipText}>
-                        Editar conta
-                    </TextDefault>
-                </Pressable>
-            </ScrollView>
-
-            <View style={styles.purchasesList}>
-                {purchasesLoading ? (
-                    <ActivityIndicator
-                        size="small"
-                        color="#B3B3B3"
-                        style={{ marginTop: 12 }}
-                    />
-                ) : (
-                    sections.map((section) => (
-                        <PurchaseSection
-                            key={section.date}
-                            date={section.date}
-                            purchases={section.purchases}
+                    {purchasesLoading ? (
+                        <ActivityIndicator
+                            size="small"
+                            color="#B3B3B3"
+                            style={{ marginTop: 12 }}
                         />
-                    ))
-                )}
+                    ) : (
+                        sections.map((section) => (
+                            <PurchaseSection
+                                key={section.date}
+                                date={section.date}
+                                purchases={section.purchases}
+                            />
+                        ))
+                    )}
 
-                {isFetchingNextPage && (
-                    <ActivityIndicator
-                        size="small"
-                        color="#B3B3B3"
-                        style={{ marginVertical: 16 }}
-                    />
-                )}
+                    {isFetchingNextPage && (
+                        <ActivityIndicator
+                            size="small"
+                            color="#B3B3B3"
+                            style={{ marginVertical: 16 }}
+                        />
+                    )}
+                </View>
             </View>
-        </View>
-    );
-});
+        );
+    },
+);
 
 export default Groups;
 
@@ -363,6 +375,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         gap: 8,
         paddingHorizontal: 16,
+        justifyContent: "space-between",
     },
     infoChip: {
         paddingHorizontal: 12,
@@ -384,17 +397,23 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: "600",
     },
+    updateText: {
+        color: "#B6B6B6",
+        fontSize: 12,
+        // fontWeight: "600",
+    },
     buttons: {
         paddingHorizontal: 12,
         paddingVertical: 8,
         backgroundColor: "#282828",
         borderRadius: 8,
-        alignItems: "center",
+        alignItems: "flex-start",
         justifyContent: "center",
         gap: 4,
     },
     purchasesList: {
         // paddingHorizontal: 16,
         width: "100%",
+        justifyContent: "flex-start",
     },
 });

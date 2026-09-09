@@ -32,6 +32,11 @@ import PopoverMenu from "@/components/home/popover-btn";
 import ScrollToTopBtn from "@/components/home/scroll-top-btn";
 import CreatePurchase from "@/components/home/float-btn";
 import FromTheStart from "@/components/home/start";
+import AvatarHeader from "@/components/home/header-avatar";
+
+import { TuningSquare2Icon } from '@solar-icons/react-native/linear/tuning-square-2'
+import { Tuning2Icon } from '@solar-icons/react-native/linear/tuning-2'
+import GroupSelectMenu from "@/components/home/group-select-menu";
 
 const HEADER_HEIGHT = 64;
 
@@ -39,6 +44,7 @@ export default function Home() {
     const { session } = useAuth();
     const queryClient = useQueryClient();
     const { data, refetch, isFetching } = useGroups();
+    const [updatedAt, setUpdatedAt] = useState(Date.now());
     // const {}
     const [showHeader, setShowHeader] = useState(false);
 
@@ -149,6 +155,7 @@ export default function Home() {
         setShowHeader(true);
         refetch(); // groups
         groupsRef.current?.refreshInvoiceData(); // invoices + purchases + total da fatura selecionada
+        setUpdatedAt(Date.now());
         setTimeout(() => {
             setShowHeader(false);
         }, 1000);
@@ -176,11 +183,9 @@ export default function Home() {
                 ]}
             >
                 <View style={styles.headerTop}>
-                    <View style={styles.headerSlotLeft}>
-                        <Avatar />
-                    </View>
+                    <AvatarHeader />
 
-                    <PopoverMenu
+                    <GroupSelectMenu
                         data={data}
                         menuOpen={menuOpen}
                         setMenuOpen={setMenuOpen}
@@ -192,7 +197,7 @@ export default function Home() {
 
                     <View style={styles.headerActions}>
                         <Pressable style={styles.iconButton}>
-                            <TextDefault style={styles.icon}>♧</TextDefault>
+                            <Tuning2Icon size={24} color="#fff" />
                         </Pressable>
                     </View>
                 </View>
@@ -261,7 +266,7 @@ export default function Home() {
                     />
                 }
             >
-                <Groups ref={groupsRef} groupId={selectedGroupId} />
+                <Groups ref={groupsRef} groupId={selectedGroupId} updatedAt={updatedAt} />
                 {allGroups.length === 0 && (
                     <View
                         style={{

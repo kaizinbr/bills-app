@@ -1,9 +1,9 @@
-import { useRouter } from "expo-router";
-import { Animated, Pressable, StyleSheet } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMemo } from "react";
 import { useGroupInvoices, type Invoice } from "@/hooks/use-group-invoices";
 import { AddIcon } from "@solar-icons/react-native/linear/add";
+import { useRouter } from "expo-router";
+import { useMemo } from "react";
+import { Animated, Pressable, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function CreatePurchase({
     selectedGroupId,
@@ -18,16 +18,29 @@ export default function CreatePurchase({
     const { data: invoicesData } = useGroupInvoices(selectedGroupId ?? "");
 
     const currentInvoice = useMemo(
-        () => invoicesData?.invoices.find((inv: Invoice) => inv.status === "OPEN") ?? null,
+        () =>
+            invoicesData?.invoices.find(
+                (inv: Invoice) => inv.status === "OPEN",
+            ) ?? null,
         [invoicesData],
     );
+
+    const floatButtonScale = floatbBtnTranslateY.interpolate({
+        inputRange: [0, 100],
+        outputRange: [1, 0.6],
+        extrapolate: "clamp",
+    });
 
     if (!selectedGroupId || !currentInvoice) return null;
 
     return (
         <Animated.View
             style={{
-                transform: [{ translateY: floatbBtnTranslateY }],
+                transform: [
+                    { translateY: floatbBtnTranslateY },
+                    { scaleX: floatButtonScale },
+                    { scaleY: floatButtonScale },
+                ],
                 position: "absolute",
                 bottom: insets.bottom,
                 right: 16,

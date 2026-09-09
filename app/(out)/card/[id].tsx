@@ -8,6 +8,7 @@ import { useAuth } from "@/components/core/auth-provider";
 import StatusBar from "@/components/core/status-bar";
 import TextDefault from "@/components/core/text-core";
 import { PurchaseIcon } from "@/components/home/purchase-icon";
+import { LinearGradient } from "expo-linear-gradient";
 import { formatCurrency } from "@/lib/format-currency";
 import {
     ActivityIndicator,
@@ -17,36 +18,25 @@ import {
     Pressable,
     RefreshControl,
     StyleSheet,
-    View
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
 
 import {
     BottomSheetBackdrop,
     BottomSheetModal,
     BottomSheetView,
-    useBottomSheetModal
+    useBottomSheetModal,
 } from "@gorhom/bottom-sheet";
 
-
 import BackBtn from "@/components/core/back-btn";
-import EditPurchaseBottomSheet from "@/components/purchases/edit-purchade-bottomsheet";
-import {
-    useDefaultStyles
-} from "react-native-ui-datepicker";
+import EditCardBottomSheet from "@/components/cards/edit-card-bottomsheet";
+import { useDefaultStyles } from "react-native-ui-datepicker";
 
-function formatMoneyInput(digits: string) {
-    if (!digits) return "";
 
-    const paddedDigits = digits.padStart(3, "0");
-    const integerPart = paddedDigits.slice(0, -2).replace(/^0+(?=\d)/, "");
-    const decimalPart = paddedDigits.slice(-2);
 
-    return `R$ ${integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".")},${decimalPart}`;
-}
 
-export default function PurchasePage() {
+export default function CardPage() {
     const router = useRouter();
     const local = useLocalSearchParams();
     const purchaseId = local.id as string; // id da compra, se for edição
@@ -60,7 +50,7 @@ export default function PurchasePage() {
     const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const [purchaseData, setPurchaseData] = useState<any>(null);
+    const [cardData, setCardData] = useState<any>(null);
 
     let today = new Date();
     const defaultStyles = useDefaultStyles();
@@ -72,13 +62,13 @@ export default function PurchasePage() {
         }
 
         try {
-            const response = await api.get(`/purchases/${purchaseId}`);
-            setPurchaseData(response.data.purchase);
+            const response = await api.get(`/cards/${purchaseId}`);
+            setCardData(response.data.card);
             // console.log("Fetched purchase data:", response.data.purchase);
             setError(null);
             setLoading(false);
         } catch (error) {
-            setError("Erro ao buscar os dados da compra.");
+            setError("Erro ao buscar os dados do cartão.");
             setLoading(false);
             console.error("Error fetching users:", error);
         } finally {
@@ -92,15 +82,15 @@ export default function PurchasePage() {
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-    const handleDeletePurchase = async () => {
+    const handleDeleteCard = async () => {
         try {
-            const response = await api.delete(`/purchases/${purchaseId}`);
-            console.log("Purchase deleted:", response.data.purchase);
+            const response = await api.delete(`/cards/${purchaseId}`);
+            console.log("Card deleted:", response.data.card);
             setShowDeleteModal(false);
             router.back();
         } catch (error) {
-            console.error("Error deleting purchase:", error);
-            setError("Erro ao excluir a compra.");
+            console.error("Error deleting card:", error);
+            setError("Erro ao excluir o cartão.");
         }
     };
 
@@ -144,7 +134,7 @@ export default function PurchasePage() {
                     <ActivityIndicator color={"#fff"} size={"large"} />
                 </View>
             )}
-            {purchaseData && (
+            {cardData && (
                 <Animated.ScrollView
                     horizontal={false}
                     contentContainerStyle={{
@@ -177,12 +167,51 @@ export default function PurchasePage() {
                         />
                     }
                 >
+                    <LinearGradient
+                        colors={[cardData.color || "#282828", "#161718"]}
+                        style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            height: insets.top + 164,
+                            zIndex: -5,
+                            opacity: 0.5,
+                        }}
+                    />
                     <BackBtn />
+                    <View
+                        style={{
+                            width: "100%",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            marginBottom: 16,
+                        }}
+                    >
+                        <View
+                            style={{
+                                height: 64,
+                                borderRadius: 12,
+                                backgroundColor: cardData.color || "#282828",
+                                alignItems: "flex-start",
+                                justifyContent: "center",
+                                paddingHorizontal: 16,
+                                paddingBottom: 16,
+                                aspectRatio: 1.6 / 1,
+                            }}
+                        >
+                            <View
+                                style={{
+                                    width: 14,
+                                    height: 11,
+                                    backgroundColor: "#DBDBDB",
+                                    borderRadius: 2,
+                                }}
+                            />
+                        </View>
+                    </View>
                     <TextDefault style={styles.title}>
-                        {purchaseData.description ||
-                            purchaseData.category?.label ||
-                            "Sem descrição"}{" "}
-                        · {formatCurrency(purchaseData.amount)}
+                        {cardData.name || "Sem nome"}
                     </TextDefault>
 
                     <TextDefault
@@ -193,50 +222,34 @@ export default function PurchasePage() {
                             },
                         ]}
                     >
-                        {purchaseData.subscription
-                            ? "Compra recorrente"
-                            : "Compra única"}
+                        Cartão de crédito
                     </TextDefault>
 
-                    <View
-                        style={[
-                            styles.section,
-                            {
-                                flexDirection: "row",
-                                gap: 8,
-                                alignItems: "center",
-                            },
-                        ]}
-                    >
-                        <PurchaseIcon
-                            categoryKey={purchaseData.category?.key}
-                            style={styles.icon}
-                        />
-                        <View>
-                            <TextDefault style={styles.label}>
-                                Categoria
-                            </TextDefault>
-                            <TextDefault style={styles.description}>
-                                {purchaseData.category?.label ||
-                                    "Sem categoria"}
-                            </TextDefault>
-                        </View>
-                    </View>
                     <View style={styles.section}>
                         <TextDefault style={styles.label}>
-                            Data da compra
+                            Últimos dígitos
                         </TextDefault>
                         <TextDefault style={styles.description}>
-                            {new Date(
-                                purchaseData.purchasedAt,
-                            ).toLocaleDateString("pt-BR", {
-                                day: "2-digit",
-                                month: "2-digit",
-                                year: "numeric",
-                            })}
+                            {cardData.digits || "Sem dígitos"}
                         </TextDefault>
                     </View>
-                    {purchaseData.amount && (
+
+                    <View style={styles.section}>
+                        <TextDefault style={styles.label}>
+                            Criado em
+                        </TextDefault>
+                        <TextDefault style={styles.description}>
+                            {new Date(cardData.createdAt).toLocaleDateString(
+                                "pt-BR",
+                                {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                },
+                            )}
+                        </TextDefault>
+                    </View>
+                    {cardData.amount && (
                         <View style={styles.section}>
                             <TextDefault style={styles.label}>
                                 Valor
@@ -245,19 +258,18 @@ export default function PurchasePage() {
                                 {new Intl.NumberFormat("pt-BR", {
                                     style: "currency",
                                     currency: "BRL",
-                                }).format(purchaseData.amount)}
+                                }).format(cardData.amount)}
                             </TextDefault>
                         </View>
                     )}
 
-                    {purchaseData.cardId && (
+                    {cardData.cardId && (
                         <View style={styles.section}>
                             <TextDefault style={styles.label}>
                                 Cartão
                             </TextDefault>
                             <TextDefault style={styles.description}>
-                                {purchaseData.card.name} ·{" "}
-                                {purchaseData.card.digits}
+                                {cardData.card.name} · {cardData.card.digits}
                             </TextDefault>
                         </View>
                     )}
@@ -287,7 +299,7 @@ export default function PurchasePage() {
                             <TextDefault
                                 style={{ color: "#fff", fontWeight: "700" }}
                             >
-                                Excluir compra
+                                Excluir cartão
                             </TextDefault>
                         </Pressable>
                         <Pressable
@@ -304,7 +316,7 @@ export default function PurchasePage() {
                             <TextDefault
                                 style={{ color: "#fff", fontWeight: "700" }}
                             >
-                                Editar compra
+                                Editar cartão
                             </TextDefault>
                         </Pressable>
                     </View>
@@ -352,7 +364,16 @@ export default function PurchasePage() {
                                 width: "100%",
                             }}
                         >
-                            Tem certeza que deseja excluir esta compra?
+                            Tem certeza que deseja excluir este cartão?
+                        </TextDefault>
+                        <TextDefault
+                            style={{
+                                color: "#fff",
+                                textAlign: "center",
+                                width: "100%",
+                            }}
+                        >
+                            Suas compras associadas a este cartão não serão excluídas, mas o cartão será removido da lista de cartões.
                         </TextDefault>
                         <Pressable
                             onPress={() => {
@@ -374,7 +395,7 @@ export default function PurchasePage() {
                         </Pressable>
                         <Pressable
                             onPress={() => {
-                                handleDeletePurchase();
+                                handleDeleteCard();
                             }}
                             style={{
                                 padding: 12,
@@ -400,7 +421,6 @@ export default function PurchasePage() {
                 onDismiss={() => {
                     fecthData(true);
                 }}
-                // snapPoints={snapPoints}
                 backdropComponent={(backdropProps) => (
                     <BottomSheetBackdrop
                         {...backdropProps}
@@ -415,8 +435,8 @@ export default function PurchasePage() {
                 enableDynamicSizing={true}
             >
                 <BottomSheetView style={styles.contentContainer}>
-                    <EditPurchaseBottomSheet
-                        initialData={purchaseData}
+                    <EditCardBottomSheet
+                        initialData={cardData}
                         onFinish={() => {
                             bottomSheetModalRef.current?.dismiss();
                         }}

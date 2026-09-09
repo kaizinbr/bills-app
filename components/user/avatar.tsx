@@ -1,4 +1,10 @@
-import { Text, View, StyleSheet, ActivityIndicator, Pressable } from "react-native";
+import {
+    Text,
+    View,
+    StyleSheet,
+    ActivityIndicator,
+    Pressable,
+} from "react-native";
 import { authClient } from "@/lib/auth-client";
 import { useRouter, Href, Link } from "expo-router";
 import { Image } from "expo-image";
@@ -11,30 +17,93 @@ export default function Avatar({
     data,
     style,
     size,
+    fontSize,
 }: {
     data?: UserProfile;
     style?: any;
     size?: number;
+    fontSize?: number;
 }) {
     const router = useRouter();
 
     const { data: profile, isLoading } = useProfile();
 
-
     return (
         <>
             {isLoading ? (
                 <ActivityIndicator size="small" color="#0000ff" />
-            ) : (<Pressable
-            onPress={() =>
-                router.push({
-                    pathname: "/",
-                    // params: { username: data.lowername },
-                })
-            }
-            style={({ pressed }) => [
+            ) : (
+                <View style={[styles.main]}>
+                    {profile.image ? (
+                        <Image
+                            source={{ uri: profile.image }}
+                            style={[
+                                styles.cardImage,
+                                style,
+                                {
+                                    width: size || 32,
+                                    height: size || 32,
+                                    borderRadius: 9999,
+                                },
+                            ]}
+                        />
+                    ) : (
+                        <View
+                            style={[
+                                styles.cardImage,
+                                style,
+                                {
+                                    width: size || 32,
+                                    height: size || 32,
+                                    borderRadius: 9999,
+                                },
+                            ]}
+                        >
+                            <TextDefault style={styles.cardImageText}>
+                                {profile.name?.[0].toUpperCase()}
+                            </TextDefault>
+                        </View>
+                    )}
+                    <TextDefault
+                        style={{
+                            color: "#eeeeee",
+                            fontSize: fontSize || 12,
+                            marginTop: 0,
+                            fontWeight: "600",
+                        }}
+                        numberOfLines={1}
+                    >
+                        {profile.name}
+                    </TextDefault>
+                </View>
+            )}
+        </>
+    );
+}
+
+export function AvatarNoPress({
+    data,
+    style,
+    size,
+    fontSize,
+    focused,
+}: {
+    data?: UserProfile | any;
+    style?: any;
+    size?: number;
+    fontSize?: number;
+    focused?: boolean;
+}) {
+    const { data: profile, isLoading } = useProfile();
+    return (
+        <View
+            style={[
                 styles.main,
-                pressed && styles.mainPressed,
+                {
+                    width: size || 32,
+                    height: size || 32,
+                    borderRadius: 9999,
+                },
             ]}
         >
             {profile.image ? (
@@ -51,60 +120,22 @@ export default function Avatar({
                     ]}
                 />
             ) : (
-                <View style={[
-                    styles.cardImage,
-                    style,
-                    {
-                        width: size || 32,
-                        height: size || 32,
-                        borderRadius: 9999,
-                    },
-                ]} />
+                <View
+                    style={[
+                        styles.cardImage,
+                        style,
+                        {
+                            width: size || 32,
+                            height: size || 32,
+                            borderRadius: 9999,
+                        },
+                    ]}
+                >
+                    <TextDefault style={[styles.cardImageText, { fontSize: fontSize || 16 }]}>
+                        {profile.name?.[0].toUpperCase()}
+                    </TextDefault>
+                </View>
             )}
-            <TextDefault style={{ color: "#eeeeee", fontSize: 12, marginTop: 4 }}>
-                {profile.name}
-            </TextDefault>
-        </Pressable>)}
-        </>
-    );
-}
-
-export function AvatarNoPress({
-    data,
-    style,
-    size,
-    focused
-}: {
-    data: UserProfile | any;
-    style?: any;
-    size?: number;
-    focused?: boolean;
-}) {
-    return (
-        <View
-            style={[
-                styles.main,
-                {
-                    width: size || 32,
-                    height: size || 32,
-                    borderRadius: 9999,
-                },
-            ]}
-        >
-            <Image
-                source={{ uri: data.avatar_url! }}
-                style={[
-                    styles.cardImage,
-                    style,
-                    {
-                        width: size || 32,
-                        height: size || 32,
-                        borderRadius: 9999,
-                    borderWidth: focused ? 2 : 0,
-                    borderColor: focused ? "#8065ef" : "transparent",
-                    },
-                ]}
-            />
         </View>
     );
 }
@@ -124,7 +155,14 @@ const styles = StyleSheet.create({
     cardImage: {
         width: 32,
         height: 32,
-        backgroundColor: "#bbb",
+        backgroundColor: "#009C7A",
         borderRadius: 32 * 0.306,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    cardImageText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: 700,
     },
 });
