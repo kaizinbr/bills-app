@@ -27,7 +27,7 @@ export default function CreatePurchase({
 
     const floatButtonScale = floatbBtnTranslateY.interpolate({
         inputRange: [0, 100],
-        outputRange: [1, 0.6],
+        outputRange: [1, 0.2],
         extrapolate: "clamp",
     });
 

@@ -222,6 +222,19 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                             {totalPurchases} compras
                         </TextDefault>
                     </View>
+                    <Pressable style={styles.buttons}
+                        onPress={() => {
+                            router.push({
+                                pathname: `/(tabs)/subscriptions/[groupId]`,
+                                params: { groupId: group.id },
+                            });
+                        }}
+                    >
+                        <Bag3Icon size={24} color="white" />
+                        <TextDefault style={styles.infoChipText}>
+                            {group._count?.subscriptions} assinatura{group._count?.subscriptions !== 1 ? "s" : ""}
+                        </TextDefault>
+                    </Pressable>
 
                     {group.cards?.map((card: any) => (
                         <Pressable

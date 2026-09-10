@@ -8,7 +8,6 @@ import { useAuth } from "@/components/core/auth-provider";
 import StatusBar from "@/components/core/status-bar";
 import TextDefault from "@/components/core/text-core";
 import { PurchaseIcon } from "@/components/home/purchase-icon";
-import { LinearGradient } from "expo-linear-gradient";
 import { formatCurrency } from "@/lib/format-currency";
 import {
     ActivityIndicator,
@@ -18,25 +17,39 @@ import {
     Pressable,
     RefreshControl,
     StyleSheet,
-    View,
+    View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 
 import {
     BottomSheetBackdrop,
     BottomSheetModal,
     BottomSheetView,
-    useBottomSheetModal,
+    useBottomSheetModal
 } from "@gorhom/bottom-sheet";
 
-import BackBtn from "@/components/core/back-btn";
-import EditCardBottomSheet from "@/components/cards/edit-card-bottomsheet";
-import { useDefaultStyles } from "react-native-ui-datepicker";
 
-export default function CardPage() {
+import BackBtn from "@/components/core/back-btn";
+import EditSubscriptionBottomSheet from "@/components/subscriptions/edit-subscription-bottomsheet";
+import {
+    useDefaultStyles
+} from "react-native-ui-datepicker";
+
+function formatMoneyInput(digits: string) {
+    if (!digits) return "";
+
+    const paddedDigits = digits.padStart(3, "0");
+    const integerPart = paddedDigits.slice(0, -2).replace(/^0+(?=\d)/, "");
+    const decimalPart = paddedDigits.slice(-2);
+
+    return `R$ ${integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".")},${decimalPart}`;
+}
+
+export default function PurchasePage() {
     const router = useRouter();
     const local = useLocalSearchParams();
-    const purchaseId = local.id as string; // id da compra, se for edição
+    const subscriptionId = local.id as string; // id da compra, se for edição
     console.log("Local search params:", local.id);
 
     const { session } = useAuth();
@@ -47,7 +60,7 @@ export default function CardPage() {
     const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const [cardData, setCardData] = useState<any>(null);
+    const [data, setData] = useState<any>(null);
 
     let today = new Date();
     const defaultStyles = useDefaultStyles();
@@ -59,13 +72,13 @@ export default function CardPage() {
         }
 
         try {
-            const response = await api.get(`/cards/${purchaseId}`);
-            setCardData(response.data.card);
+            const response = await api.get(`/subscriptions/${subscriptionId}`);
+            setData(response.data.subscription);
             // console.log("Fetched purchase data:", response.data.purchase);
             setError(null);
             setLoading(false);
         } catch (error) {
-            setError("Erro ao buscar os dados do cartão.");
+            setError("Erro ao buscar os dados da compra.");
             setLoading(false);
             console.error("Error fetching users:", error);
         } finally {
@@ -79,15 +92,15 @@ export default function CardPage() {
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-    const handleDeleteCard = async () => {
+    const handleDeletePurchase = async () => {
         try {
-            const response = await api.delete(`/cards/${purchaseId}`);
-            console.log("Card deleted:", response.data.card);
+            const response = await api.delete(`/subscriptions/${subscriptionId}`);
+            console.log("Purchase deleted:", response.data.purchase);
             setShowDeleteModal(false);
             router.back();
         } catch (error) {
-            console.error("Error deleting card:", error);
-            setError("Erro ao excluir o cartão.");
+            console.error("Error deleting purchase:", error);
+            setError("Erro ao excluir a compra.");
         }
     };
 
@@ -131,7 +144,7 @@ export default function CardPage() {
                     <ActivityIndicator color={"#fff"} size={"large"} />
                 </View>
             )}
-            {cardData && (
+            {data && (
                 <Animated.ScrollView
                     horizontal={false}
                     contentContainerStyle={{
@@ -164,51 +177,12 @@ export default function CardPage() {
                         />
                     }
                 >
-                    <LinearGradient
-                        colors={[cardData.color || "#282828", "#161718"]}
-                        style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            height: insets.top + 164,
-                            zIndex: -5,
-                            opacity: 0.5,
-                        }}
-                    />
                     <BackBtn />
-                    <View
-                        style={{
-                            width: "100%",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            marginBottom: 16,
-                        }}
-                    >
-                        <View
-                            style={{
-                                height: 64,
-                                borderRadius: 12,
-                                backgroundColor: cardData.color || "#282828",
-                                alignItems: "flex-start",
-                                justifyContent: "center",
-                                paddingHorizontal: 16,
-                                paddingBottom: 16,
-                                aspectRatio: 1.6 / 1,
-                            }}
-                        >
-                            <View
-                                style={{
-                                    width: 14,
-                                    height: 11,
-                                    backgroundColor: "#DBDBDB",
-                                    borderRadius: 2,
-                                }}
-                            />
-                        </View>
-                    </View>
                     <TextDefault style={styles.title}>
-                        {cardData.name || "Sem nome"}
+                        {data.description ||
+                            data.category?.label ||
+                            "Sem descrição"}{" "}
+                        · {formatCurrency(data.amount)}
                     </TextDefault>
 
                     <TextDefault
@@ -219,34 +193,48 @@ export default function CardPage() {
                             },
                         ]}
                     >
-                        Cartão de crédito
+                        Assinatura
                     </TextDefault>
 
+                    <View
+                        style={[
+                            styles.section,
+                            {
+                                flexDirection: "row",
+                                gap: 8,
+                                alignItems: "center",
+                            },
+                        ]}
+                    >
+                        <PurchaseIcon
+                            categoryKey={data.category?.key}
+                            style={styles.icon}
+                        />
+                        <View>
+                            <TextDefault style={styles.label}>
+                                Categoria
+                            </TextDefault>
+                            <TextDefault style={styles.description}>
+                                {data.category?.label ||
+                                    "Sem categoria"}
+                            </TextDefault>
+                        </View>
+                    </View>
                     <View style={styles.section}>
                         <TextDefault style={styles.label}>
-                            Últimos dígitos
+                            Cadastrada em
                         </TextDefault>
                         <TextDefault style={styles.description}>
-                            {cardData.digits || "Sem dígitos"}
+                            {new Date(
+                                data.createdAt,
+                            ).toLocaleDateString("pt-BR", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                            })}
                         </TextDefault>
                     </View>
-
-                    <View style={styles.section}>
-                        <TextDefault style={styles.label}>
-                            Criado em
-                        </TextDefault>
-                        <TextDefault style={styles.description}>
-                            {new Date(cardData.createdAt).toLocaleDateString(
-                                "pt-BR",
-                                {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    year: "numeric",
-                                },
-                            )}
-                        </TextDefault>
-                    </View>
-                    {cardData.amount && (
+                    {data.amount && (
                         <View style={styles.section}>
                             <TextDefault style={styles.label}>
                                 Valor
@@ -255,18 +243,19 @@ export default function CardPage() {
                                 {new Intl.NumberFormat("pt-BR", {
                                     style: "currency",
                                     currency: "BRL",
-                                }).format(cardData.amount)}
+                                }).format(data.amount)}
                             </TextDefault>
                         </View>
                     )}
 
-                    {cardData.cardId && (
+                    {data.cardId && (
                         <View style={styles.section}>
                             <TextDefault style={styles.label}>
                                 Cartão
                             </TextDefault>
                             <TextDefault style={styles.description}>
-                                {cardData.card.name} · {cardData.card.digits}
+                                {data.card.name} ·{" "}
+                                {data.card.digits}
                             </TextDefault>
                         </View>
                     )}
@@ -296,7 +285,7 @@ export default function CardPage() {
                             <TextDefault
                                 style={{ color: "#fff", fontWeight: "700" }}
                             >
-                                Excluir cartão
+                                Excluir assinatura
                             </TextDefault>
                         </Pressable>
                         <Pressable
@@ -313,7 +302,7 @@ export default function CardPage() {
                             <TextDefault
                                 style={{ color: "#fff", fontWeight: "700" }}
                             >
-                                Editar cartão
+                                Editar assinatura
                             </TextDefault>
                         </Pressable>
                     </View>
@@ -361,18 +350,7 @@ export default function CardPage() {
                                 width: "100%",
                             }}
                         >
-                            Tem certeza que deseja excluir este cartão?
-                        </TextDefault>
-                        <TextDefault
-                            style={{
-                                color: "#fff",
-                                textAlign: "center",
-                                width: "100%",
-                            }}
-                        >
-                            As assinaturas cadastradas nesse cartão serão
-                            excluídas e não poderão ser recuperadas. As compras
-                            vinculadas a esse cartão não serão afetadas.
+                            Tem certeza que deseja excluir esta compra?
                         </TextDefault>
                         <Pressable
                             onPress={() => {
@@ -394,7 +372,7 @@ export default function CardPage() {
                         </Pressable>
                         <Pressable
                             onPress={() => {
-                                handleDeleteCard();
+                                handleDeletePurchase();
                             }}
                             style={{
                                 padding: 12,
@@ -420,6 +398,7 @@ export default function CardPage() {
                 onDismiss={() => {
                     fecthData(true);
                 }}
+                // snapPoints={snapPoints}
                 backdropComponent={(backdropProps) => (
                     <BottomSheetBackdrop
                         {...backdropProps}
@@ -434,8 +413,8 @@ export default function CardPage() {
                 enableDynamicSizing={true}
             >
                 <BottomSheetView style={styles.contentContainer}>
-                    <EditCardBottomSheet
-                        initialData={cardData}
+                    <EditSubscriptionBottomSheet
+                        initialData={data}
                         onFinish={() => {
                             bottomSheetModalRef.current?.dismiss();
                         }}

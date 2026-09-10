@@ -117,6 +117,8 @@ export default function CreateCard() {
     }, []);
 
     const handleCreateCard = async () => {
+        setCanSubmit(false);
+        setLoading(true);
         try {
             const resolvedOwner = myCard ? currentUserId : cardOwner;
 
@@ -135,8 +137,13 @@ export default function CreateCard() {
                 digits: digits,
             });
             console.log("Group created:", response.data);
+            
+            router.push(`/(tabs)/home`);
         } catch (error) {
             console.error("Error creating group:", error);
+        } finally {
+            setLoading(false);
+            setCanSubmit(true);
         }
     };
 

@@ -77,6 +77,14 @@ export default function TabsLayout() {
                         href: null,
                     }}
                 />
+
+                <Tabs.Screen
+                    name="subscriptions/[groupId]"
+                    options={{
+                        title: "Create Card",
+                        href: null,
+                    }}
+                />
             </Tabs>
 
             <View style={styles.offlineContainer}>

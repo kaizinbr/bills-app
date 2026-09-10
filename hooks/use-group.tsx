@@ -12,6 +12,9 @@ type Group = {
     invoices?: {
         id: string;
     }
+    _count?: {
+        subscriptions: number;
+    }
 };
 
 type GroupsResponse = {

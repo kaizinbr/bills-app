@@ -104,6 +104,7 @@ export default function CreateSubscription() {
                 cardId: selectedCardId,
                 categoryId: category,
                 chargeDay,
+                groupId,
             });
             router.back();
         } catch (err) {
