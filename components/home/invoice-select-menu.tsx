@@ -1,43 +1,23 @@
-import { useAuth } from "@/components/core/auth-provider";
-import Avatar, { AvatarNoPress } from "@/components/user/avatar";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-    Animated,
-    Platform,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    useWindowDimensions,
-    View,
-} from "react-native";
 import TextDefault from "@/components/core/text-core";
 import { useProfile } from "@/hooks/use-profile";
+import { useRouter } from "expo-router";
+import { useCallback, useMemo, useRef } from "react";
+import {
+    Pressable,
+    StyleSheet,
+    View
+} from "react-native";
 
 import {
     BottomSheetBackdrop,
     BottomSheetModal,
-    BottomSheetView,
-    useBottomSheetModal,
+    BottomSheetView
 } from "@gorhom/bottom-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AltArrowDownIcon } from "@solar-icons/react-native/linear/alt-arrow-down";
 
-import { useGroupInvoices, type Invoice } from "@/hooks/use-group-invoices";
-import { useInvoicePurchases } from "@/hooks/use-invoice-purchases";
-import { useInvoiceTotal } from "@/hooks/use-invoice-total";
-import { formatCurrency } from "@/lib/format-currency";
-
-interface Group {
-    id: string;
-    name: string;
-}
-interface PopoverMenuData {
-    creditorGroups?: Group[];
-    debtorGroups?: Group[];
-}
+import { type Invoice } from "@/hooks/use-group-invoices";
 
 function sortInvoicesDesc(invoices: Invoice[]): Invoice[] {
     return [...invoices].sort(

@@ -8,11 +8,11 @@ import {
     RefreshControl,
     ScrollView,
     StyleSheet,
-    Text,
     useWindowDimensions,
     View,
 } from "react-native";
 import { useRouter } from "expo-router";
+import TextDefault from "@/components/core/text-core";
 
 const HEADER_HEIGHT = 64;
 
@@ -21,9 +21,24 @@ export default function FromTheStart() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Parece que não tem nada por aqui ainda...</Text>
-            <Pressable style={styles.button} onPress={() => router.push("/create-group")}>
-                <Text style={{ color: "#eeeeee" }}>Criar primeira conta</Text>
+            <TextDefault style={styles.title}>
+                Parece que não tem nada por aqui ainda...
+            </TextDefault>
+            <Pressable
+                style={styles.button}
+                onPress={() => router.push("/(out)/create-group")}
+            >
+                <TextDefault style={{ color: "#fff", fontWeight: "bold" }}>
+                    Criar primeira conta
+                </TextDefault>
+            </Pressable>
+            <Pressable
+                style={styles.button}
+                onPress={() => router.push("/(out)/add-account")}
+            >
+                <TextDefault style={{ color: "#fff", fontWeight: "bold" }}>
+                    Entrar com código de convite
+                </TextDefault>
             </Pressable>
         </View>
     );
@@ -47,10 +62,11 @@ const styles = StyleSheet.create({
         // fontSize: 16,
     },
     button: {
-        backgroundColor: "#4a4a4a",
+        backgroundColor: "#009C7A",
         padding: 12,
-        borderRadius: 14,
-        borderWidth: 1,
-        borderColor: "#3a3a3a",
-    }
+        borderRadius: 999,
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+    },
 });

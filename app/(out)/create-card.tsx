@@ -19,8 +19,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Input from "@/components/core/input";
-
-import { Host, Switch, Text, ToggleButton } from "@expo/ui/jetpack-compose";
+import { useGroups } from "@/hooks/use-group";
 
 import DateTimePicker, {
     DateType,
@@ -57,6 +56,9 @@ export default function CreateCard() {
     const local = useLocalSearchParams();
     console.log("Local search params:", local.groupId);
     const groupId = local.groupId as string;
+
+    
+    const { data, refetch, isFetching } = useGroups();
 
     const { session } = useAuth();
     const currentUserId = session?.user?.id;
@@ -138,6 +140,7 @@ export default function CreateCard() {
             });
             console.log("Group created:", response.data);
             
+            refetch();
             router.push(`/(tabs)/home`);
         } catch (error) {
             console.error("Error creating group:", error);

@@ -32,12 +32,16 @@ import {
 import BackBtn from "@/components/core/back-btn";
 import EditCardBottomSheet from "@/components/cards/edit-card-bottomsheet";
 import { useDefaultStyles } from "react-native-ui-datepicker";
+import { useGroups } from "@/hooks/use-group";
 
 export default function CardPage() {
     const router = useRouter();
     const local = useLocalSearchParams();
     const purchaseId = local.id as string; // id da compra, se for edição
     console.log("Local search params:", local.id);
+
+    
+    const { data, refetch, isFetching } = useGroups();
 
     const { session } = useAuth();
     const currentUserId = session?.user?.id;
@@ -84,6 +88,8 @@ export default function CardPage() {
             const response = await api.delete(`/cards/${purchaseId}`);
             console.log("Card deleted:", response.data.card);
             setShowDeleteModal(false);
+
+            refetch();
             router.back();
         } catch (error) {
             console.error("Error deleting card:", error);
@@ -120,6 +126,7 @@ export default function CardPage() {
     return (
         <View style={styles.main}>
             <StatusBar />
+                    <BackBtn />
             {loading && (
                 <View
                     style={{
@@ -176,7 +183,6 @@ export default function CardPage() {
                             opacity: 0.5,
                         }}
                     />
-                    <BackBtn />
                     <View
                         style={{
                             width: "100%",

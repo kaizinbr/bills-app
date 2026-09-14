@@ -29,7 +29,9 @@ import DateTimePicker, {
     useDefaultStyles,
 } from "react-native-ui-datepicker";
 
-function formatMoneyInput(digits: string) {
+import { useGroups } from "@/hooks/use-group";
+
+export function formatMoneyInput(digits: string) {
     const cleanDigits = digits.replace(/\D/g, "");
     if (!cleanDigits) return "";
 
@@ -43,6 +45,9 @@ function formatMoneyInput(digits: string) {
 export default function CreateCard() {
     const router = useRouter();
     const local = useLocalSearchParams();
+
+    
+    const { data, refetch, isFetching } = useGroups();
     const groupId = local.groupId as string; // ainda usado pra buscar cartões do grupo
     const invoiceId = local.invoiceId as string; // fatura de destino, vem pronta da home
     const purchaseId = local.purchaseId as string; // id da compra, se for edição
@@ -136,6 +141,8 @@ export default function CreateCard() {
                 groupId: groupId,
                 categoryId: category,
             });
+
+            refetch();
             router.back();
         } catch (error) {
             setError("Erro ao criar a compra.");

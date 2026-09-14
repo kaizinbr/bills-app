@@ -1,25 +1,38 @@
-import { useQuery } from "@tanstack/react-query";
-import { authClient } from "@/lib/auth-client";
 import api from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 
-type Group = {
+export type Group = {
     id: string;
     name: string;
+    limit: string;
     closingDay: number;
     archived: boolean;
     cards: { id: string; name: string; color: string }[];
-    debtor?: { id: string; name: string; image: string | null };
-    invoices?: {
+    debtor?: { id: string; name: string; image: string | null } | null;
+    invoices: {
         id: string;
-    }
+        groupId: string;
+        cardId: string | null;
+        periodStart: string;
+        closingDate: string;
+        status: "OPEN" | "CLOSED" | "PAID";
+        paidAt: string | null;
+        createdAt: string;
+        updatedAt: string;
+    }[];
     _count?: {
         subscriptions: number;
-    }
+    };
+    members?: {
+        id: string;
+        groupId: string;
+        userId: string;
+        role: "OWNER" | "MEMBER";
+    }[];
 };
 
-type GroupsResponse = {
-    creditorGroups: Group[];
-    debtorGroups: Group[];
+export type GroupsResponse = {
+    groups: Group[];
 };
 
 async function fetchGroups(): Promise<GroupsResponse> {

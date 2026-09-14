@@ -17,24 +17,21 @@ import {
     Pressable,
     RefreshControl,
     StyleSheet,
-    View
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
 
 import {
     BottomSheetBackdrop,
     BottomSheetModal,
     BottomSheetView,
-    useBottomSheetModal
+    useBottomSheetModal,
 } from "@gorhom/bottom-sheet";
 
-
 import BackBtn from "@/components/core/back-btn";
-import EditPurchaseBottomSheet from "@/components/purchases/edit-purchade-bottomsheet";
-import {
-    useDefaultStyles
-} from "react-native-ui-datepicker";
+import EditPurchaseBottomSheet from "@/components/purchases/edit-purchase-bottomsheet";
+import { useDefaultStyles } from "react-native-ui-datepicker";
+import { useGroups } from "@/hooks/use-group";
 
 function formatMoneyInput(digits: string) {
     if (!digits) return "";
@@ -48,6 +45,7 @@ function formatMoneyInput(digits: string) {
 
 export default function PurchasePage() {
     const router = useRouter();
+    const { data, refetch, isFetching } = useGroups();
     const local = useLocalSearchParams();
     const purchaseId = local.id as string; // id da compra, se for edição
     console.log("Local search params:", local.id);
@@ -98,6 +96,7 @@ export default function PurchasePage() {
             console.log("Purchase deleted:", response.data.purchase);
             setShowDeleteModal(false);
             router.back();
+            refetch();
         } catch (error) {
             console.error("Error deleting purchase:", error);
             setError("Erro ao excluir a compra.");

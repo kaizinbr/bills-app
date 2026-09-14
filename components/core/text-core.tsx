@@ -9,7 +9,7 @@ export default function TextDefault({ children, style, ...props }: TextDefaultPr
         <Text
             style={[
                 {
-                    color: "#eee",
+                    color: "#fff",
                     fontWeight: 400,
                     fontFamily: "ana",
                 },

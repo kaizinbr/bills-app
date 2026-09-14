@@ -1,232 +1,476 @@
-import { Image } from "expo-image";
-import { SymbolView } from "expo-symbols";
-import { Platform, Pressable, ScrollView, StyleSheet } from "react-native";
+import { useAuth } from "@/components/core/auth-provider";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+    Animated,
+    Platform,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    useWindowDimensions,
+    View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ExternalLink } from "../../components/external-link";
-import { ThemedText } from "../../components/themed-text";
-import { ThemedView } from "../../components/themed-view";
-import { Collapsible } from "../../components/ui/collapsible";
-import { WebBadge } from "../../components/web-badge";
-import { BottomTabInset, MaxContentWidth, Spacing } from "../../constants/theme";
-import { useTheme } from "../../hooks/use-theme";
+import StatusBar from "@/components/core/status-bar";
+import Groups from "@/components/home/groups";
+import Charts from "@/components/charts/charts";
+import { useGroups } from "@/hooks/use-group";
+import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 
-export default function TabTwoScreen() {
-    const safeAreaInsets = useSafeAreaInsets();
-    const insets = {
-        ...safeAreaInsets,
-        bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
-    };
-    const theme = useTheme();
+import type { GroupsHandle } from "@/components/home/groups";
+import {
+    Extrapolation,
+    interpolate,
+    useAnimatedScrollHandler,
+    useAnimatedStyle,
+    useSharedValue,
+} from "react-native-reanimated";
 
-    const contentPlatformStyle = Platform.select({
-        android: {
-            paddingTop: insets.top,
-            paddingLeft: insets.left,
-            paddingRight: insets.right,
-            paddingBottom: insets.bottom,
-        },
-        web: {
-            paddingTop: Spacing.six,
-            paddingBottom: Spacing.four,
+import CreatePurchase from "@/components/home/float-btn";
+import AvatarHeader from "@/components/home/header-avatar";
+import FromTheStart from "@/components/home/start";
+
+import GroupManager from "@/components/home/group-manager";
+import GroupSelectMenu from "@/components/home/group-select-menu";
+
+const HEADER_HEIGHT = 64;
+
+export default function Home() {
+    const { session } = useAuth();
+    const queryClient = useQueryClient();
+    const { data, refetch, isFetching } = useGroups();
+
+    const [updatedAt, setUpdatedAt] = useState(Date.now());
+    // const {}
+    const [showHeader, setShowHeader] = useState(false);
+
+    const groupsRef = useRef<GroupsHandle>(null);
+    const [scrollViewHeight, setScrollViewHeight] = useState(0);
+    const [contentHeight, setContentHeight] = useState(0);
+
+    const { height } = useWindowDimensions();
+    const HEADER_MAX_HEIGHT = height * 0.4;
+
+    const scrollOffsetY = useSharedValue(0);
+    const insets = useSafeAreaInsets();
+
+    const handleScroll = useAnimatedScrollHandler({
+        onScroll: (event) => {
+            scrollOffsetY.value = event.contentOffset.y;
         },
     });
 
+    const statusBarOpacityStyle = useAnimatedStyle(() => ({
+        opacity: interpolate(
+            scrollOffsetY.value,
+            [100, 160],
+            [0, 1],
+            Extrapolation.CLAMP,
+        ),
+    }));
+
+    const scrollRef = useRef<ScrollView>(null);
+
+    const scrollY = useRef(new Animated.Value(0)).current;
+    const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+    const [menuOpen, setMenuOpen] = useState(false);
+
+    const closeMenu = useCallback(() => {
+        setMenuOpen(false);
+    }, []);
+
+    const groups = useMemo(() => data?.groups ?? [], [data]);
+
+    const selectedGroup =
+        groups.find((group) => group.id === selectedGroupId) ??
+        groups[0] ??
+        null;
+
+    useEffect(() => {
+        if (!selectedGroupId && groups.length > 0) {
+            setSelectedGroupId(groups[0].id);
+        }
+        // console.log("selectedGroupId", selectedGroupId);
+    }, [groups, selectedGroupId]);
+
+    useEffect(() => {
+        if (!menuOpen) {
+            return;
+        }
+
+        const timeout = setTimeout(() => {
+            setMenuOpen(false);
+        }, 10000);
+
+        return () => clearTimeout(timeout);
+    }, [menuOpen]);
+
+    const headerTranslateY = Animated.diffClamp(
+        scrollY,
+        0,
+        HEADER_HEIGHT,
+    ).interpolate({
+        inputRange: [0, HEADER_HEIGHT],
+        outputRange: [0, -(HEADER_HEIGHT + insets.top)],
+        extrapolate: "clamp",
+    });
+
+    const floatbBtnTranslateY = Animated.diffClamp(
+        scrollY,
+        0,
+        HEADER_HEIGHT,
+    ).interpolate({
+        inputRange: [0, HEADER_HEIGHT],
+        outputRange: [0, 100],
+        extrapolate: "clamp",
+    });
+
+    const isFetchingGroupData = useIsFetching({
+        predicate: (query) =>
+            query.queryKey[0] === "groups" ||
+            (query.queryKey[0] === "group" &&
+                query.queryKey[1] === selectedGroupId) ||
+            query.queryKey[0] === "invoice",
+    });
+
+    useEffect(() => {
+        if (!selectedGroupId) return;
+
+        setShowHeader(false);
+        setMenuOpen(false);
+
+        requestAnimationFrame(() => {
+            scrollRef.current?.scrollTo({ y: 0, animated: false });
+            scrollY.setValue(0);
+        });
+    }, [selectedGroupId, scrollY]);
+
+    const onRefresh = useCallback(() => {
+        setShowHeader(true);
+        refetch(); // groups
+        groupsRef.current?.refreshInvoiceData(); // invoices + purchases + total da fatura selecionada
+        setUpdatedAt(Date.now());
+        setTimeout(() => {
+            setShowHeader(false);
+        }, 1000);
+    }, [refetch]);
+
     return (
-        <ScrollView
-            style={[styles.scrollView, { backgroundColor: theme.background }]}
-            contentInset={insets}
-            contentContainerStyle={[
-                styles.contentContainer,
-                contentPlatformStyle,
-            ]}
-        >
-            <ThemedView style={styles.container}>
-                <ThemedView style={styles.titleContainer}>
-                    <ThemedText type="subtitle">Explore</ThemedText>
-                    <ThemedText
-                        style={styles.centerText}
-                        themeColor="textSecondary"
+        <View style={styles.box}>
+            <StatusBar />
+            <Animated.View
+                style={[
+                    styles.header,
+                    {
+                        paddingTop: insets.top,
+                        height: HEADER_HEIGHT + insets.top,
+                        transform: [
+                            {
+                                translateY: menuOpen
+                                    ? 0
+                                    : showHeader
+                                      ? 0
+                                      : headerTranslateY,
+                            },
+                        ],
+                    },
+                ]}
+            >
+                <View style={styles.headerTop}>
+                    <GroupSelectMenu
+                        data={data}
+                        menuOpen={menuOpen}
+                        setMenuOpen={setMenuOpen}
+                        selectedGroupId={selectedGroupId}
+                        setSelectedGroupId={setSelectedGroupId}
+                        scrollRef={scrollRef}
+                        setShowHeader={setShowHeader}
+                        customStyles={{ maxWidth: "50%" }}
+                    />
+                </View>
+            </Animated.View>
+            {/* <ScrollToTopBtn scrollRef={scrollRef} scrollY={scrollY} /> */}
+            <CreatePurchase
+                selectedGroupId={selectedGroupId}
+                floatbBtnTranslateY={floatbBtnTranslateY}
+            />
+            <Animated.ScrollView
+                style={styles.container}
+                ref={scrollRef}
+                contentContainerStyle={{
+                    paddingTop: HEADER_HEIGHT,
+                    paddingBottom: 64,
+                    alignItems: "flex-start",
+                    justifyContent: "flex-start",
+                    gap: 8,
+                    minHeight:
+                        height - HEADER_HEIGHT - insets.top - insets.bottom,
+                }}
+                showsVerticalScrollIndicator={false}
+                scrollEventThrottle={16}
+                onLayout={(e) =>
+                    setScrollViewHeight(e.nativeEvent.layout.height)
+                }
+                onContentSizeChange={(_, h) => setContentHeight(h)}
+                onScroll={Animated.event(
+                    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                    {
+                        useNativeDriver: true,
+                        listener: (event: any) => {
+                            const offsetY = event.nativeEvent.contentOffset.y;
+                            const distanceFromBottom =
+                                contentHeight - (offsetY + scrollViewHeight);
+                            if (distanceFromBottom < 400) {
+                                groupsRef.current?.loadMoreIfNeeded();
+                            }
+                        },
+                    },
+                )}
+                onMomentumScrollBegin={() => {
+                    if (menuOpen) {
+                        closeMenu();
+                    }
+                }}
+                onScrollBeginDrag={() => {
+                    if (menuOpen) {
+                        closeMenu();
+                    }
+                }}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={isFetching || isFetchingGroupData > 0}
+                        onRefresh={onRefresh}
+                        progressViewOffset={
+                            Platform.OS === "android"
+                                ? HEADER_HEIGHT + insets.top
+                                : 0
+                        }
+                        progressBackgroundColor="#282828"
+                        colors={["#5E8C61", "#5E8C61"]}
+                        style={{
+                            borderWidth: 0.5,
+                            borderColor: "#56595D",
+                        }}
+                    />
+                }
+            >
+                <Charts
+                    ref={groupsRef}
+                    groupId={selectedGroupId}
+                    updatedAt={updatedAt}
+                />
+                {groups.length === 0 && (
+                    <View
+                        style={{
+                            width: "100%",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: 16,
+                        }}
                     >
-                        This starter app includes example{"\n"}code to help you
-                        get started.
-                    </ThemedText>
-
-                    <ExternalLink href="https://docs.expo.dev" asChild>
-                        <Pressable
-                            style={({ pressed }) => pressed && styles.pressed}
-                        >
-                            <ThemedView
-                                type="backgroundElement"
-                                style={styles.linkButton}
-                            >
-                                <ThemedText type="link">
-                                    Expo documentation
-                                </ThemedText>
-                                <SymbolView
-                                    tintColor={theme.text}
-                                    name={{
-                                        ios: "arrow.up.right.square",
-                                        android: "link",
-                                        web: "link",
-                                    }}
-                                    size={12}
-                                />
-                            </ThemedView>
-                        </Pressable>
-                    </ExternalLink>
-                </ThemedView>
-
-                <ThemedView style={styles.sectionsWrapper}>
-                    <Collapsible title="File-based routing">
-                        <ThemedText type="small">
-                            This app has two screens:{" "}
-                            <ThemedText type="code">
-                                src/app/index.tsx
-                            </ThemedText>{" "}
-                            and{" "}
-                            <ThemedText type="code">
-                                src/app/explore.tsx
-                            </ThemedText>
-                        </ThemedText>
-                        <ThemedText type="small">
-                            The layout file in{" "}
-                            <ThemedText type="code">
-                                src/app/_layout.tsx
-                            </ThemedText>{" "}
-                            sets up the tab navigator.
-                        </ThemedText>
-                        <ExternalLink href="https://docs.expo.dev/router/introduction">
-                            <ThemedText type="linkPrimary">
-                                Learn more
-                            </ThemedText>
-                        </ExternalLink>
-                    </Collapsible>
-
-                    <Collapsible title="Android, iOS, and web support">
-                        <ThemedView
-                            type="backgroundElement"
-                            style={styles.collapsibleContent}
-                        >
-                            <ThemedText type="small">
-                                You can open this project on Android, iOS, and
-                                the web. To open the web version, press{" "}
-                                <ThemedText type="smallBold">w</ThemedText> in
-                                the terminal running this project.
-                            </ThemedText>
-                            <Image
-                                source={require("@/assets/images/tutorial-web.png")}
-                                style={styles.imageTutorial}
-                            />
-                        </ThemedView>
-                    </Collapsible>
-
-                    <Collapsible title="Images">
-                        <ThemedText type="small">
-                            For static images, you can use the{" "}
-                            <ThemedText type="code">@2x</ThemedText> and{" "}
-                            <ThemedText type="code">@3x</ThemedText> suffixes to
-                            provide files for different screen densities.
-                        </ThemedText>
-                        <Image
-                            source={require("@/assets/images/react-logo.png")}
-                            style={styles.imageReact}
-                        />
-                        <ExternalLink href="https://reactnative.dev/docs/images">
-                            <ThemedText type="linkPrimary">
-                                Learn more
-                            </ThemedText>
-                        </ExternalLink>
-                    </Collapsible>
-
-                    <Collapsible title="Light and dark mode components">
-                        <ThemedText type="small">
-                            This template has light and dark mode support. The{" "}
-                            <ThemedText type="code">
-                                useColorScheme()
-                            </ThemedText>{" "}
-                            hook lets you inspect what the user&apos;s current
-                            color scheme is, and so you can adjust UI colors
-                            accordingly.
-                        </ThemedText>
-                        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-                            <ThemedText type="linkPrimary">
-                                Learn more
-                            </ThemedText>
-                        </ExternalLink>
-                    </Collapsible>
-
-                    <Collapsible title="Animations">
-                        <ThemedText type="small">
-                            This template includes an example of an animated
-                            component. The{" "}
-                            <ThemedText type="code">
-                                src/components/ui/collapsible.tsx
-                            </ThemedText>{" "}
-                            component uses the powerful{" "}
-                            <ThemedText type="code">
-                                react-native-reanimated
-                            </ThemedText>{" "}
-                            library to animate opening this hint.
-                        </ThemedText>
-                    </Collapsible>
-                </ThemedView>
-                {Platform.OS === "web" && <WebBadge />}
-            </ThemedView>
-        </ScrollView>
+                        <FromTheStart />
+                    </View>
+                )}
+            </Animated.ScrollView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    scrollView: {
+    box: {
         flex: 1,
-    },
-    contentContainer: {
-        flexDirection: "row",
-        justifyContent: "center",
+        backgroundColor: "#161718",
     },
     container: {
-        maxWidth: MaxContentWidth,
-        flexGrow: 1,
+        flex: 1,
+        backgroundColor: "#161718",
+        gap: 8,
+        // padding: 16,
+        paddingTop: 64,
+        flexDirection: "column",
     },
-    titleContainer: {
-        gap: Spacing.three,
+    title: {
+        color: "#eeeeee",
+        fontSize: 20,
+    },
+
+    statusBarBg: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: "transparent",
+        zIndex: 0,
+    },
+
+    header: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        elevation: 10,
+        backgroundColor: "#161718",
+        borderBottomWidth: 0.5,
+        borderBottomColor: "#282828",
+    },
+    headerTop: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        flexDirection: "row",
         alignItems: "center",
-        paddingHorizontal: Spacing.four,
-        paddingVertical: Spacing.six,
+        justifyContent: "space-between",
     },
-    centerText: {
+    headerSlotLeft: {
+        width: "33%",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "flex-start",
+    },
+    headerCenter: {
+        width: "33%",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    headerButton: {
+        width: "100%",
+        backgroundColor: "#2b2b2b",
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 10,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        borderWidth: 1,
+        borderColor: "#3a3a3a",
+        shadowColor: "#000",
+        shadowOpacity: 0.15,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 3 },
+    },
+    headerButtonActive: {
+        borderColor: "#5E8C61",
+        backgroundColor: "#303a32",
+    },
+    headerButtonTitle: {
+        flexShrink: 1,
+        color: "#fff",
+        fontSize: 12,
+        fontWeight: "600",
         textAlign: "center",
     },
-    pressed: {
-        opacity: 0.7,
+    headerButtonIcon: {
+        color: "#fff",
+        fontSize: 10,
+        fontWeight: "700",
+        transform: [{ rotate: "0deg" }],
     },
-    linkButton: {
+    headerButtonIconOpen: {
+        transform: [{ rotate: "180deg" }],
+    },
+    popover: {
+        backgroundColor: "#1f1f1f",
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: "#3a3a3a",
+        overflow: "hidden",
+        maxWidth: 220,
+        shadowColor: "#000",
+        shadowOpacity: 0.22,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 6 },
+    },
+    dropdownMenu: {
+        width: 220,
+        maxWidth: "80%",
+        backgroundColor: "#1f1f1f",
+    },
+    dropdownItem: {
+        paddingHorizontal: 12,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: "#2d2d2d",
+    },
+    dropdownItemSelected: {
+        backgroundColor: "#2d3a2f",
+    },
+    dropdownItemText: {
+        color: "#fff",
+        fontSize: 13,
+        fontWeight: "500",
+    },
+    logo: {
+        color: "#fff",
+        fontSize: 26,
+        fontWeight: "700",
+    },
+
+    headerActions: {
         flexDirection: "row",
-        paddingHorizontal: Spacing.four,
-        paddingVertical: Spacing.two,
-        borderRadius: Spacing.five,
+        alignItems: "center",
+        justifyContent: "flex-end",
+        gap: 12,
+        width: "33%",
+        // backgroundColor: "red",
+    },
+
+    iconButton: {
+        width: 44,
+        height: 44,
+        alignItems: "center",
         justifyContent: "center",
-        gap: Spacing.one,
+    },
+
+    icon: {
+        color: "#fff",
+        fontSize: 25,
+    },
+
+    avatar: {
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        backgroundColor: "#6255b5",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    avatarText: {
+        color: "#fff",
+        fontWeight: "600",
+    },
+
+    categories: {
+        paddingHorizontal: 16,
+        gap: 10,
         alignItems: "center",
     },
-    sectionsWrapper: {
-        gap: Spacing.five,
-        paddingHorizontal: Spacing.four,
-        paddingTop: Spacing.three,
-    },
-    collapsibleContent: {
+
+    category: {
+        height: 40,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+        backgroundColor: "#202020",
         alignItems: "center",
+        justifyContent: "center",
     },
-    imageTutorial: {
-        width: "100%",
-        aspectRatio: 296 / 171,
-        borderRadius: Spacing.three,
-        marginTop: Spacing.two,
+
+    categoryText: {
+        color: "#fff",
+        fontSize: 14,
+        fontWeight: "600",
     },
-    imageReact: {
-        width: 100,
-        height: 100,
-        alignSelf: "center",
+
+    section: {
+        paddingHorizontal: 20,
+        marginBottom: 32,
+    },
+
+    sectionTitle: {
+        color: "#fff",
+        fontSize: 21,
+        fontWeight: "700",
+        marginBottom: 16,
     },
 });

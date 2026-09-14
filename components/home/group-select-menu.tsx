@@ -1,36 +1,19 @@
-import { useAuth } from "@/components/core/auth-provider";
-import Avatar, { AvatarNoPress } from "@/components/user/avatar";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-    Animated,
-    Platform,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    useWindowDimensions,
-    View,
-} from "react-native";
 import TextDefault from "@/components/core/text-core";
+import type { GroupsResponse } from "@/hooks/use-group";
 import { useProfile } from "@/hooks/use-profile";
+import { useRouter } from "expo-router";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import {
     BottomSheetBackdrop,
     BottomSheetModal,
     BottomSheetView,
-    useBottomSheetModal,
 } from "@gorhom/bottom-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-interface Group {
-    id: string;
-    name: string;
-}
-interface PopoverMenuData {
-    creditorGroups?: Group[];
-    debtorGroups?: Group[];
-}
+
+import { AltArrowDownIcon } from "@solar-icons/react-native/linear/alt-arrow-down";
 
 export default function GroupSelectMenu({
     data,
@@ -40,14 +23,16 @@ export default function GroupSelectMenu({
     setSelectedGroupId,
     scrollRef,
     setShowHeader,
+    customStyles,
 }: {
-    data?: PopoverMenuData;
+    data?: GroupsResponse;
     menuOpen: boolean;
     setMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
     selectedGroupId: string | null;
     setSelectedGroupId: (groupId: string) => void;
     scrollRef: React.RefObject<ScrollView> | any;
     setShowHeader: React.Dispatch<React.SetStateAction<boolean>>;
+    customStyles?: any;
 }) {
     const router = useRouter();
     const insets = useSafeAreaInsets();
@@ -83,10 +68,7 @@ export default function GroupSelectMenu({
         setMenuOpen(false);
     }, []);
 
-    const allGroups = useMemo(
-        () => [...(data?.creditorGroups ?? []), ...(data?.debtorGroups ?? [])],
-        [data],
-    );
+    const allGroups = useMemo(() => data?.groups ?? [], [data]);
 
     const selectedGroup =
         allGroups.find((group) => group.id === selectedGroupId) ??
@@ -103,11 +85,12 @@ export default function GroupSelectMenu({
         <>
             <Pressable
                 onPress={handlePresentModalPress}
-                style={styles.headerButton}
+                style={[styles.headerButton, customStyles]}
             >
                 <TextDefault style={styles.headerButtonTitle} numberOfLines={1}>
-                    {selectedGroup?.name ?? "Selecionar conta"}
+                    {selectedGroup?.name ?? "Selecionar conta"} 
                 </TextDefault>
+                <AltArrowDownIcon size={12} color="#fff" />
             </Pressable>
             <BottomSheetModal
                 ref={bottomSheetModalRef}
@@ -138,9 +121,7 @@ export default function GroupSelectMenu({
                             {allGroups.map((group) => (
                                 <Pressable
                                     key={group.id}
-                                    style={[
-                                        styles.options,
-                                    ]}
+                                    style={[styles.options]}
                                     onPress={() => {
                                         setSelectedGroupId(group.id);
                                         setMenuOpen(false);
@@ -153,7 +134,7 @@ export default function GroupSelectMenu({
                                             styles.optionsText,
                                             group.id === selectedGroupId && {
                                                 fontWeight: "700",
-                                                color: "#009C7A"
+                                                color: "#009C7A",
                                             },
                                         ]}
                                     >
@@ -165,13 +146,25 @@ export default function GroupSelectMenu({
                             <Pressable
                                 style={styles.options}
                                 onPress={() => {
-                                    router.push("/(tabs)/create-group");
+                                    router.push("/(out)/create-group");
                                     setMenuOpen(false);
                                     bottomSheetModalRef.current?.dismiss();
                                 }}
                             >
                                 <TextDefault style={styles.optionsText}>
                                     Criar nova conta
+                                </TextDefault>
+                            </Pressable>
+                            <Pressable
+                                style={styles.options}
+                                onPress={() => {
+                                    router.push("/(out)/add-account");
+                                    setMenuOpen(false);
+                                    bottomSheetModalRef.current?.dismiss();
+                                }}
+                            >
+                                <TextDefault style={styles.optionsText}>
+                                    Adicionar com código de convite
                                 </TextDefault>
                             </Pressable>
                         </View>
@@ -190,7 +183,7 @@ const styles = StyleSheet.create({
         justifyContent: "flex-start",
     },
     headerButton: {
-        maxWidth: "100%",
+        maxWidth: "33%",
         backgroundColor: "#2b2b2b",
         paddingHorizontal: 12,
         paddingVertical: 8,
@@ -198,7 +191,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "flex-start",
-        gap: 8,
+        gap: 2,
         borderWidth: 1,
         borderColor: "#3a3a3a",
         shadowColor: "#000",

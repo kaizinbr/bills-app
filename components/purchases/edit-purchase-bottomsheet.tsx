@@ -31,7 +31,7 @@ function formatMoneyInput(digits: string) {
     return `R$ ${integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".")},${decimalPart}`;
 }
 
-function parseAmountToCents(value: unknown) {
+export function parseAmountToCents(value: unknown) {
     if (typeof value !== "string" && typeof value !== "number") return "";
 
     const rawValue = String(value).trim().replace(",", ".");
@@ -134,7 +134,6 @@ export default function EditPurchaseBottomSheet({
 
     const handleUpdatePurchase = async () => {
         try {
-
             const response = await api.patch(`/purchases/${initialData.id}`, {
                 description: cardName,
                 amount: amountCents,
@@ -311,14 +310,24 @@ export default function EditPurchaseBottomSheet({
                                 </Pressable>
                             ))}
                         </ScrollView>
-                        <View style={{ padding: 16, paddingBottom: 0, width: "100%" }}>
+                        <View
+                            style={{
+                                padding: 16,
+                                paddingBottom: 0,
+                                width: "100%",
+                            }}
+                        >
                             <Pressable
                                 onPress={handleUpdatePurchase}
-                                style={[
+                                style={({ pressed }) => [
                                     styles.submitBtn,
                                     {
                                         // bottom: insets.bottom + 16,
                                         opacity: canSubmit ? 1 : 0.5,
+
+                                        backgroundColor: pressed
+                                            ? "#007B5E"
+                                            : "#009C7A",
                                     },
                                 ]}
                                 disabled={!canSubmit}

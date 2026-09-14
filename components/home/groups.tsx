@@ -1,4 +1,15 @@
 // components/home/groups.tsx
+import TextDefault from "@/components/core/text-core";
+import { PurchaseSection } from "@/components/home/purchase-section";
+import { useGroups } from "@/hooks/use-group";
+import { useGroupInvoices, type Invoice } from "@/hooks/use-group-invoices";
+import { useInvoicePurchases } from "@/hooks/use-invoice-purchases";
+import { useInvoiceTotal } from "@/hooks/use-invoice-total";
+import { formatCurrency } from "@/lib/format-currency";
+import { groupPurchasesByDate } from "@/lib/group-purchases-by-date";
+import { useQueryClient } from "@tanstack/react-query";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import {
     forwardRef,
     useEffect,
@@ -15,26 +26,15 @@ import {
     useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
-import { useQueryClient } from "@tanstack/react-query";
-import TextDefault from "@/components/core/text-core";
-import { useGroups } from "@/hooks/use-group";
-import { useGroupInvoices, type Invoice } from "@/hooks/use-group-invoices";
-import { useInvoicePurchases } from "@/hooks/use-invoice-purchases";
-import { useInvoiceTotal } from "@/hooks/use-invoice-total";
-import { formatCurrency } from "@/lib/format-currency";
-import { groupPurchasesByDate } from "@/lib/group-purchases-by-date";
-import { PurchaseSection } from "@/components/home/purchase-section";
 
-import { CardIcon } from "@solar-icons/react-native/linear/card";
-import { WalletIcon } from "@solar-icons/react-native/linear/wallet";
-import { BagCheckIcon } from "@solar-icons/react-native/linear/bag-check";
-import { Bag3Icon } from "@solar-icons/react-native/linear/bag-3";
-import { UserCircleIcon } from "@solar-icons/react-native/linear/user-circle";
-import { RefreshCircleIcon } from "@solar-icons/react-native/linear/refresh-circle";
-import InvoicesCarousel from "@/components/home/invoices-carousel";
 import InvoiceSelectMenu from "@/components/home/invoice-select-menu";
+import { Bag3Icon } from "@solar-icons/react-native/linear/bag-3";
+import { BagCheckIcon } from "@solar-icons/react-native/linear/bag-check";
+import { CardIcon } from "@solar-icons/react-native/linear/card";
+import { RefreshCircleIcon } from "@solar-icons/react-native/linear/refresh-circle";
+import { UserCircleIcon } from "@solar-icons/react-native/linear/user-circle";
+import { WalletIcon } from "@solar-icons/react-native/linear/wallet";
+import Avatar, { AvatarNoPress } from "@/components/user/avatar";
 
 type GroupsProps = {
     groupId: string | null;
@@ -77,11 +77,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
 
         const group = useMemo(() => {
             if (!data || !groupId) return null;
-            return (
-                [...data.creditorGroups, ...data.debtorGroups].find(
-                    (g) => g.id === groupId,
-                ) ?? null
-            );
+            return data.groups.find((g) => g.id === groupId) ?? null;
         }, [data, groupId]);
         // console.log(group)
 
@@ -168,12 +164,14 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
         return (
             <View style={styles.container}>
                 <View style={styles.infoRow}>
-                    <InvoiceSelectMenu
-                        invoices={invoices}
-                        isSelected={!!selectedInvoice}
-                        selectedInvoice={selectedInvoice}
-                        setSelectedInvoiceId={setSelectedInvoiceId}
-                    />
+                    {invoices.length > 0 && (
+                        <InvoiceSelectMenu
+                            invoices={invoices}
+                            isSelected={!!selectedInvoice}
+                            selectedInvoice={selectedInvoice}
+                            setSelectedInvoiceId={setSelectedInvoiceId}
+                        />
+                    )}
                     <TextDefault style={styles.updateText}>
                         Atualizado:{" "}
                         {new Date(updatedAt).toLocaleTimeString("pt-BR", {
@@ -189,17 +187,26 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                         end={{ x: 1, y: 1 }}
                         style={styles.groupCard}
                     >
-                        <TextDefault style={styles.groupName}>
+                        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                            
+                            <TextDefault style={styles.groupName} numberOfLines={1}>
+                                {group.name}
+                            </TextDefault>
+                            <TextDefault style={styles.groupName} numberOfLines={1}>
+                                {group.members?.length} membro{group.members?.length !== 1 ? "s" : ""}
+                            </TextDefault>
+                        </View>
+                        {/* <TextDefault style={styles.groupName} numberOfLines={1}>
                             Total da conta {group.name}:
-                        </TextDefault>
-                        <TextDefault style={[styles.groupValue]}>
-                            {formatCurrency(totalData?.total)}
-                        </TextDefault>
-                        <TextDefault style={styles.groupClosing}>
-                            {selectedInvoice
-                                ? `Fecha ${new Date(selectedInvoice.closingDate).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}`
-                                : `Fecha dia ${group.closingDay}`}
-                        </TextDefault>
+                        </TextDefault> */}
+                        <View>
+                            <TextDefault style={[styles.groupValue]}>
+                                {formatCurrency(totalData?.total)}
+                            </TextDefault>
+                            <TextDefault style={styles.groupClosing}>
+                                Fecha dia {group.closingDay} {group.limit ? `• Limite ${formatCurrency(group.limit)}` : ""}
+                            </TextDefault>
+                        </View>
                     </LinearGradient>
                 </View>
 
@@ -209,6 +216,32 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.infoRow}
                 >
+                    {Number(group.limit) > 0 && totalData?.total != null && (
+                        <Pressable
+                            style={styles.buttons}
+                            onPress={() => {
+                                // router.push({
+                                //     pathname: `/(tabs)/subscriptions/[groupId]`,
+                                //     params: { groupId: group.id },
+                                // });
+                            }}
+                        >
+                            <TextDefault
+                                style={[
+                                    styles.infoChipText,
+                                    { fontSize: 16, fontWeight: "700" },
+                                ]}
+                            >
+                                {((totalData.total / Number(group.limit)) * 100)
+                                    .toFixed(0)
+                                    .replace(".", ",")}
+                                %
+                            </TextDefault>
+                            <TextDefault style={styles.infoChipText}>
+                                do limite atingido
+                            </TextDefault>
+                        </Pressable>
+                    )}
                     <View style={styles.buttons}>
                         <UserCircleIcon size={24} color="white" />
                         <TextDefault style={styles.infoChipText}>
@@ -222,7 +255,8 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                             {totalPurchases} compras
                         </TextDefault>
                     </View>
-                    <Pressable style={styles.buttons}
+                    <Pressable
+                        style={styles.buttons}
                         onPress={() => {
                             router.push({
                                 pathname: `/(tabs)/subscriptions/[groupId]`,
@@ -232,7 +266,8 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                     >
                         <Bag3Icon size={24} color="white" />
                         <TextDefault style={styles.infoChipText}>
-                            {group._count?.subscriptions} assinatura{group._count?.subscriptions !== 1 ? "s" : ""}
+                            {group._count?.subscriptions} assinatura
+                            {group._count?.subscriptions !== 1 ? "s" : ""}
                         </TextDefault>
                     </Pressable>
 
@@ -278,7 +313,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                         disabled={!selectedInvoice || !canCreateInSelected}
                         onPress={() =>
                             router.push(
-                                `/purchase-edit?groupId=${group.id}&invoiceId=${selectedInvoice?.id}&purchaseId=null`,
+                                `/create-purchase?groupId=${group.id}&invoiceId=${selectedInvoice?.id}&purchaseId=null`,
                             )
                         }
                         style={[
@@ -303,21 +338,6 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                         <RefreshCircleIcon size={24} color="white" />
                         <TextDefault style={styles.infoChipText}>
                             Criar assinatura
-                        </TextDefault>
-                    </Pressable>
-
-                    <Pressable
-                        onPress={() =>
-                            router.push({
-                                pathname: "/create-group",
-                                params: { groupId: group.id },
-                            })
-                        }
-                        style={styles.buttons}
-                    >
-                        <BagCheckIcon size={24} color="white" />
-                        <TextDefault style={styles.infoChipText}>
-                            Editar conta
                         </TextDefault>
                     </Pressable>
                 </ScrollView>
@@ -369,7 +389,7 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         width: "100%",
         aspectRatio: 5 / 3,
-        justifyContent: "flex-end",
+        justifyContent: "space-between",
     },
     groupName: {
         fontSize: 14,
@@ -379,6 +399,7 @@ const styles = StyleSheet.create({
         fontSize: 32,
         color: "#fff",
         fontWeight: "800",
+        marginBottom: 16
     },
     groupClosing: {
         fontSize: 14,

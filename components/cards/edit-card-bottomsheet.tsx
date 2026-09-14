@@ -20,6 +20,8 @@ import { BottomSheetInput } from "@/components/core/input";
 
 import { DateType, useDefaultStyles } from "react-native-ui-datepicker";
 
+import { useGroups } from "@/hooks/use-group";
+
 const CARDCOLORS = [
     { id: 6, hex: "#820AD1" }, // Nubank
     { id: 1, hex: "#CC092F" }, // Bradesco
@@ -54,6 +56,7 @@ export default function EditCardBottomSheet({
 }) {
     const router = useRouter();
     // console.log("initialData", initialData);
+    const { refetch, isFetching } = useGroups();
 
     const { session } = useAuth();
     const currentUserId = session?.user?.id;
@@ -114,6 +117,7 @@ export default function EditCardBottomSheet({
                 color: cardColor,
             });
             console.log("Purchase updated successfully:", response.data);
+            refetch();
             onFinish();
         } catch (error) {
             setError("Erro ao atualizar a compra.");

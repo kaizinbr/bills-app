@@ -1,17 +1,14 @@
 import { useAuth } from "@/components/core/auth-provider";
-import Avatar from "@/components/user/avatar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
     Animated,
     Platform,
-    Pressable,
     RefreshControl,
     ScrollView,
     StyleSheet,
     useWindowDimensions,
-    View,
+    View
 } from "react-native";
-import TextDefault from "@/components/core/text-core";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import StatusBar from "@/components/core/status-bar";
@@ -28,14 +25,11 @@ import {
     useSharedValue,
 } from "react-native-reanimated";
 
-import PopoverMenu from "@/components/home/popover-btn";
-import ScrollToTopBtn from "@/components/home/scroll-top-btn";
 import CreatePurchase from "@/components/home/float-btn";
-import FromTheStart from "@/components/home/start";
 import AvatarHeader from "@/components/home/header-avatar";
+import FromTheStart from "@/components/home/start";
 
-import { TuningSquare2Icon } from '@solar-icons/react-native/linear/tuning-square-2'
-import { Tuning2Icon } from '@solar-icons/react-native/linear/tuning-2'
+import GroupManager from "@/components/home/group-manager";
 import GroupSelectMenu from "@/components/home/group-select-menu";
 
 const HEADER_HEIGHT = 64;
@@ -44,6 +38,7 @@ export default function Home() {
     const { session } = useAuth();
     const queryClient = useQueryClient();
     const { data, refetch, isFetching } = useGroups();
+    
     const [updatedAt, setUpdatedAt] = useState(Date.now());
     // const {}
     const [showHeader, setShowHeader] = useState(false);
@@ -83,21 +78,19 @@ export default function Home() {
         setMenuOpen(false);
     }, []);
 
-    const allGroups = useMemo(
-        () => [...(data?.creditorGroups ?? []), ...(data?.debtorGroups ?? [])],
-        [data],
-    );
+    const groups = useMemo(() => data?.groups ?? [], [data]);
 
     const selectedGroup =
-        allGroups.find((group) => group.id === selectedGroupId) ??
-        allGroups[0] ??
+        groups.find((group) => group.id === selectedGroupId) ??
+        groups[0] ??
         null;
 
     useEffect(() => {
-        if (!selectedGroupId && allGroups.length > 0) {
-            setSelectedGroupId(allGroups[0].id);
+        if (!selectedGroupId && groups.length > 0) {
+            setSelectedGroupId(groups[0].id);
         }
-    }, [allGroups, selectedGroupId]);
+        // console.log("selectedGroupId", selectedGroupId);
+    }, [groups, selectedGroupId]);
 
     useEffect(() => {
         if (!menuOpen) {
@@ -195,11 +188,7 @@ export default function Home() {
                         setShowHeader={setShowHeader}
                     />
 
-                    <View style={styles.headerActions}>
-                        <Pressable style={styles.iconButton}>
-                            <Tuning2Icon size={24} color="#fff" />
-                        </Pressable>
-                    </View>
+                    <GroupManager selectedGroupId={selectedGroupId!} />
                 </View>
             </Animated.View>
             {/* <ScrollToTopBtn scrollRef={scrollRef} scrollY={scrollY} /> */}
@@ -216,7 +205,8 @@ export default function Home() {
                     alignItems: "flex-start",
                     justifyContent: "flex-start",
                     gap: 8,
-                    minHeight: height - HEADER_HEIGHT - insets.top - insets.bottom,
+                    minHeight:
+                        height - HEADER_HEIGHT - insets.top - insets.bottom,
                 }}
                 showsVerticalScrollIndicator={false}
                 scrollEventThrottle={16}
@@ -266,8 +256,12 @@ export default function Home() {
                     />
                 }
             >
-                <Groups ref={groupsRef} groupId={selectedGroupId} updatedAt={updatedAt} />
-                {allGroups.length === 0 && (
+                <Groups
+                    ref={groupsRef}
+                    groupId={selectedGroupId}
+                    updatedAt={updatedAt}
+                />
+                {groups.length === 0 && (
                     <View
                         style={{
                             width: "100%",

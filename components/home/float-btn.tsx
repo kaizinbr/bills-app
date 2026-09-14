@@ -50,7 +50,7 @@ export default function CreatePurchase({
             <Pressable
                 onPress={() =>
                     router.push(
-                        `/purchase-edit?groupId=${selectedGroupId}&invoiceId=${currentInvoice.id}&purchaseId=null`,
+                        `/create-purchase?groupId=${selectedGroupId}&invoiceId=${currentInvoice.id}&purchaseId=null`,
                     )
                 }
                 style={styles.container}

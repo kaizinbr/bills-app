@@ -1,37 +1,19 @@
-import { useRef, useState, useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
-    View,
-    Pressable,
-    Text,
-    StyleSheet,
     Modal,
+    Pressable,
     ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
-import { useAuth } from "@/components/core/auth-provider";
-import Avatar from "@/components/user/avatar";
-import Popover, {
-    PopoverMode,
-    PopoverPlacement,
-} from "react-native-popover-view";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type { GroupsResponse } from "@/hooks/use-group";
 import { useRouter } from "expo-router";
-import StatusBar from "@/components/core/status-bar";
-import Groups from "@/components/home/groups";
-import { useGroups } from "@/hooks/use-group";
-import { useQueryClient, useIsFetching } from "@tanstack/react-query";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import type { GroupsHandle } from "@/components/home/groups";
-import {
-    Extrapolation,
-    interpolate,
-    useAnimatedScrollHandler,
-    useAnimatedStyle,
-    useSharedValue,
-} from "react-native-reanimated";
 
-import { AltArrowDownIcon } from "@solar-icons/react-native/linear/alt-arrow-down";
 
 const HEADER_HEIGHT = 64;
 
@@ -52,16 +34,6 @@ type DropdownMenuProps = {
 };
 
 const MAX_MENU_HEIGHT = 280;
-interface Group {
-    id: string;
-    name: string;
-}
-
-interface PopoverMenuData {
-    creditorGroups?: Group[];
-    debtorGroups?: Group[];
-}
-
 export default function DropdownMenu({
     data,
     menuOpen,
@@ -71,7 +43,7 @@ export default function DropdownMenu({
     scrollRef,
     setShowHeader,
 }: {
-    data?: PopoverMenuData;
+    data?: GroupsResponse;
     menuOpen: boolean;
     setMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
     selectedGroupId: string | null;
@@ -101,10 +73,7 @@ export default function DropdownMenu({
         setMenuOpen(false);
     }, []);
 
-    const allGroups = useMemo(
-        () => [...(data?.creditorGroups ?? []), ...(data?.debtorGroups ?? [])],
-        [data],
-    );
+    const allGroups = useMemo(() => data?.groups ?? [], [data]);
 
     const selectedGroup =
         allGroups.find((group) => group.id === selectedGroupId) ??
@@ -197,7 +166,6 @@ export default function DropdownMenu({
                                     Criar nova conta
                                 </Text>
                             </Pressable>
-
                         </ScrollView>
                     </Animated.View>
                 </Pressable>

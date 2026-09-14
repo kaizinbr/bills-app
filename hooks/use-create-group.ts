@@ -1,8 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
+import { TimeString } from "better-auth/plugins/device-authorization";
 
 type CreateGroupInput = {
     name: string;
+    amount: number | TimeString;
     payerId: string;
     receiverId: string;
     closingDay?: number;

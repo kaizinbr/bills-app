@@ -42,7 +42,7 @@ export default function TabsLayout() {
                 <Tabs.Screen
                     name="option"
                     options={{
-                        title: "Perfil",
+                        title: "Charts",
                         tabBarIcon: ({ color, focused }) =>
                             focused ? (
                                 <GhostBoldIcon color={color as string} />

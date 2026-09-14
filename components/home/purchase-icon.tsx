@@ -16,6 +16,7 @@ import { MusicNote3Icon } from '@solar-icons/react-native/linear/music-note-3'
 type PurchaseIconProps = {
     categoryKey?: string | null;
     style?: any;
+    iconSize?: number;
 };
 
 const iconProps = {
@@ -24,7 +25,7 @@ const iconProps = {
     strokeWidth: 1.8,
 };
 
-export function PurchaseIcon({ categoryKey, style }: PurchaseIconProps) {
+export function PurchaseIcon({ categoryKey, style, iconSize }: PurchaseIconProps) {
     let Icon = Bag3Icon;
 
     switch (categoryKey) {
@@ -69,7 +70,7 @@ export function PurchaseIcon({ categoryKey, style }: PurchaseIconProps) {
 
     return (
         <View style={[styles.container, style]}>
-            <Icon {...iconProps} />
+            <Icon {...iconProps} size={iconSize} />
         </View>
     );
 }

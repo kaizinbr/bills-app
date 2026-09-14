@@ -19,6 +19,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useGroups } from "@/hooks/use-group";
+
 import Input from "@/components/core/input";
 import BackBtn from "@/components/core/back-btn";
 
@@ -42,6 +44,9 @@ export default function CreateSubscription() {
     const router = useRouter();
     const local = useLocalSearchParams();
     const groupId = local.groupId as string;
+
+    
+    const { data, refetch, isFetching } = useGroups();
 
     const { session } = useAuth();
     const insets = useSafeAreaInsets();
@@ -106,6 +111,8 @@ export default function CreateSubscription() {
                 chargeDay,
                 groupId,
             });
+
+            refetch();
             router.back();
         } catch (err) {
             setError("Erro ao criar a assinatura.");
