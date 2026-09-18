@@ -5,6 +5,8 @@ import { useAuth } from "@/components/core/auth-provider";
 
 import StatusBar from "@/components/core/status-bar";
 import TextDefault from "@/components/core/text-core";
+import * as Clipboard from "expo-clipboard";
+import * as Sharing from "expo-sharing";
 import {
     ActivityIndicator,
     KeyboardAvoidingView,
@@ -15,18 +17,13 @@ import {
     View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as Clipboard from "expo-clipboard";
-import * as Sharing from "expo-sharing";
 
-import Input from "@/components/core/input";
 
-import { formatMoneyInput } from "@/app/(out)/create-purchase";
 
 import BackBtn from "@/components/core/back-btn";
-import { parseAmountToCents } from "@/components/purchases/edit-purchase-bottomsheet";
 import { useCreateGroup } from "@/hooks/use-create-group";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import DateTimePicker, {
+import {
     DateType,
     useDefaultStyles,
 } from "react-native-ui-datepicker";
@@ -184,8 +181,8 @@ export default function CreateGroup() {
                                         // bottom: insets.bottom + 16,
                                         // opacity: canSubmit ? 1 : 0.5,
                                         backgroundColor: pressed
-                                        ? "#007B5E"
-                                        : "#009C7A",
+                                            ? "#007B5E"
+                                            : "#009C7A",
                                     },
                                 ]}
                                 // disabled={!canSubmit}

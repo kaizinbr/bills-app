@@ -2,16 +2,12 @@ import TextDefault from "@/components/core/text-core";
 import { useProfile } from "@/hooks/use-profile";
 import { useRouter } from "expo-router";
 import { useCallback, useMemo, useRef } from "react";
-import {
-    Pressable,
-    StyleSheet,
-    View
-} from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import {
     BottomSheetBackdrop,
     BottomSheetModal,
-    BottomSheetView
+    BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -28,15 +24,26 @@ function sortInvoicesDesc(invoices: Invoice[]): Invoice[] {
 }
 
 function formatFaturaLabel(invoice: Invoice): string {
-    const closing = new Date(invoice.closingDate);
-    const closingLabel = closing.toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-    });
+    const months = [
+        "Janeiro",
+        "Fevereiro",
+        "Março",
+        "Abril",
+        "Maio",
+        "Junho",
+        "Julho",
+        "Agosto",
+        "Setembro",
+        "Outubro",
+        "Novembro",
+        "Dezembro",
+    ];
+    const referenceMonth = months[invoice.referenceMonth - 1];
+    const referenceYear = invoice.referenceYear.toString();
 
-    if (invoice.status === "OPEN") return "Fatura atual";
-    if (invoice.status === "PAID") return `Paga ${closingLabel}`;
-    return `Fechada ${closingLabel}`;
+    return referenceYear === new Date().getFullYear().toString()
+        ? referenceMonth
+        : `${referenceMonth}/${referenceYear}`;
 }
 
 export default function InvoiceSelectMenu({
@@ -50,6 +57,7 @@ export default function InvoiceSelectMenu({
     selectedInvoice?: Invoice | null;
     setSelectedInvoiceId: (id: string) => void;
 }) {
+    
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const { data: profile, isLoading } = useProfile();
@@ -63,6 +71,8 @@ export default function InvoiceSelectMenu({
     const handleSheetChanges = useCallback((index: number) => {
         console.log("handleSheetChanges", index);
     }, []);
+
+    // console.log("InvoiceSelectMenu", selectedInvoice);
 
     return (
         <>

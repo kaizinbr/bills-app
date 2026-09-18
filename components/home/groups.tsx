@@ -35,6 +35,7 @@ import { RefreshCircleIcon } from "@solar-icons/react-native/linear/refresh-circ
 import { UserCircleIcon } from "@solar-icons/react-native/linear/user-circle";
 import { WalletIcon } from "@solar-icons/react-native/linear/wallet";
 import Avatar, { AvatarNoPress } from "@/components/user/avatar";
+import Incomes from "@/components/home/incomes";
 
 type GroupsProps = {
     groupId: string | null;
@@ -49,8 +50,8 @@ export type GroupsHandle = {
 function sortInvoicesDesc(invoices: Invoice[]): Invoice[] {
     return [...invoices].sort(
         (a, b) =>
-            new Date(b.periodStart).getTime() -
-            new Date(a.periodStart).getTime(),
+            new Date(a.periodStart).getTime() -
+            new Date(b.periodStart).getTime(),
     );
 }
 
@@ -97,7 +98,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
 
         const [selectedInvoiceId, setSelectedInvoiceId] = useState<
             string | null
-        >(null);
+        >(currentInvoice?.id);
 
         useEffect(() => {
             setSelectedInvoiceId(null);
@@ -110,6 +111,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                     currentInvoice
                 );
             }
+            setSelectedInvoiceId(currentInvoice?.id ?? null);
             return currentInvoice;
         }, [invoices, selectedInvoiceId, currentInvoice]);
 
@@ -133,7 +135,10 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
         const totalPurchases = purchasesData?.pages[0]?.pagination.total ?? 0;
 
         const sections = useMemo(
-            () => groupPurchasesByDate(purchases),
+            () =>
+                groupPurchasesByDate(
+                    purchases as Parameters<typeof groupPurchasesByDate>[0],
+                ),
             [purchases],
         );
 
@@ -185,29 +190,101 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                         colors={["#00C89B", "#0B3D22"]}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
-                        style={styles.groupCard}
+                        style={styles.invoiceCard}
                     >
-                        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                            
-                            <TextDefault style={styles.groupName} numberOfLines={1}>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                            }}
+                        >
+                            <TextDefault
+                                style={styles.invoiceText}
+                                numberOfLines={1}
+                            >
                                 {group.name}
                             </TextDefault>
-                            <TextDefault style={styles.groupName} numberOfLines={1}>
-                                {group.members?.length} membro{group.members?.length !== 1 ? "s" : ""}
+                            <TextDefault
+                                style={styles.invoiceText}
+                                numberOfLines={1}
+                            >
+                                {group.members?.length} membro
+                                {group.members?.length !== 1 ? "s" : ""}
                             </TextDefault>
                         </View>
                         {/* <TextDefault style={styles.groupName} numberOfLines={1}>
                             Total da conta {group.name}:
                         </TextDefault> */}
                         <View>
-                            <TextDefault style={[styles.groupValue]}>
+                            <TextDefault style={[styles.invoiceValue]}>
                                 {formatCurrency(totalData?.total)}
                             </TextDefault>
-                            <TextDefault style={styles.groupClosing}>
-                                Fecha dia {group.closingDay} {group.limit ? `• Limite ${formatCurrency(group.limit)}` : ""}
+                            <TextDefault style={styles.invoiceClosingText}>
+                                Fecha dia {group.closingDay}{" "}
+                                {group.limit
+                                    ? `• Limite ${formatCurrency(group.limit)}`
+                                    : ""}
                             </TextDefault>
                         </View>
                     </LinearGradient>
+                </View>
+                <View
+                    style={{
+                        paddingHorizontal: 16,
+                        gap: 14,
+                        flexDirection: "row",
+                        alignItems: "center",
+                    }}
+                >
+                    {selectedInvoiceId && (
+                        <Incomes invoiceId={selectedInvoiceId} />
+                    )}
+                    {Number(group.limit) > 0 && totalData?.total != null && (
+                        <LinearGradient
+                            colors={["#8C85F7", "#413CA4"]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={[
+                                {
+                                    width: (width - 46) / 2,
+                                    borderRadius: 16,
+                                },
+                            ]}
+                        >
+                            <Pressable
+                                style={[
+                                    styles.assetCard,
+                                    {
+                                        width: (width - 46) / 2,
+                                    },
+                                ]}
+                            >
+                                <View
+                                    style={{
+                                        flexDirection: "row",
+                                        justifyContent: "space-between",
+                                    }}
+                                >
+                                    <TextDefault
+                                        style={styles.assetText}
+                                        numberOfLines={1}
+                                    >
+                                        Uso do limite
+                                    </TextDefault>
+                                </View>
+                                <TextDefault style={[styles.assetValue]}>
+                                    {(
+                                        (totalData.total /
+                                            Number(group.limit)) *
+                                        100
+                                    )
+                                        .toFixed(0)
+                                        .replace(".", ",")}
+                                    %
+                                </TextDefault>
+                            </Pressable>
+                        </LinearGradient>
+                    )}
                 </View>
 
                 {/* credor, cartões e ações da conta */}
@@ -216,32 +293,6 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.infoRow}
                 >
-                    {Number(group.limit) > 0 && totalData?.total != null && (
-                        <Pressable
-                            style={styles.buttons}
-                            onPress={() => {
-                                // router.push({
-                                //     pathname: `/(tabs)/subscriptions/[groupId]`,
-                                //     params: { groupId: group.id },
-                                // });
-                            }}
-                        >
-                            <TextDefault
-                                style={[
-                                    styles.infoChipText,
-                                    { fontSize: 16, fontWeight: "700" },
-                                ]}
-                            >
-                                {((totalData.total / Number(group.limit)) * 100)
-                                    .toFixed(0)
-                                    .replace(".", ",")}
-                                %
-                            </TextDefault>
-                            <TextDefault style={styles.infoChipText}>
-                                do limite atingido
-                            </TextDefault>
-                        </Pressable>
-                    )}
                     <View style={styles.buttons}>
                         <UserCircleIcon size={24} color="white" />
                         <TextDefault style={styles.infoChipText}>
@@ -384,24 +435,42 @@ const styles = StyleSheet.create({
         width: "100%",
         gap: 16,
     },
-    groupCard: {
+    invoiceCard: {
         padding: 16,
         borderRadius: 16,
         width: "100%",
-        aspectRatio: 5 / 3,
+        aspectRatio: 5 / 2,
         justifyContent: "space-between",
     },
-    groupName: {
+    invoiceText: {
         fontSize: 14,
         color: "#fff",
     },
-    groupValue: {
+    invoiceValue: {
         fontSize: 32,
         color: "#fff",
         fontWeight: "800",
-        marginBottom: 16
+        marginBottom: 16,
     },
-    groupClosing: {
+    invoiceClosingText: {
+        fontSize: 14,
+        color: "#eaeaea",
+    },
+    assetCard: {
+        padding: 16,
+        borderRadius: 16,
+        justifyContent: "space-between",
+    },
+    assetText: {
+        fontSize: 14,
+        color: "#fff",
+    },
+    assetValue: {
+        fontSize: 18,
+        color: "#fff",
+        fontWeight: "800",
+    },
+    assetClosingText: {
         fontSize: 14,
         color: "#eaeaea",
     },

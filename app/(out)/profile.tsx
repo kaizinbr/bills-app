@@ -1,42 +1,29 @@
-import api from "@/lib/api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { useAuth } from "@/components/core/auth-provider";
 
 import StatusBar from "@/components/core/status-bar";
 import TextDefault from "@/components/core/text-core";
 import {
     ActivityIndicator,
+    Animated,
     KeyboardAvoidingView,
     Platform,
     Pressable,
-    ScrollView,
+    RefreshControl,
     StyleSheet,
-    View,
-    Animated,
-    RefreshControl
+    View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as Clipboard from "expo-clipboard";
-import * as Sharing from "expo-sharing";
 
-import Input from "@/components/core/input";
 
-import { formatMoneyInput } from "@/app/(out)/create-purchase";
 
 import { LinearGradient } from "expo-linear-gradient";
 
 import BackBtn from "@/components/core/back-btn";
-import { parseAmountToCents } from "@/components/purchases/edit-purchase-bottomsheet";
-import { useCreateGroup } from "@/hooks/use-create-group";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import DateTimePicker, {
-    DateType,
-    useDefaultStyles,
-} from "react-native-ui-datepicker";
+import { useRouter } from "expo-router";
 
+import { AvatarNoPress } from "@/components/user/avatar";
 import { useProfile } from "@/hooks/use-profile";
-import Avatar, { AvatarNoPress } from "@/components/user/avatar";
 
 export default function CreateGroup() {
     const router = useRouter();
@@ -46,7 +33,7 @@ export default function CreateGroup() {
     const insets = useSafeAreaInsets();
 
     const [loading, setLoading] = useState(false);
-    
+
     const onRefresh = async () => {
         try {
             await refetch();
@@ -85,22 +72,22 @@ export default function CreateGroup() {
                         }}
                         style={[styles.container]}
                         refreshControl={
-                                            <RefreshControl
-                                                refreshing={isFetching}
-                                                onRefresh={onRefresh}
-                                                progressViewOffset={
-                                                    Platform.OS === "android"
-                                                        ? 64 + insets.top
-                                                        : 0
-                                                }
-                                                progressBackgroundColor="#282828"
-                                                colors={["#5E8C61", "#5E8C61"]}
-                                                style={{
-                                                    borderWidth: 0.5,
-                                                    borderColor: "#56595D",
-                                                }}
-                                            />
-                                        }
+                            <RefreshControl
+                                refreshing={isFetching}
+                                onRefresh={onRefresh}
+                                progressViewOffset={
+                                    Platform.OS === "android"
+                                        ? 64 + insets.top
+                                        : 0
+                                }
+                                progressBackgroundColor="#282828"
+                                colors={["#5E8C61", "#5E8C61"]}
+                                style={{
+                                    borderWidth: 0.5,
+                                    borderColor: "#56595D",
+                                }}
+                            />
+                        }
                     >
                         <LinearGradient
                             colors={["#009C7A", "#161718"]}
@@ -114,7 +101,7 @@ export default function CreateGroup() {
                                 opacity: 0.5,
                             }}
                         />
-                        
+
                         <View
                             style={{
                                 width: "100%",
@@ -124,36 +111,37 @@ export default function CreateGroup() {
                             }}
                         >
                             <AvatarNoPress size={64} fontSize={28} />
-                            <TextDefault style={styles.title}>{profile?.name}</TextDefault>
+                            <TextDefault style={styles.title}>
+                                {profile?.name}
+                            </TextDefault>
                             <TextDefault style={styles.description}>
                                 Compartilhe o código de convite abaixo com a
                                 pessoa que deseja adicionar a essa conta.
                             </TextDefault>
-                                <Pressable
-                                    // onPress={copyToClipboard}
-                                    style={({ pressed }) => [
-                                        styles.submitBtn,
-                                        {
-                                            // bottom: insets.bottom + 16,
-                                            // opacity: canSubmit ? 1 : 0.5,
-                                            backgroundColor: pressed
-                                                ? "#007B5E"
-                                                : "#009C7A",
-                                        },
-                                    ]}
-                                    // disabled={!canSubmit}
+                            <Pressable
+                                // onPress={copyToClipboard}
+                                style={({ pressed }) => [
+                                    styles.submitBtn,
+                                    {
+                                        // bottom: insets.bottom + 16,
+                                        // opacity: canSubmit ? 1 : 0.5,
+                                        backgroundColor: pressed
+                                            ? "#007B5E"
+                                            : "#009C7A",
+                                    },
+                                ]}
+                                // disabled={!canSubmit}
+                            >
+                                <TextDefault
+                                    style={{
+                                        color: "#fff",
+                                        fontWeight: "700",
+                                    }}
                                 >
-                                    <TextDefault
-                                        style={{
-                                            color: "#fff",
-                                            fontWeight: "700",
-                                        }}
-                                    >
-                                        Editar Perfil
-                                    </TextDefault>
-                                </Pressable>
+                                    Editar Perfil
+                                </TextDefault>
+                            </Pressable>
                         </View>
-
                     </Animated.ScrollView>
                 </KeyboardAvoidingView>
             )}

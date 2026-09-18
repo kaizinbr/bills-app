@@ -31,6 +31,7 @@ import FromTheStart from "@/components/home/start";
 
 import GroupManager from "@/components/home/group-manager";
 import GroupSelectMenu from "@/components/home/group-select-menu";
+import { useIncomesFromInvoice } from "@/hooks/use-income-total";
 
 const HEADER_HEIGHT = 64;
 
@@ -38,6 +39,7 @@ export default function Home() {
     const { session } = useAuth();
     const queryClient = useQueryClient();
     const { data, refetch, isFetching } = useGroups();
+    // const { refetch: refetchIncomes } = useIncomesFromInvoice("some-invoice-id");
     
     const [updatedAt, setUpdatedAt] = useState(Date.now());
     // const {}
@@ -89,7 +91,7 @@ export default function Home() {
         if (!selectedGroupId && groups.length > 0) {
             setSelectedGroupId(groups[0].id);
         }
-        // console.log("selectedGroupId", selectedGroupId);
+        console.log("selectedGroupId", selectedGroupId);
     }, [groups, selectedGroupId]);
 
     useEffect(() => {
@@ -137,7 +139,7 @@ export default function Home() {
 
         setShowHeader(false);
         setMenuOpen(false);
-
+        // refetchIncomes();
         requestAnimationFrame(() => {
             scrollRef.current?.scrollTo({ y: 0, animated: false });
             scrollY.setValue(0);
@@ -147,6 +149,7 @@ export default function Home() {
     const onRefresh = useCallback(() => {
         setShowHeader(true);
         refetch(); // groups
+        // refetchIncomes(); // incomes
         groupsRef.current?.refreshInvoiceData(); // invoices + purchases + total da fatura selecionada
         setUpdatedAt(Date.now());
         setTimeout(() => {
@@ -188,7 +191,11 @@ export default function Home() {
                         setShowHeader={setShowHeader}
                     />
 
-                    <GroupManager selectedGroupId={selectedGroupId!} />
+                    {selectedGroup && (
+                        <GroupManager
+                            selectedGroupId={selectedGroupId ?? ""}
+                        />
+                    )}
                 </View>
             </Animated.View>
             {/* <ScrollToTopBtn scrollRef={scrollRef} scrollY={scrollY} /> */}

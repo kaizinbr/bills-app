@@ -17,34 +17,21 @@ import {
     Pressable,
     RefreshControl,
     StyleSheet,
-    View
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
 
 import {
     BottomSheetBackdrop,
     BottomSheetModal,
     BottomSheetView,
-    useBottomSheetModal
+    useBottomSheetModal,
 } from "@gorhom/bottom-sheet";
-
 
 import BackBtn from "@/components/core/back-btn";
 import EditSubscriptionBottomSheet from "@/components/subscriptions/edit-subscription-bottomsheet";
-import {
-    useDefaultStyles
-} from "react-native-ui-datepicker";
+import { useDefaultStyles } from "react-native-ui-datepicker";
 
-function formatMoneyInput(digits: string) {
-    if (!digits) return "";
-
-    const paddedDigits = digits.padStart(3, "0");
-    const integerPart = paddedDigits.slice(0, -2).replace(/^0+(?=\d)/, "");
-    const decimalPart = paddedDigits.slice(-2);
-
-    return `R$ ${integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".")},${decimalPart}`;
-}
 
 export default function PurchasePage() {
     const router = useRouter();
@@ -94,7 +81,9 @@ export default function PurchasePage() {
 
     const handleDeletePurchase = async () => {
         try {
-            const response = await api.delete(`/subscriptions/${subscriptionId}`);
+            const response = await api.delete(
+                `/subscriptions/${subscriptionId}`,
+            );
             console.log("Purchase deleted:", response.data.purchase);
             setShowDeleteModal(false);
             router.back();
@@ -215,8 +204,7 @@ export default function PurchasePage() {
                                 Categoria
                             </TextDefault>
                             <TextDefault style={styles.description}>
-                                {data.category?.label ||
-                                    "Sem categoria"}
+                                {data.category?.label || "Sem categoria"}
                             </TextDefault>
                         </View>
                     </View>
@@ -225,13 +213,14 @@ export default function PurchasePage() {
                             Cadastrada em
                         </TextDefault>
                         <TextDefault style={styles.description}>
-                            {new Date(
-                                data.createdAt,
-                            ).toLocaleDateString("pt-BR", {
-                                day: "2-digit",
-                                month: "2-digit",
-                                year: "numeric",
-                            })}
+                            {new Date(data.createdAt).toLocaleDateString(
+                                "pt-BR",
+                                {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                },
+                            )}
                         </TextDefault>
                     </View>
                     {data.amount && (
@@ -254,8 +243,7 @@ export default function PurchasePage() {
                                 Cartão
                             </TextDefault>
                             <TextDefault style={styles.description}>
-                                {data.card.name} ·{" "}
-                                {data.card.digits}
+                                {data.card.name} · {data.card.digits}
                             </TextDefault>
                         </View>
                     )}

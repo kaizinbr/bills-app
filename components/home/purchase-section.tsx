@@ -13,7 +13,7 @@ type PurchaseSectionProps = {
 export function PurchaseSection({ date, purchases }: PurchaseSectionProps) {
     const { width, height } = useWindowDimensions();
     const insets = useSafeAreaInsets();
-    
+
     return (
         <View>
             <TextDefault style={styles.header}>
@@ -27,6 +27,18 @@ export function PurchaseSection({ date, purchases }: PurchaseSectionProps) {
                     category={purchase.category}
                     amount={purchase.amount}
                     id={purchase.id}
+                    purchasedAt={purchase.purchasedAt}
+                    invoiceId={purchase.invoiceId}
+                    cardId={purchase.cardId}
+                    userId={purchase.userId}
+                    installmentPlanId={purchase.installmentPlanId}
+                    installmentNumber={purchase.installmentNumber}
+                    subscriptionId={purchase.subscriptionId}
+                    createdAt={purchase.createdAt}
+                    updatedAt={purchase.updatedAt}
+                    createdById={purchase.createdById}
+                    subscription={purchase.subscription}
+                    installmentPlan={purchase.installmentPlan}
                 />
             ))}
         </View>

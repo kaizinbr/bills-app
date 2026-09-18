@@ -31,22 +31,31 @@ import DateTimePicker, {
 
 import { useGroups } from "@/hooks/use-group";
 
-export function formatMoneyInput(digits: string) {
-    const cleanDigits = digits.replace(/\D/g, "");
-    if (!cleanDigits) return "";
+import { formatCurrency } from "@/lib/format-currency";
 
-    const paddedDigits = cleanDigits.padStart(3, "0");
-    const integerPart = paddedDigits.slice(0, -2).replace(/^0+(?=\d)/, "");
-    const decimalPart = paddedDigits.slice(-2);
+// Divide o valor total em `installments` parcelas iguais (em centavos),
+// jogando o resto do arredondamento na 1ª parcela — mesma regra usada no
+// backend, só que aqui é pra exibir o preview antes de enviar.
+function getInstallmentPreview(
+    totalCents: number,
+    installments: number,
+): string {
+    if (installments < 2 || totalCents <= 0) return "";
 
-    return `R$ ${integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".")},${decimalPart}`;
+    const base = Math.floor(totalCents / installments);
+    const remainder = totalCents - base * installments;
+    const firstAmount = base + remainder;
+
+    if (remainder === 0) {
+        return `${installments}x de ${formatCurrency(base)}`;
+    }
+    return `${installments}x de ${formatCurrency(base)} (1ª parcela: ${formatCurrency(firstAmount)})`;
 }
 
 export default function CreateCard() {
     const router = useRouter();
     const local = useLocalSearchParams();
 
-    
     const { data, refetch, isFetching } = useGroups();
     const groupId = local.groupId as string; // ainda usado pra buscar cartões do grupo
     const invoiceId = local.invoiceId as string; // fatura de destino, vem pronta da home
@@ -70,31 +79,52 @@ export default function CreateCard() {
     const [purchasedToday, setPurchasedToday] = useState<boolean>(true);
     const [purchaseDate, setPurchaseDate] = useState<DateType>(today);
 
-    const [myPurchase, setMyPurchase] = useState<boolean>(true);
-    const [purchaseOwner, setPurchaseOwner] = useState<string | null>(
-        currentUserId!,
-    );
+    // parcelamento
+    const [isInstallment, setIsInstallment] = useState<boolean>(false);
+    const [installmentsCount, setInstallmentsCount] = useState("");
 
     const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+    const [selectedMemberId, setSelectedMemberId] = useState<string | null>(
+        null,
+    );
     const [category, setCategory] = useState<string | null>(null);
 
     const [users, setUsers] = useState<any[]>([]);
     const [cards, setCards] = useState<any[]>([]);
+    const [members, setMembers] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
 
     const [canSubmit, setCanSubmit] = useState(false);
 
+    const totalCents = parseInt(amountCents, 10) || 0;
+    const installmentsNumber = parseInt(installmentsCount, 10) || 0;
+    const installmentPreview = isInstallment
+        ? getInstallmentPreview(totalCents, installmentsNumber)
+        : "";
+
     useEffect(() => {
+        const hasValidAmount = !Number.isNaN(parseInt(amountCents, 10));
+        const hasValidInstallments =
+            !isInstallment || installmentsNumber >= 2;
+
         if (
             cardName.trim() !== "" &&
-            amountCents.trim() !== "" &&
-            category !== null
+            hasValidAmount &&
+            category !== null &&
+            hasValidInstallments
         ) {
             setCanSubmit(true);
         } else {
             setCanSubmit(false);
         }
-    }, [cardName, amountCents, selectedCardId, category]);
+    }, [
+        cardName,
+        amountCents,
+        selectedCardId,
+        category,
+        isInstallment,
+        installmentsCount,
+    ]);
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -105,6 +135,7 @@ export default function CreateCard() {
                 const groupsResponse = await api.get(`groups/${groupId}`);
                 setGroupData(groupsResponse.data.group);
                 setCards(groupsResponse.data.group?.cards ?? []);
+                setMembers(groupsResponse.data.group?.members ?? []);
 
                 const categoriesResponse = await api.get(`categories`);
                 setCategories(categoriesResponse.data.categories);
@@ -123,29 +154,43 @@ export default function CreateCard() {
 
     const handleCreatePurchase = async () => {
         try {
-            const resolvedOwner = myPurchase ? currentUserId : purchaseOwner;
+            const resolvedDate = purchasedToday
+                ? new Date()
+                : new Date(purchaseDate as string);
 
-            if (!resolvedOwner) {
-                console.warn(
-                    "Selecione o proprietário antes de criar a compra.",
-                );
-                return;
+            if (isInstallment) {
+                await api.post("/parcelado", {
+                    description: cardName,
+                    totalAmount: totalCents,
+                    installments: installmentsNumber,
+                    dayOfMonth: resolvedDate.getUTCDate(),
+                    startDate: resolvedDate,
+                    cardId: selectedCardId,
+                    groupId: groupId,
+                    userId: selectedMemberId,
+                    categoryId: category,
+                });
+            } else {
+                await api.post("/purchases", {
+                    description: cardName,
+                    amount: totalCents,
+                    purchasedDate: resolvedDate,
+                    cardId: selectedCardId,
+                    invoiceId: invoiceId,
+                    groupId: groupId,
+                    userId: selectedMemberId,
+                    categoryId: category,
+                });
             }
-
-            const response = await api.post("/purchases", {
-                description: cardName,
-                amount: amountCents,
-                purchasedDate: purchasedToday ? new Date() : purchaseDate,
-                cardId: selectedCardId,
-                invoiceId: invoiceId,
-                groupId: groupId,
-                categoryId: category,
-            });
 
             refetch();
             router.back();
         } catch (error) {
-            setError("Erro ao criar a compra.");
+            setError(
+                isInstallment
+                    ? "Erro ao criar o parcelamento."
+                    : "Erro ao criar a compra.",
+            );
             console.error("Error creating purchase:", error);
         }
     };
@@ -153,6 +198,7 @@ export default function CreateCard() {
     return (
         <View style={styles.main}>
             <StatusBar />
+                        <BackBtn />
             {loading ? (
                 <View
                     style={{
@@ -171,16 +217,15 @@ export default function CreateCard() {
                     <ScrollView
                         horizontal={false}
                         contentContainerStyle={{
-                            paddingBottom: 32,
                             alignItems: "flex-start",
                             justifyContent: "flex-start",
                             gap: 8,
                             paddingTop: insets.top + 64,
+                            paddingBottom: insets.bottom + 64,
                         }}
                         showsVerticalScrollIndicator={false}
                         style={[styles.container]}
                     >
-                        <BackBtn />
                         <TextDefault style={styles.title}>
                             Criar Compra
                         </TextDefault>
@@ -208,32 +253,90 @@ export default function CreateCard() {
                             </TextDefault>
                             <Input
                                 placeholder="Lanche no dêssa"
-                                // style={[styles.input]}
                                 value={cardName}
                                 onChangeText={setCardName}
                             />
                         </View>
                         <View style={[styles.inputContainer]}>
                             <TextDefault style={styles.label}>
-                                Valor
+                                {isInstallment ? "Valor total" : "Valor"}
                             </TextDefault>
                             <Input
                                 placeholder="R$ 0,00"
-                                value={formatMoneyInput(amountCents)}
+                                value={formatCurrency(amountCents)}
                                 selection={{
-                                    start: formatMoneyInput(amountCents).length,
-                                    end: formatMoneyInput(amountCents).length,
+                                    start: formatCurrency(amountCents).length,
+                                    end: formatCurrency(amountCents).length,
                                 }}
                                 onChangeText={(text) => {
                                     const digits = text
                                         .replace(/\D/g, "")
-                                        .slice(0, 10);
+                                        .slice(0, 9);
                                     setAmountCents(digits);
                                 }}
                                 keyboardType="number-pad"
                                 inputMode="numeric"
                             />
                         </View>
+
+                        <View style={[styles.inputContainer]}>
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                }}
+                            >
+                                <Host matchContents>
+                                    <Switch
+                                        value={isInstallment}
+                                        onCheckedChange={(value) => {
+                                            setIsInstallment(value);
+                                            if (value) {
+                                                // parcelamento exige uma data
+                                                // explícita (dia 1-28), não dá
+                                                // pra assumir "hoje" às cegas
+                                                setPurchasedToday(false);
+                                            }
+                                        }}
+                                        colors={{
+                                            checkedThumbColor: "#0B3D22",
+                                            checkedTrackColor: "#009C7A",
+                                        }}
+                                    />
+                                </Host>
+                                <TextDefault style={{ marginLeft: 8 }}>
+                                    Compra parcelada
+                                </TextDefault>
+                            </View>
+                        </View>
+
+                        {isInstallment && (
+                            <View style={[styles.inputContainer]}>
+                                <TextDefault style={styles.label}>
+                                    Número de parcelas
+                                </TextDefault>
+                                <Input
+                                    placeholder="Ex: 3"
+                                    value={installmentsCount}
+                                    onChangeText={(text) => {
+                                        const digits = text
+                                            .replace(/\D/g, "")
+                                            .slice(0, 2); // até 99x
+                                        setInstallmentsCount(digits);
+                                    }}
+                                    keyboardType="number-pad"
+                                    inputMode="numeric"
+                                />
+                                {installmentPreview !== "" && (
+                                    <TextDefault
+                                        style={styles.installmentPreview}
+                                    >
+                                        {installmentPreview}
+                                    </TextDefault>
+                                )}
+                            </View>
+                        )}
+
                         <View
                             style={[
                                 styles.inputContainer,
@@ -248,12 +351,6 @@ export default function CreateCard() {
                             >
                                 Categoria
                             </TextDefault>
-                            {/* <PopoverCategories
-                                items={categories}
-                                selectedId={category}
-                                onSelect={setCategory}
-                                placeholder="Sem categoria"
-                            /> */}
 
                             <ScrollView
                                 horizontal
@@ -345,7 +442,6 @@ export default function CreateCard() {
                                             styles.cardButton,
                                             selectedCardId === card.id &&
                                                 styles.cardButtonSelected,
-
                                             {
                                                 backgroundColor:
                                                     card.color || "#282828",
@@ -361,38 +457,108 @@ export default function CreateCard() {
                                 ))}
                             </ScrollView>
                         </View>
-
-                        <View style={[styles.inputContainer]}>
-                            <View
+                        <View
+                            style={[
+                                styles.inputContainer,
+                                { paddingHorizontal: 0 },
+                            ]}
+                        >
+                            <TextDefault
+                                style={[
+                                    styles.label,
+                                    { paddingHorizontal: 16 },
+                                ]}
+                            >
+                                {isInstallment
+                                    ? "Dono do parcelamento"
+                                    : "Usuário que fez a compra"}
+                            </TextDefault>
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
                                 style={{
+                                    width: "100%",
                                     flexDirection: "row",
+                                    gap: 8,
+                                }}
+                                contentContainerStyle={{
+                                    flexDirection: "row",
+                                    gap: 8,
+                                    paddingHorizontal: 16,
+                                    justifyContent: "flex-start",
                                     alignItems: "center",
                                 }}
                             >
-                                <Host matchContents>
-                                    <Switch
-                                        value={purchasedToday}
-                                        onCheckedChange={setPurchasedToday}
-                                        colors={{
-                                            checkedThumbColor: "#0B3D22",
-                                            checkedTrackColor: "#009C7A",
-                                        }}
-                                    />
-                                </Host>
-                                <TextDefault style={{ marginLeft: 8 }}>
-                                    Comprado hoje
-                                </TextDefault>
-                            </View>
+                                <Pressable
+                                    onPress={() => setSelectedMemberId(null)}
+                                    style={[
+                                        styles.cardButton,
+                                        selectedMemberId === null &&
+                                            styles.cardButtonSelected,
+                                    ]}
+                                >
+                                    <TextDefault style={styles.cardButtonText}>
+                                        Sem usuário
+                                    </TextDefault>
+                                </Pressable>
+                                {members.map((member) => (
+                                    <Pressable
+                                        key={member.id}
+                                        onPress={() =>
+                                            {setSelectedMemberId(member.user.id)
+                                            // console.log("selectedMemberId", member.user.id)
+                                        }
+                                        }
+                                        style={[
+                                            styles.cardButton,
+                                            selectedMemberId === member.id &&
+                                                styles.cardButtonSelected,
+                                        ]}
+                                    >
+                                        <TextDefault
+                                            style={styles.cardButtonText}
+                                        >
+                                            {member.user?.name || member.id}
+                                        </TextDefault>
+                                    </Pressable>
+                                ))}
+                            </ScrollView>
                         </View>
 
-                        {!purchasedToday && (
+                        {!isInstallment && (
+                            <View style={[styles.inputContainer]}>
+                                <View
+                                    style={{
+                                        flexDirection: "row",
+                                        alignItems: "center",
+                                    }}
+                                >
+                                    <Host matchContents>
+                                        <Switch
+                                            value={purchasedToday}
+                                            onCheckedChange={setPurchasedToday}
+                                            colors={{
+                                                checkedThumbColor: "#0B3D22",
+                                                checkedTrackColor: "#009C7A",
+                                            }}
+                                        />
+                                    </Host>
+                                    <TextDefault style={{ marginLeft: 8 }}>
+                                        Comprado hoje
+                                    </TextDefault>
+                                </View>
+                            </View>
+                        )}
+
+                        {(isInstallment || !purchasedToday) && (
                             <View style={[styles.inputContainer]}>
                                 <TextDefault style={styles.label}>
-                                    Selecione a data da compra
+                                    {isInstallment
+                                        ? "Data da 1ª parcela (dia 1 a 28)"
+                                        : "Selecione a data da compra"}
                                 </TextDefault>
                                 <Pressable
                                     onPress={() => {
-                                        console.log("Pressable tocado!");
                                         setShowDatePicker(true);
                                     }}
                                     style={styles.input}
@@ -409,43 +575,6 @@ export default function CreateCard() {
                                 </Pressable>
                             </View>
                         )}
-
-                        {/* <View style={[styles.inputContainer]}>
-                            <View
-                                style={{
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                }}
-                            >
-                                <Host matchContents>
-                                    <Switch
-                                        value={myPurchase}
-                                        onCheckedChange={setMyPurchase}
-                                        colors={{
-                                            checkedThumbColor: "#0B3D22",
-                                            checkedTrackColor: "#009C7A",
-                                        }}
-                                    />
-                                </Host>
-                                <TextDefault style={{ marginLeft: 8 }}>
-                                    Eu fiz essa compra
-                                </TextDefault>
-                            </View>
-                        </View>
-
-                        {!myPurchase && (
-                            <View style={[styles.inputContainer]}>
-                                <TextDefault style={styles.label}>
-                                    Quem fez essa compra
-                                </TextDefault>
-                                <PopoverUsers
-                                    items={users}
-                                    selectedId={purchaseOwner}
-                                    onSelect={setPurchaseOwner}
-                                    placeholder="Selecione o usuário"
-                                />
-                            </View>
-                        )} */}
                     </ScrollView>
                 </KeyboardAvoidingView>
             )}
@@ -461,7 +590,7 @@ export default function CreateCard() {
                 disabled={!canSubmit}
             >
                 <TextDefault style={{ color: "#fff", fontWeight: "700" }}>
-                    Criar compra
+                    {isInstallment ? "Criar parcelamento" : "Criar compra"}
                 </TextDefault>
             </Pressable>
             {error && (
@@ -539,22 +668,27 @@ export default function CreateCard() {
                             date={purchaseDate}
                             onChange={({ date }) => {
                                 setPurchaseDate(date);
-                                // setShowDatePicker(false); <- causa erro pra abrir
                             }}
                             mode="single"
                             style={{ width: "100%" }}
-                            // textStyle={defaultStyles.text}
-                            // containerStyle={defaultStyles.container}
                             locale="pt-br"
                             timeZone="America/Fortaleza"
+                            disabledDates={
+                                isInstallment
+                                    ? (date) =>
+                                          new Date(
+                                              date as string,
+                                          ).getUTCDate() > 28
+                                    : undefined
+                            }
                             styles={{
                                 ...defaultStyles,
                                 today: {
                                     borderColor: "gray",
                                     borderWidth: 1,
-                                }, // Add a border to today's date
-                                selected: { backgroundColor: "gray" }, // Highlight the selected day
-                                selected_label: { color: "white" }, // Highlight the selected day label
+                                },
+                                selected: { backgroundColor: "gray" },
+                                selected_label: { color: "white" },
                             }}
                         />
                         <Pressable
@@ -612,13 +746,17 @@ const styles = StyleSheet.create({
         marginTop: 16,
         width: "100%",
         minWidth: "100%",
-        // backgroundColor: "#fff",
         paddingHorizontal: 16,
     },
     label: {
         color: "#eeeeee",
         fontSize: 12,
         marginBottom: 8,
+    },
+    installmentPreview: {
+        color: "#8f8f8f",
+        fontSize: 12,
+        marginTop: 6,
     },
     input: {
         width: "100%",
@@ -627,8 +765,6 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         borderBottomWidth: 1,
         borderBottomColor: "#212223",
-        // backgroundColor: "#212223",
-        // borderRadius: 12,
         color: "#eeeeee",
         fontFamily: "ana",
         fontWeight: 400,
@@ -674,8 +810,8 @@ const styles = StyleSheet.create({
         borderColor: "transparent",
         padding: 12,
         borderRadius: 16,
-        height: 86,
-        aspectRatio: 4 / 3,
+        height: 64,
+        aspectRatio: 5 / 3,
         justifyContent: "flex-end",
     },
     catButtonSelected: {
@@ -699,7 +835,7 @@ const styles = StyleSheet.create({
         bottom: 32,
         left: 16,
         right: 16,
-        zIndex: 10,
+        zIndex: 30,
         alignItems: "center",
     },
 });

@@ -5,10 +5,16 @@ export type PurchaseDateSection = {
     purchases: Purchase[];
 };
 
-export function groupPurchasesByDate(purchases: Purchase[]): PurchaseDateSection[] {
+export function groupPurchasesByDate(
+    purchases: Purchase[],
+): PurchaseDateSection[] {
     const map = new Map<string, Purchase[]>();
 
     for (const purchase of purchases) {
+        if (!purchase.purchasedAt) {
+            continue;
+        }
+
         const key = purchase.purchasedAt.slice(0, 10); // ignora hora
         const bucket = map.get(key);
         if (bucket) {

@@ -17,22 +17,20 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Input from "@/components/core/input";
-
-import { formatMoneyInput } from "@/app/(out)/create-purchase";
+import { formatCurrency } from "@/lib/format-currency";
 
 import BackBtn from "@/components/core/back-btn";
-import { parseAmountToCents } from "@/components/purchases/edit-purchase-bottomsheet";
 import { useCreateGroup } from "@/hooks/use-create-group";
+import { useGroups } from "@/hooks/use-group";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import DateTimePicker, {
     DateType,
     useDefaultStyles,
 } from "react-native-ui-datepicker";
-import { useGroups } from "@/hooks/use-group";
 
 export default function CreateGroup() {
     const router = useRouter();
-    
+
     const { data, refetch, isFetching } = useGroups();
 
     const local = useLocalSearchParams();
@@ -81,7 +79,8 @@ export default function CreateGroup() {
                 console.log("Fetched group data:", group);
 
                 setGroupName(group.name);
-                setAmountCents(parseAmountToCents(group.limit));
+                setAmountCents(String(group.limit ?? ""));
+                console.log("Fetched group limit:", group.limit);
                 const closingDay = Number(group.closingDay);
                 const currentDate = new Date();
                 setGroupClosingDate(
@@ -107,7 +106,7 @@ export default function CreateGroup() {
 
         const groupData = {
             name: groupName,
-            limit: amountCents,
+            limit: parseInt(amountCents) || 0,
             closingDay: new Date(groupClosingDate as string).getUTCDate(),
         };
 
@@ -174,15 +173,15 @@ export default function CreateGroup() {
                             </TextDefault>
                             <Input
                                 placeholder="R$ 0,00"
-                                value={formatMoneyInput(amountCents)}
+                                value={formatCurrency(amountCents)}
                                 selection={{
-                                    start: formatMoneyInput(amountCents).length,
-                                    end: formatMoneyInput(amountCents).length,
+                                    start: formatCurrency(amountCents).length,
+                                    end: formatCurrency(amountCents).length,
                                 }}
                                 onChangeText={(text) => {
                                     const digits = text
                                         .replace(/\D/g, "")
-                                        .slice(0, 10);
+                                        .slice(0, 9);
                                     setAmountCents(digits);
                                 }}
                                 keyboardType="number-pad"

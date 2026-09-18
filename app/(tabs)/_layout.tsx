@@ -24,6 +24,9 @@ export default function TabsLayout() {
                 screenOptions={{
                     headerShown: false,
                     tabBarActiveTintColor: "#009C7A",
+                    tabBarStyle: {
+                        backgroundColor: "#161718",
+                    },
                 }}
             >
                 <Tabs.Screen
@@ -85,6 +88,13 @@ export default function TabsLayout() {
                         href: null,
                     }}
                 />
+                <Tabs.Screen
+                    name="incomes/[invoiceId]"
+                    options={{
+                        title: "Create Card",
+                        href: null,
+                    }}
+                />
             </Tabs>
 
             <View style={styles.offlineContainer}>
@@ -97,6 +107,7 @@ export default function TabsLayout() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: "#161718",
     },
 
     offlineContainer: {

@@ -8,11 +8,33 @@ type PurchaseItemProps = {
     id: string;
     description: string | null;
     amount: number;
+    purchasedAt: string | null;
+    invoiceId: string | null;
+    cardId: string | null;
+    userId: string | null;
+    installmentPlanId: string | null;
+    installmentNumber: number | null;
+    subscriptionId: string | null;
+    createdAt: string;
+    updatedAt: string;
+    createdById: string | null;
     category: {
         id: string;
         key: string;
         label: string;
         icon: string | null;
+    } | null;
+    subscription: {
+        id: string;
+        name: string;
+        description: string | null;
+    };
+    installmentPlan: {
+        id: string;
+        description: string;
+        totalAmount: number;
+        installments: number;
+        dayOfMonth: number;
     } | null;
 };
 
@@ -21,6 +43,10 @@ export function PurchaseItem({
     description,
     amount,
     category,
+    subscriptionId,
+    installmentNumber,
+    subscription,
+    installmentPlan,
 }: PurchaseItemProps) {
     const router = useRouter();
 
@@ -53,11 +79,11 @@ export function PurchaseItem({
                     <TextDefault style={styles.title}>
                         {description || category?.label || "Sem descrição"}
                     </TextDefault>
-                    {description && (
-                        <TextDefault style={styles.description}>
+                    <TextDefault style={styles.description}>
                             {category?.label || "Sem categoria"}
+                            {subscriptionId ? " • Assinatura" : ""}
+                            {installmentNumber ? ` • Parcela ${installmentNumber}/${installmentPlan?.installments || 0}` : ""}
                         </TextDefault>
-                    )}
                 </View>
             </View>
             <TextDefault style={[styles.amount]}>

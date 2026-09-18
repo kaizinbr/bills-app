@@ -6,13 +6,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/core/auth-provider";
 
 import TextDefault from "@/components/core/text-core";
-import {
-    Animated,
-    ActivityIndicator,
-    Pressable,
-    StyleSheet,
-    View,
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -20,26 +14,7 @@ import { BottomSheetInput } from "@/components/core/input";
 
 import { DateType, useDefaultStyles } from "react-native-ui-datepicker";
 
-function formatMoneyInput(digits: string) {
-    const cleanDigits = digits.replace(/\D/g, "");
-    if (!cleanDigits) return "";
-
-    const paddedDigits = cleanDigits.padStart(3, "0");
-    const integerPart = paddedDigits.slice(0, -2).replace(/^0+(?=\d)/, "");
-    const decimalPart = paddedDigits.slice(-2);
-
-    return `R$ ${integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".")},${decimalPart}`;
-}
-
-function parseAmountToCents(value: unknown) {
-    if (typeof value !== "string" && typeof value !== "number") return "";
-
-    const rawValue = String(value).trim().replace(",", ".");
-    if (!/^\d+(?:\.\d{1,2})?$/.test(rawValue)) return "";
-
-    const [integerPart, decimalPart = ""] = rawValue.split(".");
-    return `${integerPart}${decimalPart.padEnd(2, "0")}`;
-}
+import { formatCurrency } from "@/lib/format-currency";
 
 export default function EditSubscriptionBottomSheet({
     initialData,
@@ -70,9 +45,7 @@ export default function EditSubscriptionBottomSheet({
     });
 
     const [cardName, setCardName] = useState(data.name || "");
-    const [amountCents, setAmountCents] = useState(
-        parseAmountToCents(data.amount),
-    );
+    const [amountCents, setAmountCents] = useState(data.amount);
     const [purchasedToday, setPurchasedToday] = useState<boolean>(true);
     const [purchaseDate, setPurchaseDate] = useState<DateType>(today);
 
@@ -81,7 +54,9 @@ export default function EditSubscriptionBottomSheet({
         currentUserId!,
     );
 
-    const [selectedCardId, setSelectedCardId] = useState<string | null>(data.cardId);
+    const [selectedCardId, setSelectedCardId] = useState<string | null>(
+        data.cardId,
+    );
     const [category, setCategory] = useState<string | null>(null);
 
     const [users, setUsers] = useState<any[]>([]);
@@ -93,7 +68,6 @@ export default function EditSubscriptionBottomSheet({
     useEffect(() => {
         if (
             cardName.trim() !== "" &&
-            amountCents.trim() !== "" &&
             category !== null
         ) {
             setCanSubmit(true);
@@ -105,9 +79,7 @@ export default function EditSubscriptionBottomSheet({
     useEffect(() => {
         const fetchCatgories = async () => {
             try {
-                const response = await api.get(
-                    `groups/${initialData.groupId}`,
-                );
+                const response = await api.get(`groups/${initialData.groupId}`);
                 setData((prevData) => ({
                     ...prevData,
                     groupId: response.data.group.id,
@@ -131,13 +103,15 @@ export default function EditSubscriptionBottomSheet({
 
     const handleUpdatePurchase = async () => {
         try {
-
-            const response = await api.patch(`/subscriptions/${initialData.id}`, {
-                name: cardName,
-                amount: amountCents,
-                cardId: selectedCardId,
-                categoryId: category,
-            });
+            const response = await api.patch(
+                `/subscriptions/${initialData.id}`,
+                {
+                    name: cardName,
+                    amount: parseInt(amountCents) || 0,
+                    cardId: selectedCardId,
+                    categoryId: category,
+                },
+            );
             console.log("Subscription updated successfully:", response.data);
             onFinish();
         } catch (error) {
@@ -185,15 +159,15 @@ export default function EditSubscriptionBottomSheet({
                         <TextDefault style={styles.label}>Valor</TextDefault>
                         <BottomSheetInput
                             placeholder="R$ 0,00"
-                            value={formatMoneyInput(amountCents)}
+                            value={formatCurrency(amountCents)}
                             selection={{
-                                start: formatMoneyInput(amountCents).length,
-                                end: formatMoneyInput(amountCents).length,
+                                start: formatCurrency(amountCents).length,
+                                end: formatCurrency(amountCents).length,
                             }}
                             onChangeText={(text) => {
                                 const digits = text
                                     .replace(/\D/g, "")
-                                    .slice(0, 10);
+                                    .slice(0, 9);
                                 setAmountCents(digits);
                             }}
                             keyboardType="number-pad"
@@ -296,7 +270,13 @@ export default function EditSubscriptionBottomSheet({
                                 </Pressable>
                             ))}
                         </ScrollView>
-                        <View style={{ padding: 16, paddingBottom: 0, width: "100%" }}>
+                        <View
+                            style={{
+                                padding: 16,
+                                paddingBottom: 0,
+                                width: "100%",
+                            }}
+                        >
                             <Pressable
                                 onPress={handleUpdatePurchase}
                                 style={[

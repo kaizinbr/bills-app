@@ -18,8 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Input from "@/components/core/input";
 
-import { formatMoneyInput } from "@/app/(out)/create-purchase";
-import { Host, Switch } from "@expo/ui/jetpack-compose";
+import { formatCurrency } from "@/lib/format-currency";
 
 import BackBtn from "@/components/core/back-btn";
 import { useCreateGroup } from "@/hooks/use-create-group";
@@ -33,7 +32,7 @@ import DateTimePicker, {
 export default function CreateGroup() {
     const router = useRouter();
     const { mutate: createGroup, isPending, isError, error } = useCreateGroup();
-    
+
     const { data, refetch, isFetching } = useGroups();
 
     const { session } = useAuth();
@@ -66,10 +65,14 @@ export default function CreateGroup() {
     const [canSubmit, setCanSubmit] = useState(false);
 
     useEffect(() => {
-        const resolvedPayerId = iPay ? currentUserId : groupPayer;
-        const resolvedReceiverId = iReceive ? currentUserId : groupReceiver;
-        setCanSubmit(!!resolvedPayerId && !!resolvedReceiverId);
-    }, [iPay, iReceive, currentUserId, groupPayer, groupReceiver]);
+        // const resolvedPayerId = iPay ? currentUserId : groupPayer;
+        // const resolvedReceiverId = iReceive ? currentUserId : groupReceiver;
+        // setCanSubmit(!!resolvedPayerId && !!resolvedReceiverId);
+
+        const nameValid = groupName.trim().length > 0;
+        const closingDateValid = groupClosingDate instanceof Date;
+        setCanSubmit(nameValid && closingDateValid);
+    }, [groupName, groupClosingDate]);
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -95,19 +98,17 @@ export default function CreateGroup() {
         const resolvedPayerId = iPay ? currentUserId : groupPayer;
         const resolvedReceiverId = iReceive ? currentUserId : groupReceiver;
 
-        if (!resolvedPayerId || !resolvedReceiverId) {
-            console.warn(
-                "Selecione o pagador e o recebedor antes de criar o grupo.",
-            );
-            return;
-        }
+        // if (!resolvedPayerId || !resolvedReceiverId) {
+        //     console.warn(
+        //         "Selecione o pagador e o recebedor antes de criar o grupo.",
+        //     );
+        //     return;
+        // }
 
         createGroup(
             {
                 name: groupName,
                 amount: parseInt(amountCents) || 0,
-                payerId: resolvedPayerId,
-                receiverId: resolvedReceiverId,
                 closingDay: groupClosingDate
                     ? new Date(groupClosingDate as string).getUTCDate()
                     : undefined,
@@ -181,15 +182,15 @@ export default function CreateGroup() {
                             </TextDefault>
                             <Input
                                 placeholder="R$ 0,00"
-                                value={formatMoneyInput(amountCents)}
+                                value={formatCurrency(amountCents)}
                                 selection={{
-                                    start: formatMoneyInput(amountCents).length,
-                                    end: formatMoneyInput(amountCents).length,
+                                    start: formatCurrency(amountCents).length,
+                                    end: formatCurrency(amountCents).length,
                                 }}
                                 onChangeText={(text) => {
                                     const digits = text
                                         .replace(/\D/g, "")
-                                        .slice(0, 10);
+                                        .slice(0, 9);
                                     setAmountCents(digits);
                                 }}
                                 keyboardType="number-pad"
@@ -197,7 +198,7 @@ export default function CreateGroup() {
                             />
                         </View>
 
-                        <View style={[styles.inputContainer]}>
+                        {/* <View style={[styles.inputContainer]}>
                             <View
                                 style={{
                                     flexDirection: "row",
@@ -241,7 +242,7 @@ export default function CreateGroup() {
                                     Eu recebo
                                 </TextDefault>
                             </View>
-                        </View>
+                        </View> */}
                         <View style={[styles.inputContainer]}>
                             <TextDefault style={styles.label}>
                                 Fechamento em{" "}
@@ -280,40 +281,6 @@ export default function CreateGroup() {
                             />
                         </View>
 
-                        {/* <View style={[styles.inputContainer]}>
-                        <TextDefault style={styles.label}>
-                            Arquivada
-                        </TextDefault>
-
-                        <Host matchContents>
-                            <Switch
-                                value={groupArchived}
-                                onCheckedChange={setGroupArchived}
-                            />
-                        </Host>
-
-                        <Host matchContents>
-                            <ToggleButton
-                                checked={groupArchived}
-                                onCheckedChange={setGroupArchived}
-                            >
-                                <Text>Arquivada</Text>
-                            </ToggleButton>
-                        </Host>
-                    </View> 
-                    <View style={[styles.inputContainer]}>
-                        <TextDefault style={styles.label}>Cartões</TextDefault>
-                        {cards.length > 0 ? (
-                            cards.map((card) => (
-                                <Pressable key={card.id}>
-                                    <Text>{card.name}</Text>
-                                </Pressable>
-                            ))
-                        ) : (
-                            <TextDefault>Nenhum cartão encontrado</TextDefault>
-                        )}
-                    </View> */}
-
                         {isError && (
                             <TextDefault
                                 style={{ color: "#FF6B6B", marginTop: 8 }}
@@ -337,7 +304,7 @@ export default function CreateGroup() {
                 disabled={!canSubmit}
             >
                 <TextDefault style={{ color: "#fff", fontWeight: "700" }}>
-                    Criar cartão
+                    Criar conta
                 </TextDefault>
             </Pressable>
         </View>

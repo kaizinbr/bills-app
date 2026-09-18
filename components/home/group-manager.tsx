@@ -45,7 +45,7 @@ export default function GroupManager({
 }: {
     selectedGroupId: string;
 }) {
-    // console.log(selectedGroupId)
+    console.log(selectedGroupId)
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const { data: profile, isLoading } = useProfile();
@@ -87,7 +87,7 @@ export default function GroupManager({
         finally {
             setShowLogout(false);
         }
-    }, [profile, router]);
+    }, [selectedGroupId, router]);
 
     return (
         <>

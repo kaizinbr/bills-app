@@ -7,11 +7,10 @@ import { useAuth } from "@/components/core/auth-provider";
 
 import TextDefault from "@/components/core/text-core";
 import {
-    Animated,
     ActivityIndicator,
     Pressable,
     StyleSheet,
-    View,
+    View
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -20,26 +19,8 @@ import { BottomSheetInput } from "@/components/core/input";
 
 import { DateType, useDefaultStyles } from "react-native-ui-datepicker";
 
-function formatMoneyInput(digits: string) {
-    const cleanDigits = digits.replace(/\D/g, "");
-    if (!cleanDigits) return "";
+import { formatCurrency } from "@/lib/format-currency";
 
-    const paddedDigits = cleanDigits.padStart(3, "0");
-    const integerPart = paddedDigits.slice(0, -2).replace(/^0+(?=\d)/, "");
-    const decimalPart = paddedDigits.slice(-2);
-
-    return `R$ ${integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".")},${decimalPart}`;
-}
-
-export function parseAmountToCents(value: unknown) {
-    if (typeof value !== "string" && typeof value !== "number") return "";
-
-    const rawValue = String(value).trim().replace(",", ".");
-    if (!/^\d+(?:\.\d{1,2})?$/.test(rawValue)) return "";
-
-    const [integerPart, decimalPart = ""] = rawValue.split(".");
-    return `${integerPart}${decimalPart.padEnd(2, "0")}`;
-}
 
 export default function EditPurchaseBottomSheet({
     initialData,
@@ -73,9 +54,7 @@ export default function EditPurchaseBottomSheet({
     });
 
     const [cardName, setCardName] = useState(data.description || "");
-    const [amountCents, setAmountCents] = useState(
-        parseAmountToCents(data.amount),
-    );
+    const [amountCents, setAmountCents] = useState(data.amount);
     const [purchasedToday, setPurchasedToday] = useState<boolean>(true);
     const [purchaseDate, setPurchaseDate] = useState<DateType>(today);
 
@@ -96,7 +75,8 @@ export default function EditPurchaseBottomSheet({
     useEffect(() => {
         if (
             cardName.trim() !== "" &&
-            amountCents.trim() !== "" &&
+            
+            !Number.isNaN(parseInt(amountCents, 10)) &&
             category !== null
         ) {
             setCanSubmit(true);
@@ -136,7 +116,7 @@ export default function EditPurchaseBottomSheet({
         try {
             const response = await api.patch(`/purchases/${initialData.id}`, {
                 description: cardName,
-                amount: amountCents,
+                amount: parseInt(amountCents) || 0,
                 cardId: selectedCardId,
                 categoryId: category,
             });
@@ -187,15 +167,15 @@ export default function EditPurchaseBottomSheet({
                         <TextDefault style={styles.label}>Valor</TextDefault>
                         <BottomSheetInput
                             placeholder="R$ 0,00"
-                            value={formatMoneyInput(amountCents)}
+                            value={formatCurrency(amountCents)}
                             selection={{
-                                start: formatMoneyInput(amountCents).length,
-                                end: formatMoneyInput(amountCents).length,
+                                start: formatCurrency(amountCents).length,
+                                end: formatCurrency(amountCents).length,
                             }}
                             onChangeText={(text) => {
                                 const digits = text
                                     .replace(/\D/g, "")
-                                    .slice(0, 10);
+                                    .slice(0, 9);
                                 setAmountCents(digits);
                             }}
                             keyboardType="number-pad"

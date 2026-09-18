@@ -30,18 +30,9 @@ import {
 
 import BackBtn from "@/components/core/back-btn";
 import EditPurchaseBottomSheet from "@/components/purchases/edit-purchase-bottomsheet";
-import { useDefaultStyles } from "react-native-ui-datepicker";
 import { useGroups } from "@/hooks/use-group";
+import { useDefaultStyles } from "react-native-ui-datepicker";
 
-function formatMoneyInput(digits: string) {
-    if (!digits) return "";
-
-    const paddedDigits = digits.padStart(3, "0");
-    const integerPart = paddedDigits.slice(0, -2).replace(/^0+(?=\d)/, "");
-    const decimalPart = paddedDigits.slice(-2);
-
-    return `R$ ${integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".")},${decimalPart}`;
-}
 
 export default function PurchasePage() {
     const router = useRouter();
@@ -241,10 +232,7 @@ export default function PurchasePage() {
                                 Valor
                             </TextDefault>
                             <TextDefault style={styles.description}>
-                                {new Intl.NumberFormat("pt-BR", {
-                                    style: "currency",
-                                    currency: "BRL",
-                                }).format(purchaseData.amount)}
+                                {formatCurrency(purchaseData.amount)}
                             </TextDefault>
                         </View>
                     )}

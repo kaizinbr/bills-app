@@ -32,11 +32,11 @@ export type GroupsHandle = {
     refreshInvoiceData: () => void;
 };
 
-function sortInvoicesDesc(invoices: Invoice[]): Invoice[] {
+function sortInvoicesAsc(invoices: Invoice[]): Invoice[] {
     return [...invoices].sort(
         (a, b) =>
-            new Date(b.periodStart).getTime() -
-            new Date(a.periodStart).getTime(),
+            new Date(a.periodStart).getTime() -
+            new Date(b.periodStart).getTime(),
     );
 }
 
@@ -52,7 +52,7 @@ const Charts = forwardRef<GroupsHandle, GroupsProps>(
 
         const { data: invoicesData } = useGroupInvoices(groupId ?? "");
         const invoices = useMemo(
-            () => sortInvoicesDesc(invoicesData?.invoices ?? []),
+            () => sortInvoicesAsc(invoicesData?.invoices ?? []),
             [invoicesData],
         );
 

@@ -28,6 +28,11 @@ export type Group = {
         groupId: string;
         userId: string;
         role: "OWNER" | "MEMBER";
+        user: {
+            id: string;
+            name: string;
+            image: string | null;
+        };
     }[];
 };
 

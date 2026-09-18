@@ -6,32 +6,22 @@ import { useAuth } from "@/components/core/auth-provider";
 import StatusBar from "@/components/core/status-bar";
 import TextDefault from "@/components/core/text-core";
 import {
-    ActivityIndicator,
     KeyboardAvoidingView,
     Platform,
     Pressable,
     ScrollView,
     StyleSheet,
-    View,
+    View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as Clipboard from "expo-clipboard";
-import * as Sharing from "expo-sharing";
 
 import Input from "@/components/core/input";
 
-import { formatMoneyInput } from "@/app/(out)/create-purchase";
 
 import BackBtn from "@/components/core/back-btn";
-import { parseAmountToCents } from "@/components/purchases/edit-purchase-bottomsheet";
-import { useCreateGroup } from "@/hooks/use-create-group";
 
 import { useGroups } from "@/hooks/use-group";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import DateTimePicker, {
-    DateType,
-    useDefaultStyles,
-} from "react-native-ui-datepicker";
 
 export default function CreateGroup() {
     const router = useRouter();
@@ -71,7 +61,9 @@ export default function CreateGroup() {
                 router.push("/(tabs)/home");
             })
             .catch((err) => {
-                setError(err.response?.data?.error || "Erro ao entrar no grupo");
+                setError(
+                    err.response?.data?.error || "Erro ao entrar no grupo",
+                );
                 console.error(err);
                 setLoading(false);
             });
@@ -104,9 +96,7 @@ export default function CreateGroup() {
                         entrar em uma conta existente.
                     </TextDefault>
                     {error && (
-                        <TextDefault style={styles.error}>
-                            {error}
-                        </TextDefault>
+                        <TextDefault style={styles.error}>{error}</TextDefault>
                     )}
                     <Input
                         style={{
@@ -141,7 +131,6 @@ export default function CreateGroup() {
                             Entrar
                         </TextDefault>
                     </Pressable>
-
                 </ScrollView>
             </KeyboardAvoidingView>
         </View>

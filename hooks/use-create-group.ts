@@ -5,8 +5,8 @@ import { TimeString } from "better-auth/plugins/device-authorization";
 type CreateGroupInput = {
     name: string;
     amount: number | TimeString;
-    payerId: string;
-    receiverId: string;
+    payerId?: string;
+    receiverId?: string;
     closingDay?: number;
     archived: boolean;
     cards: string;

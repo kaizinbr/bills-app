@@ -7,6 +7,9 @@ export type Invoice = {
     card: { id: string; name: string; color: string } | null;
     periodStart: string;
     closingDate: string;
+    referenceMonth: number;
+    referenceYear: number;
+    groupId: string;
     status: "OPEN" | "CLOSED" | "PAID";
 };
 

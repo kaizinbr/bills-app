@@ -64,7 +64,7 @@ export default function CreatePurchase({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#2d2d2d",
+        backgroundColor: "#00C89B",
         padding: 12,
         borderRadius: 999,
         alignItems: "center",

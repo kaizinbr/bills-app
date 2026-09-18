@@ -5,10 +5,34 @@ export type Purchase = {
     id: string;
     description: string | null;
     amount: number;
-    purchasedAt: string;
+    purchasedAt: string | null;
+    invoiceId: string | null;
     cardId: string | null;
-    invoiceId: string;
-    category: { id: string; key: string; label: string; icon: string | null };
+    userId: string | null;
+    installmentPlanId: string | null;
+    installmentNumber: number | null;
+    subscriptionId: string | null;
+    createdAt: string;
+    updatedAt: string;
+    createdById: string | null;
+    category: {
+        id: string;
+        key: string;
+        label: string;
+        icon: string | null;
+    } | null;
+    subscription: {
+        id: string;
+        name: string;
+        description: string | null;
+    };
+    installmentPlan: {
+        id: string;
+        description: string;
+        totalAmount: number;
+        installments: number;
+        dayOfMonth: number;
+    } | null;
 };
 
 export type Period = {

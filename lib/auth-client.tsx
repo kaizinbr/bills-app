@@ -7,8 +7,8 @@ import * as SecureStore from "expo-secure-store";
 
 export const authClient = createAuthClient({
     // baseURL: "https://api.kaizin.work/", 
-    // baseURL: "https://mobile-backend-psi.vercel.app", 
-    baseURL: "http://192.168.18.152:3000",
+    baseURL: "https://financas.kaizin.work", 
+    // baseURL: "http://192.168.18.152:3000",
     plugins: [
         oneTimeTokenClient(),
         emailOTPClient(),
@@ -18,4 +18,7 @@ export const authClient = createAuthClient({
             storage: SecureStore,
         }),
     ],
+    fetchOptions: {
+        timeout: 10000,
+    }
 });
