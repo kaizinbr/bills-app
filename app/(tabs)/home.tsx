@@ -7,7 +7,7 @@ import {
     ScrollView,
     StyleSheet,
     useWindowDimensions,
-    View
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -33,6 +33,8 @@ import GroupManager from "@/components/home/group-manager";
 import GroupSelectMenu from "@/components/home/group-select-menu";
 import { useIncomesFromInvoice } from "@/hooks/use-income-total";
 
+import { useSelectedGroup } from "@/components/core/select-group-context";
+
 const HEADER_HEIGHT = 64;
 
 export default function Home() {
@@ -40,7 +42,7 @@ export default function Home() {
     const queryClient = useQueryClient();
     const { data, refetch, isFetching } = useGroups();
     // const { refetch: refetchIncomes } = useIncomesFromInvoice("some-invoice-id");
-    
+
     const [updatedAt, setUpdatedAt] = useState(Date.now());
     // const {}
     const [showHeader, setShowHeader] = useState(false);
@@ -73,7 +75,9 @@ export default function Home() {
     const scrollRef = useRef<ScrollView>(null);
 
     const scrollY = useRef(new Animated.Value(0)).current;
-    const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+    const { selectedGroupId, setSelectedGroupId, isLoaded } =
+        useSelectedGroup();
+
     const [menuOpen, setMenuOpen] = useState(false);
 
     const closeMenu = useCallback(() => {
@@ -88,11 +92,13 @@ export default function Home() {
         null;
 
     useEffect(() => {
-        if (!selectedGroupId && groups.length > 0) {
+        if (!isLoaded) return; // ainda lendo do storage, não decide nada ainda
+
+        const stillExists = groups.some((g) => g.id === selectedGroupId);
+        if ((!selectedGroupId || !stillExists) && groups.length > 0) {
             setSelectedGroupId(groups[0].id);
         }
-        console.log("selectedGroupId", selectedGroupId);
-    }, [groups, selectedGroupId]);
+    }, [groups, selectedGroupId, isLoaded]);
 
     useEffect(() => {
         if (!menuOpen) {
@@ -192,9 +198,7 @@ export default function Home() {
                     />
 
                     {selectedGroup && (
-                        <GroupManager
-                            selectedGroupId={selectedGroupId ?? ""}
-                        />
+                        <GroupManager selectedGroupId={selectedGroupId ?? ""} />
                     )}
                 </View>
             </Animated.View>
@@ -208,7 +212,7 @@ export default function Home() {
                 ref={scrollRef}
                 contentContainerStyle={{
                     paddingTop: HEADER_HEIGHT,
-                    paddingBottom: 64,
+                    // paddingBottom: 64,
                     alignItems: "flex-start",
                     justifyContent: "flex-start",
                     gap: 8,
@@ -324,7 +328,7 @@ const styles = StyleSheet.create({
         borderBottomColor: "#282828",
     },
     headerTop: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
         paddingVertical: 8,
         flexDirection: "row",
         alignItems: "center",
@@ -451,14 +455,14 @@ const styles = StyleSheet.create({
     },
 
     categories: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
         gap: 10,
         alignItems: "center",
     },
 
     category: {
         height: 40,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
         borderRadius: 10,
         backgroundColor: "#202020",
         alignItems: "center",

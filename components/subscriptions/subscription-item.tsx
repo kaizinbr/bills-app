@@ -1,8 +1,8 @@
 import TextDefault from "@/components/core/text-core";
-import { formatCurrency } from "@/lib/format-currency";
-import { StyleSheet, View, Pressable } from "react-native";
-import { useRouter } from "expo-router";
 import { PurchaseIcon } from "@/components/home/purchase-icon";
+import { formatCurrency } from "@/lib/format-currency";
+import { useRouter } from "expo-router";
+import { Pressable, StyleSheet, View } from "react-native";
 
 type ItemProps = {
     id: string;
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
         paddingVertical: 16,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
         borderBottomWidth: 1,
         borderBottomColor: "#232323",
     },

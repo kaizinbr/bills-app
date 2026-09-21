@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
         textTransform: "uppercase",
         paddingTop: 20,
         paddingBottom: 8,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
         // borderBottomWidth: 1,
         // borderBottomColor: "#232323",
     },

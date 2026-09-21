@@ -32,7 +32,6 @@ import BackBtn from "@/components/core/back-btn";
 import EditSubscriptionBottomSheet from "@/components/subscriptions/edit-subscription-bottomsheet";
 import { useDefaultStyles } from "react-native-ui-datepicker";
 
-
 export default function PurchasePage() {
     const router = useRouter();
     const local = useLocalSearchParams();
@@ -142,7 +141,7 @@ export default function PurchasePage() {
                         justifyContent: "flex-start",
                         gap: 8,
                         paddingTop: insets.top + 64,
-                        paddingHorizontal: 16,
+                        paddingHorizontal: 24,
                         height: "100%",
                     }}
                     showsVerticalScrollIndicator={false}
@@ -428,7 +427,7 @@ const styles = StyleSheet.create({
         minHeight: "100%",
     },
     backButton: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     title: {
         fontSize: 24,

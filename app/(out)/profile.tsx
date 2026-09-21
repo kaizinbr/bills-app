@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-
 import StatusBar from "@/components/core/status-bar";
 import TextDefault from "@/components/core/text-core";
 import {
@@ -11,11 +10,9 @@ import {
     Pressable,
     RefreshControl,
     StyleSheet,
-    View
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-
 
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -107,7 +104,7 @@ export default function CreateGroup() {
                                 width: "100%",
                                 alignItems: "center",
                                 gap: 16,
-                                paddingHorizontal: 16,
+                                paddingHorizontal: 24,
                             }}
                         >
                             <AvatarNoPress size={64} fontSize={28} />
@@ -156,13 +153,13 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        // paddingHorizontal: 16,
+        // paddingHorizontal: 24,
         zIndex: 1,
     },
     title: {
         fontSize: 24,
         fontWeight: "bold",
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     description: {
         fontSize: 14,

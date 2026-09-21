@@ -1,6 +1,6 @@
 import api from "@/lib/api";
-import { useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 
 import { useAuth } from "@/components/core/auth-provider";
 
@@ -17,11 +17,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Input from "@/components/core/input";
 
-import { Host, Switch, Text, ToggleButton } from "@expo/ui/jetpack-compose";
+import { Host, Text, ToggleButton } from "@expo/ui/jetpack-compose";
 
-import DateTimePicker, {
-    DateType,
-    useDefaultStyles,
+import {
+    useDefaultStyles
 } from "react-native-ui-datepicker";
 
 export default function CreateCard() {
@@ -126,7 +125,6 @@ export default function CreateCard() {
                     <View style={[styles.inputContainer]}>
                         <TextDefault style={styles.label}>Grupo</TextDefault>
                         <TextDefault>{groupData?.name}</TextDefault>
-
                     </View>
                     <View style={[styles.inputContainer]}>
                         <TextDefault style={styles.label}>
@@ -178,9 +176,8 @@ export default function CreateCard() {
                                     <TextDefault>{user.name}</TextDefault>
                                 </Pressable>
                             ))}
-
                     </View>
-                    
+
                     <View style={[styles.inputContainer]}>
                         <TextDefault style={styles.label}>
                             Cor do Cartão
@@ -217,7 +214,7 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
         zIndex: 1,
     },
     title: {

@@ -1,6 +1,6 @@
 import api from "@/lib/api";
-import { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 
 import { useAuth } from "@/components/core/auth-provider";
 
@@ -9,21 +9,20 @@ import TextDefault from "@/components/core/text-core";
 import { AltArrowLeftIcon } from "@solar-icons/react-native/linear/alt-arrow-left";
 import {
     ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
     Pressable,
     ScrollView,
     StyleSheet,
     View,
-    KeyboardAvoidingView,
-    Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Input from "@/components/core/input";
 import { useGroups } from "@/hooks/use-group";
 
-import DateTimePicker, {
-    DateType,
-    useDefaultStyles,
+import {
+    useDefaultStyles
 } from "react-native-ui-datepicker";
 
 const CARDCOLORS = [
@@ -57,7 +56,6 @@ export default function CreateCard() {
     console.log("Local search params:", local.groupId);
     const groupId = local.groupId as string;
 
-    
     const { data, refetch, isFetching } = useGroups();
 
     const { session } = useAuth();
@@ -139,7 +137,7 @@ export default function CreateCard() {
                 digits: digits,
             });
             console.log("Group created:", response.data);
-            
+
             refetch();
             router.push(`/(tabs)/home`);
         } catch (error) {
@@ -191,12 +189,12 @@ export default function CreateCard() {
                         </TextDefault>
                         <View
                             style={{
-                                paddingHorizontal: 16,
+                                paddingHorizontal: 24,
                             }}
                         >
                             <TextDefault
                                 style={{
-                                    paddingHorizontal: 16,
+                                    paddingHorizontal: 24,
                                     paddingVertical: 6,
                                     fontWeight: "600",
                                     color: "#eeeeee",
@@ -208,7 +206,7 @@ export default function CreateCard() {
                             </TextDefault>
                         </View>
 
-                        <View style={{ paddingHorizontal: 16, marginTop: 16 }}>
+                        <View style={{ paddingHorizontal: 24, marginTop: 16 }}>
                             <View
                                 style={{
                                     aspectRatio: 5 / 3,
@@ -263,7 +261,7 @@ export default function CreateCard() {
                             <TextDefault
                                 style={[
                                     styles.label,
-                                    { paddingHorizontal: 16 },
+                                    { paddingHorizontal: 24 },
                                 ]}
                             >
                                 Cor do Cartão
@@ -275,7 +273,7 @@ export default function CreateCard() {
                                     flexDirection: "row",
                                     gap: 8,
                                     paddingVertical: 8,
-                                    paddingHorizontal: 16,
+                                    paddingHorizontal: 24,
                                 }}
                             >
                                 {CARDCOLORS.map((color) => (
@@ -332,7 +330,7 @@ const styles = StyleSheet.create({
         zIndex: 1,
     },
     backButton: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     container: {
         flex: 1,
@@ -342,7 +340,7 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: "bold",
         marginVertical: 16,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     description: {
         fontSize: 16,
@@ -352,7 +350,7 @@ const styles = StyleSheet.create({
         marginTop: 16,
         width: "100%",
         minWidth: "100%",
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     label: {
         color: "#eeeeee",

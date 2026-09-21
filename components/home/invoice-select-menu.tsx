@@ -57,7 +57,6 @@ export default function InvoiceSelectMenu({
     selectedInvoice?: Invoice | null;
     setSelectedInvoiceId: (id: string) => void;
 }) {
-    
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const { data: profile, isLoading } = useProfile();
@@ -182,7 +181,7 @@ const styles = StyleSheet.create({
     headerText: {
         fontSize: 14,
         marginTop: 8,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     menu: {
         width: "100%",

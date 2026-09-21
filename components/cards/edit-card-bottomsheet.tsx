@@ -7,18 +7,17 @@ import { useAuth } from "@/components/core/auth-provider";
 
 import TextDefault from "@/components/core/text-core";
 import {
-    Animated,
     ActivityIndicator,
     Pressable,
     StyleSheet,
-    View,
+    View
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BottomSheetInput } from "@/components/core/input";
 
-import { DateType, useDefaultStyles } from "react-native-ui-datepicker";
+import { useDefaultStyles } from "react-native-ui-datepicker";
 
 import { useGroups } from "@/hooks/use-group";
 
@@ -96,7 +95,6 @@ export default function EditCardBottomSheet({
     useEffect(() => {
         const fetchCatgories = async () => {
             try {
-
                 setLoading(false);
             } catch (error) {
                 console.error("Error fetching categories:", error);
@@ -110,7 +108,6 @@ export default function EditCardBottomSheet({
 
     const handleUpdatePurchase = async () => {
         try {
-
             const response = await api.patch(`/cards/${initialData.id}`, {
                 name: cardName,
                 digits: digits,
@@ -173,51 +170,47 @@ export default function EditCardBottomSheet({
                         />
                     </View>
 
-                    
-                                            <View
-                                                style={[
-                                                    styles.inputContainer,
-                                                    { paddingHorizontal: 0 },
-                                                ]}
-                                            >
-                                                <TextDefault
-                                                    style={[
-                                                        styles.label,
-                                                        { paddingHorizontal: 16 },
-                                                    ]}
-                                                >
-                                                    Cor do Cartão
-                                                </TextDefault>
-                                                <ScrollView
-                                                    horizontal
-                                                    showsHorizontalScrollIndicator={false}
-                                                    contentContainerStyle={{
-                                                        flexDirection: "row",
-                                                        gap: 8,
-                                                        paddingVertical: 8,
-                                                        paddingHorizontal: 16,
-                                                    }}
-                                                >
-                                                    {CARDCOLORS.map((color) => (
-                                                        <Pressable
-                                                            key={color.id}
-                                                            onPress={() => setColor(color.hex)}
-                                                            style={{
-                                                                width: 40,
-                                                                height: 40,
-                                                                borderRadius: 999,
-                                                                backgroundColor: color.hex,
-                                                                borderWidth:
-                                                                    cardColor === color.hex ? 3 : 0,
-                                                                borderColor:
-                                                                    cardColor === color.hex
-                                                                        ? "#fff"
-                                                                        : "transparent",
-                                                            }}
-                                                        />
-                                                    ))}
-                                                </ScrollView>
-                                            </View>
+                    <View
+                        style={[
+                            styles.inputContainer,
+                            { paddingHorizontal: 0 },
+                        ]}
+                    >
+                        <TextDefault
+                            style={[styles.label, { paddingHorizontal: 24 }]}
+                        >
+                            Cor do Cartão
+                        </TextDefault>
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={{
+                                flexDirection: "row",
+                                gap: 8,
+                                paddingVertical: 8,
+                                paddingHorizontal: 24,
+                            }}
+                        >
+                            {CARDCOLORS.map((color) => (
+                                <Pressable
+                                    key={color.id}
+                                    onPress={() => setColor(color.hex)}
+                                    style={{
+                                        width: 40,
+                                        height: 40,
+                                        borderRadius: 999,
+                                        backgroundColor: color.hex,
+                                        borderWidth:
+                                            cardColor === color.hex ? 3 : 0,
+                                        borderColor:
+                                            cardColor === color.hex
+                                                ? "#fff"
+                                                : "transparent",
+                                    }}
+                                />
+                            ))}
+                        </ScrollView>
+                    </View>
 
                     <View
                         style={[
@@ -225,7 +218,13 @@ export default function EditCardBottomSheet({
                             { paddingHorizontal: 0 },
                         ]}
                     >
-                        <View style={{ padding: 16, paddingBottom: 0, width: "100%" }}>
+                        <View
+                            style={{
+                                padding: 16,
+                                paddingBottom: 0,
+                                width: "100%",
+                            }}
+                        >
                             <Pressable
                                 onPress={handleUpdatePurchase}
                                 style={[
@@ -265,13 +264,13 @@ const styles = StyleSheet.create({
         zIndex: 1,
     },
     backButton: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     title: {
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 16,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     description: {
         fontSize: 16,
@@ -282,7 +281,7 @@ const styles = StyleSheet.create({
         width: "100%",
         minWidth: "100%",
         // backgroundColor: "#fff",
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     label: {
         color: "#eeeeee",

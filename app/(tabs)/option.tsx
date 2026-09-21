@@ -11,9 +11,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import StatusBar from "@/components/core/status-bar";
-import Groups from "@/components/home/groups";
 import Charts from "@/components/charts/charts";
+import StatusBar from "@/components/core/status-bar";
 import { useGroups } from "@/hooks/use-group";
 import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 
@@ -27,11 +26,10 @@ import {
 } from "react-native-reanimated";
 
 import CreatePurchase from "@/components/home/float-btn";
-import AvatarHeader from "@/components/home/header-avatar";
 import FromTheStart from "@/components/home/start";
 
-import GroupManager from "@/components/home/group-manager";
 import GroupSelectMenu from "@/components/home/group-select-menu";
+import { useSelectedGroup } from "@/components/core/select-group-context";
 
 const HEADER_HEIGHT = 64;
 
@@ -72,7 +70,7 @@ export default function Home() {
     const scrollRef = useRef<ScrollView>(null);
 
     const scrollY = useRef(new Animated.Value(0)).current;
-    const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+    const { selectedGroupId, setSelectedGroupId, isLoaded } = useSelectedGroup();
     const [menuOpen, setMenuOpen] = useState(false);
 
     const closeMenu = useCallback(() => {
@@ -87,11 +85,13 @@ export default function Home() {
         null;
 
     useEffect(() => {
-        if (!selectedGroupId && groups.length > 0) {
-            setSelectedGroupId(groups[0].id);
-        }
-        // console.log("selectedGroupId", selectedGroupId);
-    }, [groups, selectedGroupId]);
+    if (!isLoaded) return; // ainda lendo do storage, não decide nada ainda
+
+    const stillExists = groups.some((g) => g.id === selectedGroupId);
+    if ((!selectedGroupId || !stillExists) && groups.length > 0) {
+        setSelectedGroupId(groups[0].id);
+    }
+}, [groups, selectedGroupId, isLoaded]);
 
     useEffect(() => {
         if (!menuOpen) {
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
         borderBottomColor: "#282828",
     },
     headerTop: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
         paddingVertical: 8,
         flexDirection: "row",
         alignItems: "center",
@@ -442,14 +442,14 @@ const styles = StyleSheet.create({
     },
 
     categories: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
         gap: 10,
         alignItems: "center",
     },
 
     category: {
         height: 40,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
         borderRadius: 10,
         backgroundColor: "#202020",
         alignItems: "center",

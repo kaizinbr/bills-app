@@ -11,12 +11,11 @@ import {
     Pressable,
     ScrollView,
     StyleSheet,
-    View
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Input from "@/components/core/input";
-
 
 import BackBtn from "@/components/core/back-btn";
 
@@ -144,7 +143,7 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
         zIndex: 1,
     },
     title: {

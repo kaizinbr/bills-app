@@ -1,5 +1,5 @@
 import TextDefault from "@/components/core/text-core";
-import type { GroupsResponse } from "@/hooks/use-group";
+import { useGroups, type GroupsResponse } from "@/hooks/use-group";
 import { useProfile } from "@/hooks/use-profile";
 import { useRouter } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -11,7 +11,6 @@ import {
     BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
 
 import { AltArrowDownIcon } from "@solar-icons/react-native/linear/alt-arrow-down";
 
@@ -37,6 +36,7 @@ export default function GroupSelectMenu({
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const { data: profile, isLoading } = useProfile();
+    const { refetch } = useGroups();
     const snapPoints = useMemo(() => ["80%", "100%"], []);
 
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -88,7 +88,7 @@ export default function GroupSelectMenu({
                 style={[styles.headerButton, customStyles]}
             >
                 <TextDefault style={styles.headerButtonTitle} numberOfLines={1}>
-                    {selectedGroup?.name ?? "Selecionar conta"} 
+                    {selectedGroup?.name ?? "Selecionar conta"}
                 </TextDefault>
                 <AltArrowDownIcon size={12} color="#fff" />
             </Pressable>
@@ -96,7 +96,7 @@ export default function GroupSelectMenu({
                 ref={bottomSheetModalRef}
                 onChange={handleSheetChanges}
                 onDismiss={() => {
-                    // fecthData(true);
+                    refetch();
                 }}
                 snapPoints={snapPoints}
                 backdropComponent={(backdropProps) => (
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
     headerText: {
         fontSize: 14,
         marginTop: 8,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     menu: {
         width: "100%",

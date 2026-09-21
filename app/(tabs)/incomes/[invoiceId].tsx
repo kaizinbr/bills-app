@@ -1,5 +1,4 @@
 // app/create-subscription.tsx
-import api from "@/lib/api";
 import "dayjs/locale/pt-br";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -29,12 +28,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import BackBtn from "@/components/core/back-btn";
 
-import { SubscriptionItem } from "@/components/subscriptions/subscription-item";
 import { useDefaultStyles } from "react-native-ui-datepicker";
 
-import { formatCurrency } from "@/lib/format-currency";
-import { useIncomesFromInvoice } from "@/hooks/use-income-total";
 import AddIncomeBottomSheet from "@/components/incomes/add-income-bottomsheet";
+import { useIncomesFromInvoice } from "@/hooks/use-income-total";
+import { formatCurrency } from "@/lib/format-currency";
 
 import { ArrowUpIcon } from "@solar-icons/react-native/linear/arrow-up";
 
@@ -126,14 +124,19 @@ export default function CreateSubscription() {
                         Suas entradas do mês
                     </TextDefault>
                     <TextDefault
-                        style={{ color: "#fff", paddingHorizontal: 16, fontSize: 12, marginBottom: 8 }}
+                        style={{
+                            color: "#fff",
+                            paddingHorizontal: 24,
+                            fontSize: 12,
+                            marginBottom: 8,
+                        }}
                     >
                         Aqui você pode visualizar todas as suas entradas de
                         renda do mês.
                     </TextDefault>
                     {data.incomes.length === 0 ? (
                         <TextDefault
-                            style={{ color: "#fff", paddingHorizontal: 16 }}
+                            style={{ color: "#fff", paddingHorizontal: 24 }}
                         >
                             Nenhuma entrada de renda encontrada. Adicione uma
                             nova entrada.
@@ -146,7 +149,7 @@ export default function CreateSubscription() {
                             }}
                         >
                             <TextDefault
-                                style={{ color: "#fff", paddingHorizontal: 16 }}
+                                style={{ color: "#fff", paddingHorizontal: 24 }}
                             >
                                 Total de entradas: {formatCurrency(data.total)}
                             </TextDefault>
@@ -277,13 +280,13 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 16,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     inputContainer: {
         marginTop: 16,
         width: "100%",
         minWidth: "100%",
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     label: { color: "#eeeeee", fontSize: 12, marginBottom: 8 },
     overlay: {

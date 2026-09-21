@@ -7,9 +7,7 @@ import { useAuth } from "@/components/core/auth-provider";
 
 import StatusBar from "@/components/core/status-bar";
 import TextDefault from "@/components/core/text-core";
-import { PurchaseIcon } from "@/components/home/purchase-icon";
 import { LinearGradient } from "expo-linear-gradient";
-import { formatCurrency } from "@/lib/format-currency";
 import {
     ActivityIndicator,
     Animated,
@@ -29,10 +27,10 @@ import {
     useBottomSheetModal,
 } from "@gorhom/bottom-sheet";
 
-import BackBtn from "@/components/core/back-btn";
 import EditCardBottomSheet from "@/components/cards/edit-card-bottomsheet";
-import { useDefaultStyles } from "react-native-ui-datepicker";
+import BackBtn from "@/components/core/back-btn";
 import { useGroups } from "@/hooks/use-group";
+import { useDefaultStyles } from "react-native-ui-datepicker";
 
 export default function CardPage() {
     const router = useRouter();
@@ -40,7 +38,6 @@ export default function CardPage() {
     const purchaseId = local.id as string; // id da compra, se for edição
     console.log("Local search params:", local.id);
 
-    
     const { data, refetch, isFetching } = useGroups();
 
     const { session } = useAuth();
@@ -126,7 +123,7 @@ export default function CardPage() {
     return (
         <View style={styles.main}>
             <StatusBar />
-                    <BackBtn />
+            <BackBtn />
             {loading && (
                 <View
                     style={{
@@ -147,7 +144,7 @@ export default function CardPage() {
                         justifyContent: "flex-start",
                         gap: 8,
                         paddingTop: insets.top + 64,
-                        paddingHorizontal: 16,
+                        paddingHorizontal: 24,
                         height: "100%",
                     }}
                     showsVerticalScrollIndicator={false}
@@ -198,7 +195,7 @@ export default function CardPage() {
                                 backgroundColor: cardData.color || "#282828",
                                 alignItems: "flex-start",
                                 justifyContent: "center",
-                                paddingHorizontal: 16,
+                                paddingHorizontal: 24,
                                 paddingBottom: 16,
                                 aspectRatio: 1.6 / 1,
                             }}
@@ -467,7 +464,7 @@ const styles = StyleSheet.create({
         minHeight: "100%",
     },
     backButton: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     title: {
         fontSize: 24,

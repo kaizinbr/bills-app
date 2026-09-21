@@ -169,7 +169,7 @@ export default function CreateGroup() {
 
                         <View style={[styles.inputContainer]}>
                             <TextDefault style={styles.label}>
-                                Limite de gastos (opcional)
+                                Limite de gastos
                             </TextDefault>
                             <Input
                                 placeholder="R$ 0,00"
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
         zIndex: 1,
     },
     title: {

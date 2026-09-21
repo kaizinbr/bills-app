@@ -145,10 +145,10 @@ export default function CreateSubscription() {
                             Criar Assinatura
                         </TextDefault>
 
-                        <View style={{ paddingHorizontal: 16 }}>
+                        <View style={{ paddingHorizontal: 24 }}>
                             <TextDefault
                                 style={{
-                                    paddingHorizontal: 16,
+                                    paddingHorizontal: 24,
                                     paddingVertical: 6,
                                     fontWeight: "600",
                                     color: "#eeeeee",
@@ -201,7 +201,7 @@ export default function CreateSubscription() {
                             <TextDefault
                                 style={[
                                     styles.label,
-                                    { paddingHorizontal: 16 },
+                                    { paddingHorizontal: 24 },
                                 ]}
                             >
                                 Categoria
@@ -212,7 +212,7 @@ export default function CreateSubscription() {
                                 contentContainerStyle={{
                                     flexDirection: "row",
                                     gap: 8,
-                                    paddingHorizontal: 16,
+                                    paddingHorizontal: 24,
                                 }}
                             >
                                 {categories.map((cat) => (
@@ -244,7 +244,7 @@ export default function CreateSubscription() {
                             <TextDefault
                                 style={[
                                     styles.label,
-                                    { paddingHorizontal: 16 },
+                                    { paddingHorizontal: 24 },
                                 ]}
                             >
                                 Cartão
@@ -255,7 +255,7 @@ export default function CreateSubscription() {
                                 contentContainerStyle={{
                                     flexDirection: "row",
                                     gap: 8,
-                                    paddingHorizontal: 16,
+                                    paddingHorizontal: 24,
                                 }}
                             >
                                 {cards.map((card) => (
@@ -285,7 +285,7 @@ export default function CreateSubscription() {
                             {cards.length === 0 && (
                                 <TextDefault
                                     style={{
-                                        paddingHorizontal: 16,
+                                        paddingHorizontal: 24,
                                         color: "#888",
                                     }}
                                 >
@@ -398,13 +398,13 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 16,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     inputContainer: {
         marginTop: 16,
         width: "100%",
         minWidth: "100%",
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     label: { color: "#eeeeee", fontSize: 12, marginBottom: 8 },
     overlay: {

@@ -3,8 +3,8 @@ import { authClient } from "@/lib/auth-client";
 
 const api = axios.create({
     // Use o IP da máquina quando executar em um dispositivo físico.
-    baseURL: "http://192.168.18.152:3000/api",
-    // baseURL: "https://financas.kaizin.work/api",
+    // baseURL: "http://192.168.18.152:3000/api",
+    baseURL: "https://financas.kaizin.work/api",
     timeout: 10000,
     headers: {
         "Content-Type": "application/json",

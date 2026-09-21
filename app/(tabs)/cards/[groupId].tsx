@@ -23,7 +23,7 @@ import BackBtn from "@/components/core/back-btn";
 
 import { SubscriptionItem } from "@/components/subscriptions/subscription-item";
 import { useDefaultStyles } from "react-native-ui-datepicker";
-
+import { CardIcon } from "@solar-icons/react-native/linear/card";
 
 export default function CreateSubscription() {
     const router = useRouter();
@@ -35,13 +35,13 @@ export default function CreateSubscription() {
     const defaultStyles = useDefaultStyles();
 
     const [loading, setLoading] = useState(true);
-    const [subscriptions, setSubscriptions] = useState<any>(null);
+    const [cards, setCards] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
 
     const fetchData = async () => {
         try {
-            const response = await api.get(`/groups/${groupId}/subscriptions`);
-            setSubscriptions(response.data.subscriptions);
+            const response = await api.get(`/groups/${groupId}/cards`);
+            setCards(response.data.cards);
 
             setLoading(false);
         } catch (error) {
@@ -96,26 +96,48 @@ export default function CreateSubscription() {
                 >
                     <BackBtn />
                     <TextDefault style={styles.title}>
-                        Suas assinaturas
+                        Cartões da conta
                     </TextDefault>
-                    {subscriptions.length === 0 ? (
+                    {cards.length === 0 ? (
                         <TextDefault
                             style={{ color: "#fff", paddingHorizontal: 24 }}
                         >
-                            Nenhuma assinatura encontrada. Adicione uma nova
-                            assinatura.
+                            Nenhum cartão encontrado. Adicione um novo cartão.
                         </TextDefault>
                     ) : (
-                        subscriptions.map((subscription: any) => (
-                            <SubscriptionItem
-                                key={subscription.id}
-                                id={subscription.id}
-                                name={subscription.name}
-                                amount={subscription.amount}
-                                chargeDay={subscription.chargeDay}
-                                category={subscription.category}
-                                card={subscription.card}
-                            />
+                        cards.map((card: any) => (
+                            <Pressable
+                                key={card.id}
+                                style={[
+                                    styles.item,
+                                ]}
+                                onPress={() =>
+                                    router.push({
+                                        pathname: `/card/[id]`,
+                                        params: { id: card.id },
+                                    })
+                                }
+                            >
+                                <View
+                                    style={[
+                                        styles.cardIconContainer,
+                                        {
+                                            backgroundColor:
+                                                card.color || "#282828",
+                                        },
+                                    ]}
+                                >
+                                    <CardIcon size={20} color="white" />
+                                </View>
+                                <View>
+                                    <TextDefault style={styles.cardTitle}>
+                                        {card.name}
+                                    </TextDefault>
+                                    <TextDefault style={styles.description}>
+                                        {card.digits}
+                                    </TextDefault>
+                                </View>
+                            </Pressable>
                         ))
                     )}
                 </ScrollView>
@@ -244,5 +266,42 @@ const styles = StyleSheet.create({
         right: 16,
         zIndex: 10,
         alignItems: "center",
+    },
+
+    item: {
+        flexDirection: "row",
+        // justifyContent: "space-between",
+        gap: 8,
+        alignItems: "center",
+        paddingVertical: 16,
+        paddingHorizontal: 24,
+        borderBottomWidth: 1,
+        borderBottomColor: "#232323",
+        width: "100%",
+    },
+
+    buttons: {
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        backgroundColor: "#282828",
+        borderRadius: 8,
+        alignItems: "flex-start",
+        justifyContent: "center",
+        gap: 4,
+    },
+    cardTitle: {
+        fontSize: 14,
+        color: "#eee",
+    },
+    description: {
+        fontSize: 12,
+        color: "#aaa",
+    },
+    cardIconContainer: {
+        width: 36,
+        height: 36,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 999,
     },
 });

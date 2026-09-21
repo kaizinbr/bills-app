@@ -3,8 +3,8 @@ import { useGroups } from "@/hooks/use-group";
 import { useGroupInvoices, type Invoice } from "@/hooks/use-group-invoices";
 import { useInvoicePurchases } from "@/hooks/use-invoice-purchases";
 import { useInvoiceTotal } from "@/hooks/use-invoice-total";
-import { formatCurrency } from "@/lib/format-currency";
 import { colorForIndex } from "@/lib/category-colors";
+import { formatCurrency } from "@/lib/format-currency";
 import { useQueryClient } from "@tanstack/react-query";
 import {
     forwardRef,
@@ -15,12 +15,12 @@ import {
 } from "react";
 import { StyleSheet, View } from "react-native";
 
-import InvoiceSelectMenu from "@/components/home/invoice-select-menu";
 import {
     CategoryDonut,
     type DonutSegment,
 } from "@/components/charts/category-donut";
 import { CategoryLegend } from "@/components/charts/category-legend";
+import InvoiceSelectMenu from "@/components/home/invoice-select-menu";
 
 type GroupsProps = {
     groupId: string | null;
@@ -172,11 +172,9 @@ const Charts = forwardRef<GroupsHandle, GroupsProps>(
                     </TextDefault>
                 </View>
 
-                <View style={{ paddingHorizontal: 16 }}>
+                <View style={{ paddingHorizontal: 24 }}>
                     <View style={styles.groupCard}>
-                        <View
-                            style={{ alignItems: "center" }}
-                        >
+                        <View style={{ alignItems: "center" }}>
                             <CategoryDonut
                                 segments={categoryBreakdown}
                                 centerLabel={formatCurrency(totalData?.total)}
@@ -185,7 +183,13 @@ const Charts = forwardRef<GroupsHandle, GroupsProps>(
                         </View>
                     </View>
                 </View>
-                <View style={{ paddingHorizontal: 16, marginBottom: 16, paddingTop: 16 }}>
+                <View
+                    style={{
+                        paddingHorizontal: 24,
+                        marginBottom: 16,
+                        paddingTop: 16,
+                    }}
+                >
                     {categoryBreakdown.length > 0 ? (
                         <CategoryLegend
                             segments={categoryBreakdown}
@@ -220,7 +224,7 @@ const styles = StyleSheet.create({
     infoRow: {
         flexDirection: "row",
         gap: 8,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
         justifyContent: "space-between",
         alignItems: "center",
     },

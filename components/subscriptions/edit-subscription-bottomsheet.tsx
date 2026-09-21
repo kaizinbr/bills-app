@@ -66,10 +66,7 @@ export default function EditSubscriptionBottomSheet({
     const [canSubmit, setCanSubmit] = useState(false);
 
     useEffect(() => {
-        if (
-            cardName.trim() !== "" &&
-            category !== null
-        ) {
+        if (cardName.trim() !== "" && category !== null) {
             setCanSubmit(true);
         } else {
             setCanSubmit(false);
@@ -181,7 +178,7 @@ export default function EditSubscriptionBottomSheet({
                         ]}
                     >
                         <TextDefault
-                            style={[styles.label, { paddingHorizontal: 16 }]}
+                            style={[styles.label, { paddingHorizontal: 24 }]}
                         >
                             Categoria
                         </TextDefault>
@@ -197,7 +194,7 @@ export default function EditSubscriptionBottomSheet({
                             contentContainerStyle={{
                                 flexDirection: "row",
                                 gap: 8,
-                                paddingHorizontal: 16,
+                                paddingHorizontal: 24,
                                 justifyContent: "flex-start",
                                 alignItems: "center",
                             }}
@@ -229,7 +226,7 @@ export default function EditSubscriptionBottomSheet({
                         ]}
                     >
                         <TextDefault
-                            style={[styles.label, { paddingHorizontal: 16 }]}
+                            style={[styles.label, { paddingHorizontal: 24 }]}
                         >
                             Cartão
                         </TextDefault>
@@ -244,7 +241,7 @@ export default function EditSubscriptionBottomSheet({
                             contentContainerStyle={{
                                 flexDirection: "row",
                                 gap: 8,
-                                paddingHorizontal: 16,
+                                paddingHorizontal: 24,
                                 justifyContent: "flex-start",
                                 alignItems: "center",
                             }}
@@ -316,13 +313,13 @@ const styles = StyleSheet.create({
         zIndex: 1,
     },
     backButton: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     title: {
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 16,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     description: {
         fontSize: 16,
@@ -333,7 +330,7 @@ const styles = StyleSheet.create({
         width: "100%",
         minWidth: "100%",
         // backgroundColor: "#fff",
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     label: {
         color: "#eeeeee",

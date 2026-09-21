@@ -18,15 +18,10 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-
-
 import BackBtn from "@/components/core/back-btn";
 import { useCreateGroup } from "@/hooks/use-create-group";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import {
-    DateType,
-    useDefaultStyles,
-} from "react-native-ui-datepicker";
+import { DateType, useDefaultStyles } from "react-native-ui-datepicker";
 
 export default function CreateGroup() {
     const router = useRouter();
@@ -216,7 +211,7 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
         zIndex: 1,
     },
     title: {

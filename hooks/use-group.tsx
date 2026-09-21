@@ -22,6 +22,7 @@ export type Group = {
     }[];
     _count?: {
         subscriptions: number;
+        cards: number;
     };
     members?: {
         id: string;

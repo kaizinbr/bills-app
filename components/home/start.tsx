@@ -1,18 +1,10 @@
-import { useAuth } from "@/components/core/auth-provider";
-import Avatar from "@/components/user/avatar";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-    Animated,
-    Platform,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    useWindowDimensions,
-    View,
-} from "react-native";
-import { useRouter } from "expo-router";
 import TextDefault from "@/components/core/text-core";
+import { useRouter } from "expo-router";
+import {
+    Pressable,
+    StyleSheet,
+    View
+} from "react-native";
 
 const HEADER_HEIGHT = 64;
 
@@ -51,7 +43,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#2b2b2b",
         borderRadius: 16,
         gap: 8,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
         paddingVertical: 32,
         flexDirection: "column",
         alignItems: "center",

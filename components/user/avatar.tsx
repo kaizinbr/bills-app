@@ -140,6 +140,65 @@ export function AvatarNoPress({
     );
 }
 
+export function AvatarGeneric({
+    name,
+    style,
+    size,
+    fontSize,
+    focused,
+}: {
+    name?: string | any;
+    style?: any;
+    size?: number;
+    fontSize?: number;
+    focused?: boolean;
+}) {
+    const { data: profile, isLoading } = useProfile();
+    return (
+        <View
+            style={[
+                styles.main,
+                {
+                    width: size || 32,
+                    height: size || 32,
+                    borderRadius: 9999,
+                },
+            ]}
+        >
+            {profile.image ? (
+                <Image
+                    source={{ uri: profile.image }}
+                    style={[
+                        styles.cardImage,
+                        style,
+                        {
+                            width: size || 32,
+                            height: size || 32,
+                            borderRadius: 9999,
+                        },
+                    ]}
+                />
+            ) : (
+                <View
+                    style={[
+                        styles.cardImage,
+                        style,
+                        {
+                            width: size || 32,
+                            height: size || 32,
+                            borderRadius: 9999,
+                        },
+                    ]}
+                >
+                    <TextDefault style={[styles.cardImageText, { fontSize: fontSize || 16 }]}>
+                        {name?.[0].toUpperCase()}
+                    </TextDefault>
+                </View>
+            )}
+        </View>
+    );
+}
+
 const styles = StyleSheet.create({
     main: {
         backgroundColor: "transparent",

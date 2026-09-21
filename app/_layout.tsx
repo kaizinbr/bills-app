@@ -11,6 +11,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useColorScheme } from "react-native";
 
 import { AnimatedSplashOverlay } from "@/components/animated-icon";
+import { SelectedGroupProvider } from "@/components/core/select-group-context";
 import AppTabs from "@/components/app-tabs";
 import { Colors } from "@/constants/theme";
 
@@ -26,23 +27,29 @@ export default function RootLayout() {
             <SafeAreaProvider>
                 <AppQueryProvider>
                     <AuthProvider>
-                        <GestureHandlerRootView style={{ flex: 1 }}>
-                            <BottomSheetModalProvider>
-                                <SafeAreaView
-                                    edges={["left", "right"]}
-                                    style={{
-                                        flex: 1,
-                                    }}
-                                >
-                                    <AnimatedSplashOverlay />
-                                    <Stack screenOptions={{ headerShown: false }}>
-                                        <Stack.Screen name="index" />
-                                        <Stack.Screen name="sign-up" />
-                                        <Stack.Screen name="(tabs)" />
-                                    </Stack>
-                                </SafeAreaView>
-                            </BottomSheetModalProvider>
-                        </GestureHandlerRootView>
+                        <SelectedGroupProvider>
+                            <GestureHandlerRootView style={{ flex: 1 }}>
+                                <BottomSheetModalProvider>
+                                    <SafeAreaView
+                                        edges={["left", "right"]}
+                                        style={{
+                                            flex: 1,
+                                        }}
+                                    >
+                                        <AnimatedSplashOverlay />
+                                        <Stack
+                                            screenOptions={{
+                                                headerShown: false,
+                                            }}
+                                        >
+                                            <Stack.Screen name="index" />
+                                            <Stack.Screen name="sign-up" />
+                                            <Stack.Screen name="(tabs)" />
+                                        </Stack>
+                                    </SafeAreaView>
+                                </BottomSheetModalProvider>
+                            </GestureHandlerRootView>
+                        </SelectedGroupProvider>
                     </AuthProvider>
                 </AppQueryProvider>
             </SafeAreaProvider>

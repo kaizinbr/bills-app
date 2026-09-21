@@ -104,8 +104,7 @@ export default function CreateCard() {
 
     useEffect(() => {
         const hasValidAmount = !Number.isNaN(parseInt(amountCents, 10));
-        const hasValidInstallments =
-            !isInstallment || installmentsNumber >= 2;
+        const hasValidInstallments = !isInstallment || installmentsNumber >= 2;
 
         if (
             cardName.trim() !== "" &&
@@ -198,7 +197,7 @@ export default function CreateCard() {
     return (
         <View style={styles.main}>
             <StatusBar />
-                        <BackBtn />
+            <BackBtn />
             {loading ? (
                 <View
                     style={{
@@ -231,12 +230,12 @@ export default function CreateCard() {
                         </TextDefault>
                         <View
                             style={{
-                                paddingHorizontal: 16,
+                                paddingHorizontal: 24,
                             }}
                         >
                             <TextDefault
                                 style={{
-                                    paddingHorizontal: 16,
+                                    paddingHorizontal: 24,
                                     paddingVertical: 6,
                                     fontWeight: "600",
                                     color: "#eeeeee",
@@ -346,7 +345,7 @@ export default function CreateCard() {
                             <TextDefault
                                 style={[
                                     styles.label,
-                                    { paddingHorizontal: 16 },
+                                    { paddingHorizontal: 24 },
                                 ]}
                             >
                                 Categoria
@@ -363,7 +362,7 @@ export default function CreateCard() {
                                 contentContainerStyle={{
                                     flexDirection: "row",
                                     gap: 8,
-                                    paddingHorizontal: 16,
+                                    paddingHorizontal: 24,
                                     justifyContent: "flex-start",
                                     alignItems: "center",
                                 }}
@@ -399,7 +398,7 @@ export default function CreateCard() {
                             <TextDefault
                                 style={[
                                     styles.label,
-                                    { paddingHorizontal: 16 },
+                                    { paddingHorizontal: 24 },
                                 ]}
                             >
                                 Cartão
@@ -415,7 +414,7 @@ export default function CreateCard() {
                                 contentContainerStyle={{
                                     flexDirection: "row",
                                     gap: 8,
-                                    paddingHorizontal: 16,
+                                    paddingHorizontal: 24,
                                     justifyContent: "flex-start",
                                     alignItems: "center",
                                 }}
@@ -466,7 +465,7 @@ export default function CreateCard() {
                             <TextDefault
                                 style={[
                                     styles.label,
-                                    { paddingHorizontal: 16 },
+                                    { paddingHorizontal: 24 },
                                 ]}
                             >
                                 {isInstallment
@@ -484,7 +483,7 @@ export default function CreateCard() {
                                 contentContainerStyle={{
                                     flexDirection: "row",
                                     gap: 8,
-                                    paddingHorizontal: 16,
+                                    paddingHorizontal: 24,
                                     justifyContent: "flex-start",
                                     alignItems: "center",
                                 }}
@@ -504,11 +503,10 @@ export default function CreateCard() {
                                 {members.map((member) => (
                                     <Pressable
                                         key={member.id}
-                                        onPress={() =>
-                                            {setSelectedMemberId(member.user.id)
+                                        onPress={() => {
+                                            setSelectedMemberId(member.user.id);
                                             // console.log("selectedMemberId", member.user.id)
-                                        }
-                                        }
+                                        }}
                                         style={[
                                             styles.cardButton,
                                             selectedMemberId === member.id &&
@@ -730,13 +728,13 @@ const styles = StyleSheet.create({
         zIndex: 1,
     },
     backButton: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     title: {
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 16,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     description: {
         fontSize: 16,
@@ -746,7 +744,7 @@ const styles = StyleSheet.create({
         marginTop: 16,
         width: "100%",
         minWidth: "100%",
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     label: {
         color: "#eeeeee",

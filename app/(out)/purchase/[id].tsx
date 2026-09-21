@@ -33,7 +33,6 @@ import EditPurchaseBottomSheet from "@/components/purchases/edit-purchase-bottom
 import { useGroups } from "@/hooks/use-group";
 import { useDefaultStyles } from "react-native-ui-datepicker";
 
-
 export default function PurchasePage() {
     const router = useRouter();
     const { data, refetch, isFetching } = useGroups();
@@ -143,7 +142,7 @@ export default function PurchasePage() {
                         justifyContent: "flex-start",
                         gap: 8,
                         paddingTop: insets.top + 64,
-                        paddingHorizontal: 16,
+                        paddingHorizontal: 24,
                         height: "100%",
                     }}
                     showsVerticalScrollIndicator={false}
@@ -429,7 +428,7 @@ const styles = StyleSheet.create({
         minHeight: "100%",
     },
     backButton: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     title: {
         fontSize: 24,

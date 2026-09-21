@@ -42,7 +42,7 @@ export default function CreatePurchase({
                     { scaleY: floatButtonScale },
                 ],
                 position: "absolute",
-                bottom: insets.bottom,
+                bottom: insets.bottom + 16,
                 right: 16,
                 zIndex: 1000,
             }}

@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BottomSheetInput } from "@/components/core/input";
 
-import { DateType, useDefaultStyles } from "react-native-ui-datepicker";
+import { useDefaultStyles } from "react-native-ui-datepicker";
 
 import { formatCurrency } from "@/lib/format-currency";
 
@@ -90,7 +90,7 @@ export default function AddIncomeBottomSheet({
                         alignItems: "flex-start",
                         justifyContent: "flex-start",
                         gap: 8,
-                        paddingHorizontal: 16,
+                        paddingHorizontal: 24,
                     }}
                     showsVerticalScrollIndicator={false}
                     style={[styles.container]}
@@ -162,13 +162,13 @@ const styles = StyleSheet.create({
         zIndex: 1,
     },
     backButton: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     title: {
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 16,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     description: {
         fontSize: 16,

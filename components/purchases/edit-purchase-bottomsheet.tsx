@@ -6,12 +6,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/core/auth-provider";
 
 import TextDefault from "@/components/core/text-core";
-import {
-    ActivityIndicator,
-    Pressable,
-    StyleSheet,
-    View
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -20,7 +15,6 @@ import { BottomSheetInput } from "@/components/core/input";
 import { DateType, useDefaultStyles } from "react-native-ui-datepicker";
 
 import { formatCurrency } from "@/lib/format-currency";
-
 
 export default function EditPurchaseBottomSheet({
     initialData,
@@ -75,7 +69,6 @@ export default function EditPurchaseBottomSheet({
     useEffect(() => {
         if (
             cardName.trim() !== "" &&
-            
             !Number.isNaN(parseInt(amountCents, 10)) &&
             category !== null
         ) {
@@ -189,7 +182,7 @@ export default function EditPurchaseBottomSheet({
                         ]}
                     >
                         <TextDefault
-                            style={[styles.label, { paddingHorizontal: 16 }]}
+                            style={[styles.label, { paddingHorizontal: 24 }]}
                         >
                             Categoria
                         </TextDefault>
@@ -205,7 +198,7 @@ export default function EditPurchaseBottomSheet({
                             contentContainerStyle={{
                                 flexDirection: "row",
                                 gap: 8,
-                                paddingHorizontal: 16,
+                                paddingHorizontal: 24,
                                 justifyContent: "flex-start",
                                 alignItems: "center",
                             }}
@@ -237,7 +230,7 @@ export default function EditPurchaseBottomSheet({
                         ]}
                     >
                         <TextDefault
-                            style={[styles.label, { paddingHorizontal: 16 }]}
+                            style={[styles.label, { paddingHorizontal: 24 }]}
                         >
                             Cartão
                         </TextDefault>
@@ -252,7 +245,7 @@ export default function EditPurchaseBottomSheet({
                             contentContainerStyle={{
                                 flexDirection: "row",
                                 gap: 8,
-                                paddingHorizontal: 16,
+                                paddingHorizontal: 24,
                                 justifyContent: "flex-start",
                                 alignItems: "center",
                             }}
@@ -340,13 +333,13 @@ const styles = StyleSheet.create({
         zIndex: 1,
     },
     backButton: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     title: {
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 16,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     description: {
         fontSize: 16,
@@ -357,7 +350,7 @@ const styles = StyleSheet.create({
         width: "100%",
         minWidth: "100%",
         // backgroundColor: "#fff",
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     label: {
         color: "#eeeeee",

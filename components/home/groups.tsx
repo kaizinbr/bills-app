@@ -27,6 +27,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import Incomes from "@/components/home/incomes";
 import InvoiceSelectMenu from "@/components/home/invoice-select-menu";
 import { Bag3Icon } from "@solar-icons/react-native/linear/bag-3";
 import { BagCheckIcon } from "@solar-icons/react-native/linear/bag-check";
@@ -34,8 +35,8 @@ import { CardIcon } from "@solar-icons/react-native/linear/card";
 import { RefreshCircleIcon } from "@solar-icons/react-native/linear/refresh-circle";
 import { UserCircleIcon } from "@solar-icons/react-native/linear/user-circle";
 import { WalletIcon } from "@solar-icons/react-native/linear/wallet";
-import Avatar, { AvatarNoPress } from "@/components/user/avatar";
-import Incomes from "@/components/home/incomes";
+
+import { UsersGroupTwoRoundedIcon } from "@solar-icons/react-native/linear/users-group-two-rounded";
 
 type GroupsProps = {
     groupId: string | null;
@@ -185,7 +186,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                         })}
                     </TextDefault>
                 </View>
-                <View style={{ paddingHorizontal: 16 }}>
+                <View style={{ paddingHorizontal: 24 }}>
                     <LinearGradient
                         colors={["#00C89B", "#0B3D22"]}
                         start={{ x: 0, y: 0 }}
@@ -230,7 +231,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                 </View>
                 <View
                     style={{
-                        paddingHorizontal: 16,
+                        paddingHorizontal: 24,
                         gap: 14,
                         flexDirection: "row",
                         alignItems: "center",
@@ -246,19 +247,12 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                             end={{ x: 1, y: 1 }}
                             style={[
                                 {
-                                    width: (width - 46) / 2,
+                                    width: (width - 64) / 2,
                                     borderRadius: 16,
                                 },
                             ]}
                         >
-                            <Pressable
-                                style={[
-                                    styles.assetCard,
-                                    {
-                                        width: (width - 46) / 2,
-                                    },
-                                ]}
-                            >
+                            <Pressable style={[styles.assetCard]}>
                                 <View
                                     style={{
                                         flexDirection: "row",
@@ -293,15 +287,27 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.infoRow}
                 >
-                    <View style={styles.buttons}>
-                        <UserCircleIcon size={24} color="white" />
+                    <Pressable
+                        onPress={() => {
+                            router.push({
+                                pathname: `/(tabs)/values/[invoiceId]`,
+                                params: { invoiceId: selectedInvoiceId },
+                            });
+                        }}
+                        style={styles.buttons}
+                    >
+                        <View style={styles.itemIcon}>
+                            <UsersGroupTwoRoundedIcon size={20} color="white" />
+                        </View>
                         <TextDefault style={styles.infoChipText}>
-                            Pagar a: {group.debtor?.name}
+                            Distinção de valores
                         </TextDefault>
-                    </View>
+                    </Pressable>
 
                     <View style={styles.buttons}>
-                        <Bag3Icon size={24} color="white" />
+                        <View style={styles.itemIcon}>
+                            <Bag3Icon size={24} color="white" />
+                        </View>
                         <TextDefault style={styles.infoChipText}>
                             {totalPurchases} compras
                         </TextDefault>
@@ -315,36 +321,30 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                             });
                         }}
                     >
-                        <Bag3Icon size={24} color="white" />
+                        <View style={styles.itemIcon}>
+                            <Bag3Icon size={24} color="white" />
+                        </View>
                         <TextDefault style={styles.infoChipText}>
                             {group._count?.subscriptions} assinatura
                             {group._count?.subscriptions !== 1 ? "s" : ""}
                         </TextDefault>
                     </Pressable>
-
-                    {group.cards?.map((card: any) => (
-                        <Pressable
-                            key={card.id}
-                            style={[
-                                styles.buttons,
-                                {
-                                    backgroundColor: card.color || "#282828",
-                                    aspectRatio: 5 / 3,
-                                },
-                            ]}
-                            onPress={() =>
-                                router.push({
-                                    pathname: `/card/[id]`,
-                                    params: { id: card.id },
-                                })
-                            }
-                        >
+                    <Pressable
+                        style={styles.buttons}
+                        onPress={() => {
+                            router.push({
+                                pathname: `/(tabs)/cards/[groupId]`,
+                                params: { groupId: group.id },
+                            });
+                        }}
+                    >
+                        <View style={styles.itemIcon}>
                             <CardIcon size={24} color="white" />
-                            <TextDefault style={styles.infoChipText}>
-                                {card.name}
-                            </TextDefault>
-                        </Pressable>
-                    ))}
+                        </View>
+                        <TextDefault style={styles.infoChipText}>
+                            {group._count?.cards} cartões
+                        </TextDefault>
+                    </Pressable>
 
                     <Pressable
                         onPress={() =>
@@ -354,9 +354,11 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                         }
                         style={styles.buttons}
                     >
-                        <WalletIcon size={24} color="white" />
+                        <View style={styles.itemIcon}>
+                            <WalletIcon size={24} color="white" />
+                        </View>
                         <TextDefault style={styles.infoChipText}>
-                            Criar cartão
+                            Adicionar cartão
                         </TextDefault>
                     </Pressable>
 
@@ -372,9 +374,11 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                             !canCreateInSelected && styles.infoChipDisabled,
                         ]}
                     >
-                        <BagCheckIcon size={24} color="white" />
+                        <View style={styles.itemIcon}>
+                            <BagCheckIcon size={24} color="white" />
+                        </View>
                         <TextDefault style={styles.infoChipText}>
-                            Criar compra
+                            Adicionar compra
                         </TextDefault>
                     </Pressable>
 
@@ -386,9 +390,11 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                         }
                         style={styles.buttons}
                     >
-                        <RefreshCircleIcon size={24} color="white" />
+                        <View style={styles.itemIcon}>
+                            <RefreshCircleIcon size={24} color="white" />
+                        </View>
                         <TextDefault style={styles.infoChipText}>
-                            Criar assinatura
+                            Adicionar assinatura
                         </TextDefault>
                     </Pressable>
                 </ScrollView>
@@ -476,9 +482,10 @@ const styles = StyleSheet.create({
     },
     infoRow: {
         flexDirection: "row",
-        gap: 8,
-        paddingHorizontal: 16,
+        gap: 16,
+        paddingHorizontal: 24,
         justifyContent: "space-between",
+        alignItems: "flex-start",
     },
     infoChip: {
         paddingHorizontal: 12,
@@ -495,27 +502,35 @@ const styles = StyleSheet.create({
     infoChipDisabled: {
         opacity: 0.4,
     },
+    updateText: {
+        color: "#B6B6B6",
+        fontSize: 12,
+        // fontWeight: "600",
+        wordWrap: "",
+    },
+    buttons: {
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 4,
+        maxWidth: 58,
+        textAlign: "center",
+    },
+    itemIcon: {
+        padding: 16,
+        borderRadius: 999,
+        width: 58,
+        height: 58,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#282828",
+    },
     infoChipText: {
         color: "#fff",
         fontSize: 12,
         fontWeight: "600",
     },
-    updateText: {
-        color: "#B6B6B6",
-        fontSize: 12,
-        // fontWeight: "600",
-    },
-    buttons: {
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        backgroundColor: "#282828",
-        borderRadius: 8,
-        alignItems: "flex-start",
-        justifyContent: "center",
-        gap: 4,
-    },
     purchasesList: {
-        // paddingHorizontal: 16,
+        // paddingHorizontal: 24,
         width: "100%",
         justifyContent: "flex-start",
     },
