@@ -90,7 +90,7 @@ export default function CreateSubscription() {
                         alignItems: "center",
                     }}
                 >
-                    <ActivityIndicator color={"#fff"} size={"large"} />
+                    <ActivityIndicator color={"#00c89b"} size={"large"} />
                 </View>
             ) : (
                 <ScrollView
@@ -344,8 +344,8 @@ const styles = StyleSheet.create({
         borderRadius: 9999,
         position: "absolute",
         // bottom: 32,
-        left: 16,
-        right: 16,
+        left: 24,
+        right: 24,
         zIndex: 50,
         alignItems: "center",
     },

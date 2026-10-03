@@ -88,3 +88,22 @@ export function useGroupPurchases(groupId: string) {
         enabled: !!groupId,
     });
 }
+
+
+async function fetchGroupMembers(groupId: string) {
+    try {
+        const response = await api.get(`/groups/${groupId}/members`);
+        return response.data.members;
+    } catch (error) {
+        console.error("Error fetching group Members:", error);
+        throw error;
+    }
+}
+
+export function useGroupMembers(groupId: string) {
+    return useQuery({
+        queryKey: ["group", groupId, "members"],
+        queryFn: () => fetchGroupMembers(groupId),
+        enabled: !!groupId,
+    });
+}

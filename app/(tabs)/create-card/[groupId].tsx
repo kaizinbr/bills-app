@@ -19,9 +19,7 @@ import Input from "@/components/core/input";
 
 import { Host, Text, ToggleButton } from "@expo/ui/jetpack-compose";
 
-import {
-    useDefaultStyles
-} from "react-native-ui-datepicker";
+import { useDefaultStyles } from "react-native-ui-datepicker";
 
 export default function CreateCard() {
     const local = useLocalSearchParams();
@@ -103,7 +101,7 @@ export default function CreateCard() {
                         alignItems: "center",
                     }}
                 >
-                    <ActivityIndicator color={"#fff"} size={"large"} />
+                    <ActivityIndicator color={"#00c89b"} size={"large"} />
                 </View>
             ) : (
                 <ScrollView

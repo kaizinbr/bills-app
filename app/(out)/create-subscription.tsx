@@ -121,7 +121,7 @@ export default function CreateSubscription() {
                         alignItems: "center",
                     }}
                 >
-                    <ActivityIndicator color={"#fff"} size={"large"} />
+                    <ActivityIndicator color={"#00c89b"} size={"large"} />
                 </View>
             ) : (
                 <KeyboardAvoidingView
@@ -329,11 +329,17 @@ export default function CreateSubscription() {
 
             <Pressable
                 onPress={handleCreateSubscription}
-                style={[
+                style={({ pressed }) => [
                     styles.submitBtn,
                     {
                         bottom: insets.bottom + 16,
-                        opacity: canSubmit ? 1 : 0.5,
+                        backgroundColor: pressed
+                            ? canSubmit
+                                ? "#007B5E"
+                                : "#282828"
+                            : canSubmit
+                              ? "#009C7A"
+                              : "#282828",
                     },
                 ]}
                 disabled={!canSubmit}
@@ -462,8 +468,8 @@ const styles = StyleSheet.create({
         borderRadius: 9999,
         position: "absolute",
         bottom: 32,
-        left: 16,
-        right: 16,
+        left: 24,
+        right: 24,
         zIndex: 10,
         alignItems: "center",
     },

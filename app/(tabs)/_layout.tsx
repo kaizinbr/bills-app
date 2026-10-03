@@ -64,7 +64,7 @@ export default function TabsLayout() {
                 />
 
                 <Tabs.Screen
-                    name="option"
+                    name="chart"
                     options={{
                         title: "Charts",
                         tabBarIcon: ({ color, focused }) =>
@@ -80,6 +80,7 @@ export default function TabsLayout() {
                     name="modal"
                     options={{
                         title: "Modal",
+                        href: null,
                         tabBarIcon: ({ color, focused }) =>
                             focused ? (
                                 <StarBoldIcon color={color as string} />

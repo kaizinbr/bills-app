@@ -21,9 +21,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import BackBtn from "@/components/core/back-btn";
 
-import { SubscriptionItem } from "@/components/subscriptions/subscription-item";
-import { useDefaultStyles } from "react-native-ui-datepicker";
 import { CardIcon } from "@solar-icons/react-native/linear/card";
+import { useDefaultStyles } from "react-native-ui-datepicker";
 
 export default function CreateSubscription() {
     const router = useRouter();
@@ -64,7 +63,7 @@ export default function CreateSubscription() {
                         alignItems: "center",
                     }}
                 >
-                    <ActivityIndicator color={"#fff"} size={"large"} />
+                    <ActivityIndicator color={"#00c89b"} size={"large"} />
                 </View>
             ) : (
                 <ScrollView
@@ -73,7 +72,7 @@ export default function CreateSubscription() {
                         paddingBottom: 32,
                         alignItems: "flex-start",
                         justifyContent: "flex-start",
-                        gap: 8,
+                        gap: 0,
                         paddingTop: insets.top + 64,
                     }}
                     showsVerticalScrollIndicator={false}
@@ -108,8 +107,13 @@ export default function CreateSubscription() {
                         cards.map((card: any) => (
                             <Pressable
                                 key={card.id}
-                                style={[
+                                style={({ pressed }) => [
                                     styles.item,
+                                    {
+                                        backgroundColor: pressed
+                                            ? "#282828"
+                                            : "#161718",
+                                    },
                                 ]}
                                 onPress={() =>
                                     router.push({
@@ -262,8 +266,8 @@ const styles = StyleSheet.create({
         borderRadius: 9999,
         position: "absolute",
         bottom: 32,
-        left: 16,
-        right: 16,
+        left: 24,
+        right: 24,
         zIndex: 10,
         alignItems: "center",
     },

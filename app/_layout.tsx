@@ -15,14 +15,15 @@ import { SelectedGroupProvider } from "@/components/core/select-group-context";
 import AppTabs from "@/components/app-tabs";
 import { Colors } from "@/constants/theme";
 
+import { AppThemeProvider } from '@/theme/theme-context';
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
     const colorScheme = useColorScheme();
     // console.log("RootLayout colorScheme", colorScheme);
     return (
-        <ThemeProvider
-            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        <AppThemeProvider
         >
             <SafeAreaProvider>
                 <AppQueryProvider>
@@ -53,6 +54,6 @@ export default function RootLayout() {
                     </AuthProvider>
                 </AppQueryProvider>
             </SafeAreaProvider>
-        </ThemeProvider>
+        </AppThemeProvider>
     );
 }

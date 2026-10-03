@@ -132,7 +132,7 @@ export default function CardPage() {
                         alignItems: "center",
                     }}
                 >
-                    <ActivityIndicator color={"#fff"} size={"large"} />
+                    <ActivityIndicator color={"#00c89b"} size={"large"} />
                 </View>
             )}
             {cardData && (
@@ -277,8 +277,8 @@ export default function CardPage() {
                         style={{
                             position: "absolute",
                             bottom: insets.bottom + 16,
-                            left: 16,
-                            right: 16,
+                            left: 24,
+                            right: 24,
                             gap: 8,
                         }}
                     >

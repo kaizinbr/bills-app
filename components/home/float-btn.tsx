@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { Animated, Pressable, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+
 export default function CreatePurchase({
     selectedGroupId,
     floatbBtnTranslateY,
@@ -35,17 +36,19 @@ export default function CreatePurchase({
 
     return (
         <Animated.View
-            style={{
-                transform: [
-                    { translateY: floatbBtnTranslateY },
-                    { scaleX: floatButtonScale },
-                    { scaleY: floatButtonScale },
-                ],
-                position: "absolute",
-                bottom: insets.bottom + 16,
-                right: 16,
-                zIndex: 1000,
-            }}
+            style={[
+                {
+                    transform: [
+                        { translateY: floatbBtnTranslateY },
+                        { scaleX: floatButtonScale },
+                        { scaleY: floatButtonScale },
+                    ],
+                    position: "absolute",
+                    bottom: insets.bottom + 16,
+                    right: 16,
+                    zIndex: 1000,
+                },
+            ]}
         >
             <Pressable
                 onPress={() =>
@@ -53,9 +56,15 @@ export default function CreatePurchase({
                         `/create-purchase?groupId=${selectedGroupId}&invoiceId=${currentInvoice.id}&purchaseId=null`,
                     )
                 }
-                style={styles.container}
+                style={({ pressed }) => [
+                    styles.container,
+                    {
+                        transform: [{ scale: pressed ? 0.9 : 1 }],
+                        backgroundColor: pressed ? "#007B5E" : "#00C89B",
+                    },
+                ]}
             >
-                <AddIcon size={24} color="#ffffff" strokeWidth={3} />
+                <AddIcon size={28} color="#ffffff" strokeWidth={3} />
             </Pressable>
         </Animated.View>
     );
@@ -64,7 +73,7 @@ export default function CreatePurchase({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#00C89B",
+        // backgroundColor: "#00C89B",
         padding: 12,
         borderRadius: 999,
         alignItems: "center",

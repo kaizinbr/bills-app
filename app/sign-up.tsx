@@ -9,8 +9,13 @@ import {
     Platform,
     ScrollView,
     StyleSheet,
-    Text
+    View,
 } from "react-native";
+import TextDefault from "@/components/core/text-core";
+
+import { LinearGradient } from "expo-linear-gradient";
+import { Image } from "expo-image";
+import StatusBar from "@/components/core/status-bar";
 
 export default function SignUp() {
     const { session, isPending } = useAuth();
@@ -33,11 +38,25 @@ export default function SignUp() {
         });
         setLoading(false);
         if (error) {
-            setError(error.message ?? "Não foi possível criar a conta");
+            // console.error(error);
+
+            if (error.code === "INVALID_EMAIL") {
+                setError("E-mail inválido");
+            } else if (error.code === "INVALID_EMAIL_OR_PASSWORD") {
+                setError("E-mail ou senha incorreta");
+            } else if (error.code === "USER_NOT_FOUND") {
+                setError("Usuário não encontrado");
+            } else {
+                setError("Não foi possível entrar");
+            }
+
+            // setError(error.message ?? "Não foi possível entrar")
         }
     };
 
     return (
+        <>
+        <StatusBar />
         <KeyboardAvoidingView
             style={styles.container}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -47,41 +66,81 @@ export default function SignUp() {
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
             >
-                <Text style={styles.title}>Criar conta</Text>
-
-                <Input
-                    placeholder="Nome"
-                    value={name}
-                    onChangeText={setName}
-                    error={!!error}
-                />
-                <Input
-                    placeholder="E-mail"
-                    value={email}
-                    onChangeText={setEmail}
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                    error={!!error}
-                />
-                <Input
-                    placeholder="Senha"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
-                    error={!!error}
-                />
-
-                {error && <Text style={styles.errorText}>{error}</Text>}
-
-                <Button onPress={handleSignUp} loading={loading}>
-                    Criar conta
-                </Button>
-
-                <Link href="/" style={styles.link}>
-                    <Text style={styles.linkText}>Já tem conta? Entrar</Text>
-                </Link>
+                <LinearGradient
+                    colors={["#E9FFFA", "#A6FFEC"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={[
+                        StyleSheet.absoluteFill,
+                        {
+                            zIndex: -1,
+                            maxHeight: 464,
+                            // justifyContent: "center",
+                            alignItems: "center",
+                            paddingTop: 44,
+                        },
+                    ]}
+                >
+                    <Image
+                        source={require("@/assets/images/splash-icon.png")}
+                        style={{
+                            width: "50%",
+                            height: "auto",
+                            marginBottom: 20,
+                            aspectRatio: 1,
+                        }}
+                    />
+                </LinearGradient>
+                <View
+                    style={{
+                        backgroundColor: "#161718",
+                        padding: 24,
+                        paddingTop: 32,
+                        borderRadius: 24,
+                        gap: 12,
+                        flex: 1,
+                        marginTop: 264,
+                    }}
+                >
+                    <TextDefault style={styles.title}>Criar conta</TextDefault>
+                    <Input
+                        placeholder="Nome"
+                        value={name}
+                        onChangeText={setName}
+                        error={!!error}
+                    />
+                    <Input
+                        placeholder="E-mail"
+                        value={email}
+                        onChangeText={setEmail}
+                        autoCapitalize="none"
+                        keyboardType="email-address"
+                        error={!!error}
+                    />
+                    <Input
+                        placeholder="Senha"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry
+                        error={!!error}
+                    />
+                    {error && (
+                        <TextDefault style={styles.errorText}>
+                            {error}
+                        </TextDefault>
+                    )}
+                    <Button onPress={handleSignUp} loading={loading}>
+                        Criar conta
+                    </Button>
+                    <Link href="/" style={styles.link}>
+                        <TextDefault style={styles.linkText}>
+                            Já tem conta? Entre aqui
+                        </TextDefault>
+                    </Link>
+                </View>
             </ScrollView>
         </KeyboardAvoidingView>
+        </>
     );
 }
 
@@ -93,8 +152,6 @@ const styles = StyleSheet.create({
     content: {
         flexGrow: 1,
         justifyContent: "center",
-        padding: 24,
-        gap: 12,
     },
     title: {
         color: "#eeeeee",
@@ -111,7 +168,7 @@ const styles = StyleSheet.create({
         alignSelf: "center",
     },
     linkText: {
-        color: "#8065ef",
+        color: "#00c89b",
         fontSize: 14,
     },
 });

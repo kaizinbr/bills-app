@@ -21,9 +21,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Input from "@/components/core/input";
 import { useGroups } from "@/hooks/use-group";
 
-import {
-    useDefaultStyles
-} from "react-native-ui-datepicker";
+import { useDefaultStyles } from "react-native-ui-datepicker";
+import BackBtn from "@/components/core/back-btn";
 
 const CARDCOLORS = [
     { id: 6, hex: "#820AD1" }, // Nubank
@@ -151,6 +150,7 @@ export default function CreateCard() {
     return (
         <View style={styles.main}>
             <StatusBar />
+            <BackBtn />
             {loading ? (
                 <View
                     style={{
@@ -159,7 +159,7 @@ export default function CreateCard() {
                         alignItems: "center",
                     }}
                 >
-                    <ActivityIndicator color={"#fff"} size={"large"} />
+                    <ActivityIndicator color={"#00c89b"} size={"large"} />
                 </View>
             ) : (
                 <KeyboardAvoidingView
@@ -173,17 +173,11 @@ export default function CreateCard() {
                             alignItems: "flex-start",
                             justifyContent: "flex-start",
                             gap: 8,
-                            paddingTop: insets.top + 24,
+                            paddingTop: insets.top + 64,
                         }}
                         showsVerticalScrollIndicator={false}
                         style={[styles.container]}
                     >
-                        <Pressable
-                            style={styles.backButton}
-                            onPress={() => router.back()}
-                        >
-                            <AltArrowLeftIcon size={24} color="#fff" />
-                        </Pressable>
                         <TextDefault style={styles.title}>
                             Criar cartão
                         </TextDefault>
@@ -302,11 +296,17 @@ export default function CreateCard() {
 
             <Pressable
                 onPress={handleCreateCard}
-                style={[
+                style={({ pressed }) => [
                     styles.submitBtn,
                     {
                         bottom: insets.bottom + 16,
-                        opacity: canSubmit ? 1 : 0.5,
+                        backgroundColor: pressed
+                            ? canSubmit
+                                ? "#007B5E"
+                                : "#282828"
+                            : canSubmit
+                              ? "#009C7A"
+                              : "#282828",
                     },
                 ]}
                 disabled={!canSubmit}
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: "bold",
-        marginVertical: 16,
+        // marginVertical: 16,
         paddingHorizontal: 24,
     },
     description: {
@@ -379,8 +379,8 @@ const styles = StyleSheet.create({
         justifyContent: "flex-end",
         position: "absolute",
         bottom: 32,
-        left: 16,
-        right: 16,
+        left: 24,
+        right: 24,
         zIndex: 10,
         alignItems: "center",
     },

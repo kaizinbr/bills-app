@@ -129,7 +129,7 @@ export default function PurchasePage() {
                         alignItems: "center",
                     }}
                 >
-                    <ActivityIndicator color={"#fff"} size={"large"} />
+                    <ActivityIndicator color={"#00c89b"} size={"large"} />
                 </View>
             )}
             {data && (
@@ -228,10 +228,7 @@ export default function PurchasePage() {
                                 Valor
                             </TextDefault>
                             <TextDefault style={styles.description}>
-                                {new Intl.NumberFormat("pt-BR", {
-                                    style: "currency",
-                                    currency: "BRL",
-                                }).format(data.amount)}
+                                {formatCurrency(data.amount)}
                             </TextDefault>
                         </View>
                     )}
@@ -250,8 +247,8 @@ export default function PurchasePage() {
                         style={{
                             position: "absolute",
                             bottom: insets.bottom + 16,
-                            left: 16,
-                            right: 16,
+                            left: 24,
+                            right: 24,
                             gap: 8,
                         }}
                     >

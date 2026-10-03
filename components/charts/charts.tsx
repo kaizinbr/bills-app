@@ -203,6 +203,46 @@ const Charts = forwardRef<GroupsHandle, GroupsProps>(
                         </TextDefault>
                     )}
                 </View>
+                {totalData! && (
+                    <View
+                        style={{
+                            paddingHorizontal: 24,
+                            marginBottom: 16,
+                            paddingTop: 16,
+                            gap: 8,
+                        }}
+                    >
+                        <TextDefault style={styles.title}>
+                            Uso do limite
+                        </TextDefault>
+                        <View style={styles.track}>
+                            <View
+                                style={[
+                                    styles.fill,
+                                    {
+                                        width: `${(
+                                            (totalData.total /
+                                                Number(group.limit)) *
+                                            100
+                                        ).toFixed(0)}%` as `${number}%`,
+                                        backgroundColor:
+                                            totalData.total >
+                                            Number(group.limit)
+                                                ? "#FF4D4D"
+                                                : "#00C853",
+                                    },
+                                ]}
+                            />
+                        </View>
+
+                        <TextDefault style={[styles.limit]}>
+                            {((totalData.total / Number(group.limit)) * 100)
+                                .toFixed(0)
+                                .replace(".", ",")}
+                            % utilizado
+                        </TextDefault>
+                    </View>
+                )}
             </View>
         );
     },
@@ -214,6 +254,7 @@ const styles = StyleSheet.create({
     container: {
         width: "100%",
         gap: 16,
+        paddingBottom: 32,
     },
     groupCard: {
         // padding: 16,
@@ -231,5 +272,27 @@ const styles = StyleSheet.create({
     updateText: {
         color: "#B6B6B6",
         fontSize: 12,
+    },
+    title: {
+        fontSize: 16,
+        fontWeight: "700",
+        color: "#fff",
+    },
+    limit: {
+        // fontSize: 16,
+        // fontWeight: "700",
+        color: "#fff",
+        textAlign: "right",
+    },
+
+    track: {
+        height: 8,
+        borderRadius: 999,
+        backgroundColor: "#232323",
+        overflow: "hidden",
+    },
+    fill: {
+        height: "100%",
+        borderRadius: 999,
     },
 });

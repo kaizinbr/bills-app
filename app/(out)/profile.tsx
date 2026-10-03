@@ -51,7 +51,7 @@ export default function CreateGroup() {
                         alignItems: "center",
                     }}
                 >
-                    <ActivityIndicator color={"#fff"} size={"large"} />
+                    <ActivityIndicator color={"#00c89b"} size={"large"} />
                 </View>
             ) : (
                 <KeyboardAvoidingView
@@ -87,7 +87,7 @@ export default function CreateGroup() {
                         }
                     >
                         <LinearGradient
-                            colors={["#009C7A", "#161718"]}
+                            colors={[profile?.color || "#5E8C61", "#161718"]}
                             style={{
                                 position: "absolute",
                                 top: 0,
@@ -111,12 +111,10 @@ export default function CreateGroup() {
                             <TextDefault style={styles.title}>
                                 {profile?.name}
                             </TextDefault>
-                            <TextDefault style={styles.description}>
-                                Compartilhe o código de convite abaixo com a
-                                pessoa que deseja adicionar a essa conta.
-                            </TextDefault>
                             <Pressable
-                                // onPress={copyToClipboard}
+                                onPress={() => {
+                                    router.push("/(out)/edit-profile");
+                                }}
                                 style={({ pressed }) => [
                                     styles.submitBtn,
                                     {

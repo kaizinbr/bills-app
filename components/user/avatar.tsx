@@ -1,17 +1,13 @@
-import {
-    Text,
-    View,
-    StyleSheet,
-    ActivityIndicator,
-    Pressable,
-} from "react-native";
-import { authClient } from "@/lib/auth-client";
-import { useRouter, Href, Link } from "expo-router";
-import { Image } from "expo-image";
-import { UserProfile } from "@/lib/types";
-import { useAuth } from "@/components/core/auth-provider";
 import TextDefault from "@/components/core/text-core";
 import { useProfile } from "@/hooks/use-profile";
+import { UserProfile } from "@/lib/types";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import {
+    ActivityIndicator,
+    StyleSheet,
+    View
+} from "react-native";
 
 export default function Avatar({
     data,
@@ -56,6 +52,7 @@ export default function Avatar({
                                     width: size || 32,
                                     height: size || 32,
                                     borderRadius: 9999,
+                                    backgroundColor: profile.color || "#009C7A",
                                 },
                             ]}
                         >
@@ -116,6 +113,7 @@ export function AvatarNoPress({
                             width: size || 32,
                             height: size || 32,
                             borderRadius: 9999,
+                            backgroundColor: profile.color || "#009C7A",
                         },
                     ]}
                 />
@@ -128,10 +126,16 @@ export function AvatarNoPress({
                             width: size || 32,
                             height: size || 32,
                             borderRadius: 9999,
+                            backgroundColor: profile.color || "#009C7A",
                         },
                     ]}
                 >
-                    <TextDefault style={[styles.cardImageText, { fontSize: fontSize || 16 }]}>
+                    <TextDefault
+                        style={[
+                            styles.cardImageText,
+                            { fontSize: fontSize || 16 },
+                        ]}
+                    >
                         {profile.name?.[0].toUpperCase()}
                     </TextDefault>
                 </View>
@@ -142,6 +146,7 @@ export function AvatarNoPress({
 
 export function AvatarGeneric({
     name,
+    user,
     style,
     size,
     fontSize,
@@ -149,6 +154,83 @@ export function AvatarGeneric({
 }: {
     name?: string | any;
     style?: any;
+    user?: {
+        id: string;
+        name: string;
+        image: string | null;
+        color: string | null;
+    };
+    size?: number;
+    fontSize?: number;
+    focused?: boolean;
+}) {
+    return (
+        <View
+            style={[
+                styles.main,
+                {
+                    width: size || 32,
+                    height: size || 32,
+                    borderRadius: 9999,
+                },
+            ]}
+        >
+            {user?.image ? (
+                <Image
+                    source={{ uri: user.image }}
+                    style={[
+                        styles.cardImage,
+                        style,
+                        {
+                            width: size || 32,
+                            height: size || 32,
+                            borderRadius: 9999,
+                        },
+                    ]}
+                />
+            ) : (
+                <View
+                    style={[
+                        styles.cardImage,
+                        style,
+                        {
+                            width: size || 32,
+                            height: size || 32,
+                            borderRadius: 9999,
+                            backgroundColor: user?.color || "#009C7A",
+                        },
+                    ]}
+                >
+                    <TextDefault
+                        style={[
+                            styles.cardImageText,
+                            { fontSize: fontSize || 16 },
+                        ]}
+                    >
+                        {name?.[0].toUpperCase()}
+                    </TextDefault>
+                </View>
+            )}
+        </View>
+    );
+}
+
+export function AvatarCurrentUser({
+    name,
+    user,
+    style,
+    size,
+    fontSize,
+    focused,
+}: {
+    name?: string | any;
+    style?: any;
+    user?: {
+        id: string;
+        name: string;
+        image: string | null;
+        color: string | null;
+    };
     size?: number;
     fontSize?: number;
     focused?: boolean;
@@ -187,10 +269,16 @@ export function AvatarGeneric({
                             width: size || 32,
                             height: size || 32,
                             borderRadius: 9999,
+                            backgroundColor: profile.color || "#009C7A",
                         },
                     ]}
                 >
-                    <TextDefault style={[styles.cardImageText, { fontSize: fontSize || 16 }]}>
+                    <TextDefault
+                        style={[
+                            styles.cardImageText,
+                            { fontSize: fontSize || 16 },
+                        ]}
+                    >
                         {name?.[0].toUpperCase()}
                     </TextDefault>
                 </View>

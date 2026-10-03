@@ -5,10 +5,10 @@
 const PALETTE = [
     "#00C89B", // teal
     "#60A5FA", // azul
+    "#9d4edd", // verde menta
     "#FBBF24", // âmbar
     "#C084FC", // violeta
     "#FB7185", // coral/rosa
-    "#34D399", // verde menta
     "#F97316", // laranja
     "#818CF8", // índigo
 ];

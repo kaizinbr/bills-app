@@ -16,6 +16,7 @@ import {
 import api from "@/lib/api";
 import TextDefault from "@/components/core/text-core";
 import { useProfile } from "@/hooks/use-profile";
+import { useGroups, type GroupsResponse } from "@/hooks/use-group";
 
 import {
     BottomSheetBackdrop,
@@ -36,6 +37,7 @@ import { InfoCircleIcon } from "@solar-icons/react-native/linear/info-circle";
 import { AddCircleIcon } from '@solar-icons/react-native/linear/add-circle';
 import { TrashBinMinimalisticIcon } from "@solar-icons/react-native/linear/trash-bin-minimalistic";
 import { UserPlusIcon } from "@solar-icons/react-native/linear/user-plus";
+import { CloseCircleIcon } from '@solar-icons/react-native/linear/close-circle'
 import { PenNewRoundIcon } from "@solar-icons/react-native/linear/pen-new-round";
 
 import { Tuning2Icon } from "@solar-icons/react-native/linear/tuning-2";
@@ -48,12 +50,14 @@ export default function GroupManager({
     console.log(selectedGroupId)
     const router = useRouter();
     const insets = useSafeAreaInsets();
+    const { refetch } = useGroups();
     const { data: profile, isLoading } = useProfile();
     const snapPoints = useMemo(() => ["80%", "100%"], []);
 
     const bottomSheetManageRef = useRef<BottomSheetModal>(null);
 
-    const [showLogout, setShowLogout] = useState(false);
+    const [showSignout, setShowSignout] = useState(false);
+    const [showDelete, setShowDelete] = useState(false);
 
     // modal principal
     const handleManageModalPress = useCallback(() => {
@@ -75,17 +79,34 @@ export default function GroupManager({
         bottomSheetShareRef.current?.present();
     }, []);
 
+    const handleSignout = useCallback(async () => {
+        try {
+            await api.patch(`/groups/${selectedGroupId}/signout`);
+            setShowSignout(false);
+            refetch();
+            router.replace("/(tabs)/home");
+        }
+        catch (error) {
+            console.error("Error signing out of group:", error);
+        }
+        finally {
+            setShowSignout(false);
+        }
+    }, [selectedGroupId, router]);
+
+
     const handleDeleteGroup = useCallback(async () => {
         try {
             await api.delete(`/groups/${selectedGroupId}`);
-            setShowLogout(false);
+            refetch();
+            setShowDelete(false);
             router.replace("/(tabs)/home");
         }
         catch (error) {
             console.error("Error deleting group:", error);
         }
         finally {
-            setShowLogout(false);
+            setShowDelete(false);
         }
     }, [selectedGroupId, router]);
 
@@ -150,7 +171,20 @@ export default function GroupManager({
                                 style={styles.options}
                                 onPress={() => {
                                     handleCloseModalPress();
-                                    setShowLogout(true);
+                                    setShowSignout(true);
+                                }}
+                            >
+                                <CloseCircleIcon
+                                    size={24}
+                                    color="#fff"
+                                />
+                                <TextDefault>Sair da conta</TextDefault>
+                            </Pressable>
+                            <Pressable
+                                style={styles.options}
+                                onPress={() => {
+                                    handleCloseModalPress();
+                                    setShowDelete(true);
                                 }}
                             >
                                 <TrashBinMinimalisticIcon
@@ -164,65 +198,8 @@ export default function GroupManager({
                 </BottomSheetView>
             </BottomSheetModal>
 
-            
-            {/* <BottomSheetModal
-                ref={bottomSheetShareRef}
-                onChange={handleSheetChanges}
-                onDismiss={() => {
-                    // fecthData(true);
-                }}
-                snapPoints={snapPoints}
-                backdropComponent={(backdropProps) => (
-                    <BottomSheetBackdrop
-                        {...backdropProps}
-                        disappearsOnIndex={-1}
-                        appearsOnIndex={0}
-                    />
-                )}
-                enablePanDownToClose
-                topInset={insets.top}
-                backgroundStyle={{ backgroundColor: "#161718" }}
-                handleIndicatorStyle={{ backgroundColor: "#555" }}
-                enableDynamicSizing={false}
-            >
-                <BottomSheetView style={styles.contentContainer}>
-                    <View style={styles.content}>
-                        <View style={styles.menu}>
-                            <Pressable style={styles.options}>
-                                <AddCircleIcon size={24} color="#fff" />
-                                <TextDefault>
-                                    Adicionar membro à conta
-                                </TextDefault>
-                            </Pressable>
-                            <Pressable style={styles.options}
-                                onPress={() => {
-                                    handleCloseModalPress();
-                                    router.push(`/edit-group?id=${selectedGroupId}`);
-                                }}
-                            >
-                                <PenNewRoundIcon size={24} color="#fff" />
-                                <TextDefault>Editar conta</TextDefault>
-                            </Pressable>
-                            <Pressable
-                                style={styles.options}
-                                onPress={() => {
-                                    handleCloseModalPress();
-                                    setShowLogout(true);
-                                }}
-                            >
-                                <TrashBinMinimalisticIcon
-                                    size={24}
-                                    color="#fff"
-                                />
-                                <TextDefault>Excluir conta</TextDefault>
-                            </Pressable>
-                        </View>
-                    </View>
-                </BottomSheetView>
-            </BottomSheetModal> */}
-
             <Modal
-                visible={showLogout}
+                visible={showSignout}
                 transparent
                 animationType="fade"
                 statusBarTranslucent
@@ -232,7 +209,7 @@ export default function GroupManager({
                     style={styles.overlay}
                     onPress={() => {
                         // setShowDatePicker(false);
-                        setShowLogout(false);
+                        setShowSignout(false);
                     }}
                 >
                     <View
@@ -252,7 +229,75 @@ export default function GroupManager({
                         </TextDefault>
                         <Pressable
                             onPress={() => {
-                                setShowLogout(false);
+                                setShowSignout(false);
+                            }}
+                            style={{
+                                padding: 12,
+                                backgroundColor: "#282828",
+                                borderRadius: 999,
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: "48%",
+                                marginVertical: 8,
+                            }}
+                        >
+                            <TextDefault style={{ color: "#fff" }}>
+                                Cancelar
+                            </TextDefault>
+                        </Pressable>
+                        <Pressable
+                            onPress={() => {
+                                handleSignout();
+                            }}
+                            style={{
+                                padding: 12,
+                                backgroundColor: "#BE1E1E",
+                                borderRadius: 999,
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: "48%",
+                                marginVertical: 8,
+                            }}
+                        >
+                            <TextDefault style={{ color: "#fff" }}>
+                                Sair da conta
+                            </TextDefault>
+                        </Pressable>
+                    </View>
+                </Pressable>
+            </Modal>
+            <Modal
+                visible={showDelete}
+                transparent
+                animationType="fade"
+                statusBarTranslucent
+                onRequestClose={() => {}}
+            >
+                <Pressable
+                    style={styles.overlay}
+                    onPress={() => {
+                        // setShowDatePicker(false);
+                        setShowDelete(false);
+                    }}
+                >
+                    <View
+                        style={styles.modalBox}
+                        onStartShouldSetResponder={() => true}
+                    >
+                        <TextDefault
+                            style={{
+                                color: "#fff",
+                                textAlign: "center",
+                                fontWeight: "700",
+                                fontSize: 16,
+                                width: "100%",
+                            }}
+                        >
+                            Tem certeza que deseja excluir esta conta?
+                        </TextDefault>
+                        <Pressable
+                            onPress={() => {
+                                setShowDelete(false);
                             }}
                             style={{
                                 padding: 12,

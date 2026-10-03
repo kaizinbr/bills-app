@@ -136,7 +136,7 @@ export default function CreateGroup() {
                         alignItems: "center",
                     }}
                 >
-                    <ActivityIndicator color={"#fff"} size={"large"} />
+                    <ActivityIndicator color={"#00c89b"} size={"large"} />
                 </View>
             ) : (
                 <KeyboardAvoidingView
@@ -363,8 +363,8 @@ const styles = StyleSheet.create({
         justifyContent: "flex-end",
         position: "absolute",
         bottom: 32,
-        left: 16,
-        right: 16,
+        left: 24,
+        right: 24,
         zIndex: 10,
         alignItems: "center",
     },

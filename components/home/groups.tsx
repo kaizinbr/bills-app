@@ -291,7 +291,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                         onPress={() => {
                             router.push({
                                 pathname: `/(tabs)/values/[invoiceId]`,
-                                params: { invoiceId: selectedInvoiceId },
+                                params: { invoiceId: selectedInvoiceId! },
                             });
                         }}
                         style={styles.buttons}
@@ -528,10 +528,13 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 12,
         fontWeight: "600",
+        justifyContent: "center",
+        textAlign: "center",
     },
     purchasesList: {
         // paddingHorizontal: 24,
         width: "100%",
         justifyContent: "flex-start",
+        paddingBottom: 124,
     },
 });

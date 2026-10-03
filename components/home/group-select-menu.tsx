@@ -13,6 +13,10 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AltArrowDownIcon } from "@solar-icons/react-native/linear/alt-arrow-down";
+import { FolderFavoriteStarIcon } from '@solar-icons/react-native/linear/folder-favorite-star'
+import { AddFolderIcon } from '@solar-icons/react-native/linear/add-folder'
+import { UserPlusIcon } from '@solar-icons/react-native/linear/user-plus'
+import { TicketStarIcon } from '@solar-icons/react-native/linear/ticket-star'
 
 export default function GroupSelectMenu({
     data,
@@ -129,12 +133,13 @@ export default function GroupSelectMenu({
                                         bottomSheetModalRef.current?.dismiss();
                                     }}
                                 >
+                                    <FolderFavoriteStarIcon size={24} color={group.id === selectedGroupId ? "#00D0A3" : "#fff"} />
                                     <TextDefault
                                         style={[
                                             styles.optionsText,
                                             group.id === selectedGroupId && {
                                                 fontWeight: "700",
-                                                color: "#009C7A",
+                                                color: "#00D0A3",
                                             },
                                         ]}
                                     >
@@ -151,6 +156,7 @@ export default function GroupSelectMenu({
                                     bottomSheetModalRef.current?.dismiss();
                                 }}
                             >
+                                <AddFolderIcon size={24} color="#fff" />
                                 <TextDefault style={styles.optionsText}>
                                     Criar nova conta
                                 </TextDefault>
@@ -163,8 +169,9 @@ export default function GroupSelectMenu({
                                     bottomSheetModalRef.current?.dismiss();
                                 }}
                             >
+                                <TicketStarIcon size={24} color="#fff" />
                                 <TextDefault style={styles.optionsText}>
-                                    Adicionar com código de convite
+                                    Entrar com código de convite
                                 </TextDefault>
                             </Pressable>
                         </View>
@@ -230,8 +237,13 @@ const styles = StyleSheet.create({
     options: {
         width: "100%",
         padding: 16,
-        // borderBottomWidth: 0.5,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        // borderBottomWidth: 1,
         // borderBottomColor: "#555",
+        borderBottomWidth: 0.5,
+        borderBottomColor: "#555",
     },
     optionsText: {
         color: "#fff",

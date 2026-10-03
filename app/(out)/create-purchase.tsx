@@ -65,12 +65,17 @@ export default function CreateCard() {
     const currentUserId = session?.user?.id;
     const insets = useSafeAreaInsets();
 
-    const [loading, setLoading] = useState(true);
+    const [initialLoading, setInitialLoading] = useState(true);
+
+    const [finalLoading, setFinalLoading] = useState(false);
+    const [loadingMessage, setLoadingMessage] = useState(
+        "Criando seu parcelamento...",
+    );
 
     const [showDatePicker, setShowDatePicker] = useState(false);
 
     let today = new Date();
-    const defaultStyles = useDefaultStyles();
+    const defaultStyles = useDefaultStyles("dark");
 
     const [groupData, setGroupData] = useState<any>(null);
 
@@ -140,7 +145,7 @@ export default function CreateCard() {
                 setCategories(categoriesResponse.data.categories);
                 setCategory(categoriesResponse.data.categories[0].id);
 
-                setLoading(false);
+                setInitialLoading(false);
             } catch (error) {
                 console.error("Error fetching users:", error);
             }
@@ -158,18 +163,28 @@ export default function CreateCard() {
                 : new Date(purchaseDate as string);
 
             if (isInstallment) {
-                await api.post("/parcelado", {
-                    description: cardName,
-                    totalAmount: totalCents,
-                    installments: installmentsNumber,
-                    dayOfMonth: resolvedDate.getUTCDate(),
-                    startDate: resolvedDate,
-                    cardId: selectedCardId,
-                    groupId: groupId,
-                    userId: selectedMemberId,
-                    categoryId: category,
-                });
+                setLoadingMessage("Criando as parcelas da sua compra...");
+                setFinalLoading(true);
+                await api.post(
+                    "/parcelado",
+                    {
+                        description: cardName,
+                        totalAmount: totalCents,
+                        installments: installmentsNumber,
+                        dayOfMonth: resolvedDate.getUTCDate(),
+                        startDate: resolvedDate,
+                        cardId: selectedCardId,
+                        groupId: groupId,
+                        userId: selectedMemberId,
+                        categoryId: category,
+                    },
+                    {
+                        timeout: 120_000,
+                    },
+                );
             } else {
+                setLoadingMessage("Criando sua compra...");
+                setFinalLoading(true);
                 await api.post("/purchases", {
                     description: cardName,
                     amount: totalCents,
@@ -198,7 +213,7 @@ export default function CreateCard() {
         <View style={styles.main}>
             <StatusBar />
             <BackBtn />
-            {loading ? (
+            {initialLoading ? (
                 <View
                     style={{
                         flex: 1,
@@ -206,7 +221,7 @@ export default function CreateCard() {
                         alignItems: "center",
                     }}
                 >
-                    <ActivityIndicator color={"#fff"} size={"large"} />
+                    <ActivityIndicator color={"#00c89b"} size={"large"} />
                 </View>
             ) : (
                 <KeyboardAvoidingView
@@ -220,7 +235,7 @@ export default function CreateCard() {
                             justifyContent: "flex-start",
                             gap: 8,
                             paddingTop: insets.top + 64,
-                            paddingBottom: insets.bottom + 64,
+                            paddingBottom: insets.bottom + 86,
                         }}
                         showsVerticalScrollIndicator={false}
                         style={[styles.container]}
@@ -285,7 +300,7 @@ export default function CreateCard() {
                                     alignItems: "center",
                                 }}
                             >
-                                <Host matchContents>
+                                <Host colorScheme="dark" matchContents>
                                     <Switch
                                         value={isInstallment}
                                         onCheckedChange={(value) => {
@@ -301,6 +316,7 @@ export default function CreateCard() {
                                             checkedThumbColor: "#0B3D22",
                                             checkedTrackColor: "#009C7A",
                                         }}
+
                                     />
                                 </Host>
                                 <TextDefault style={{ marginLeft: 8 }}>
@@ -505,11 +521,10 @@ export default function CreateCard() {
                                         key={member.id}
                                         onPress={() => {
                                             setSelectedMemberId(member.user.id);
-                                            // console.log("selectedMemberId", member.user.id)
                                         }}
                                         style={[
                                             styles.cardButton,
-                                            selectedMemberId === member.id &&
+                                            selectedMemberId === member.user.id &&
                                                 styles.cardButtonSelected,
                                         ]}
                                     >
@@ -531,7 +546,7 @@ export default function CreateCard() {
                                         alignItems: "center",
                                     }}
                                 >
-                                    <Host matchContents>
+                                    <Host colorScheme="dark" matchContents>
                                         <Switch
                                             value={purchasedToday}
                                             onCheckedChange={setPurchasedToday}
@@ -578,16 +593,27 @@ export default function CreateCard() {
             )}
             <Pressable
                 onPress={handleCreatePurchase}
-                style={[
+                style={({ pressed }) => [
                     styles.submitBtn,
                     {
                         bottom: insets.bottom + 16,
-                        opacity: canSubmit ? 1 : 0.5,
+                        backgroundColor: pressed
+                            ? canSubmit
+                                ? "#007B5E"
+                                : "#282828"
+                            : canSubmit
+                              ? "#009C7A"
+                              : "#282828",
                     },
                 ]}
                 disabled={!canSubmit}
             >
-                <TextDefault style={{ color: "#fff", fontWeight: "700" }}>
+                <TextDefault
+                    style={{
+                        color: canSubmit ? "#fff" : "#ccc",
+                        fontWeight: "700",
+                    }}
+                >
                     {isInstallment ? "Criar parcelamento" : "Criar compra"}
                 </TextDefault>
             </Pressable>
@@ -643,6 +669,34 @@ export default function CreateCard() {
                     </View>
                 </View>
             )}
+
+            {finalLoading && (
+                <View
+                    style={[
+                        StyleSheet.absoluteFill,
+                        {
+                            backgroundColor: "#161718",
+                            zIndex: 50,
+                            justifyContent: "center",
+                            alignItems: "center",
+                        },
+                    ]}
+                >
+                    <ActivityIndicator color={"#00c89b"} size={"large"} />
+                    <TextDefault
+                        style={{
+                            color: "#fff",
+                            textAlign: "center",
+                            fontWeight: "700",
+                            fontSize: 16,
+                            width: "100%",
+                            marginTop: 8,
+                        }}
+                    >
+                        {loadingMessage}
+                    </TextDefault>
+                </View>
+            )}
             <Modal
                 visible={showDatePicker}
                 transparent
@@ -668,6 +722,7 @@ export default function CreateCard() {
                                 setPurchaseDate(date);
                             }}
                             mode="single"
+                            
                             style={{ width: "100%" }}
                             locale="pt-br"
                             timeZone="America/Fortaleza"
@@ -685,7 +740,7 @@ export default function CreateCard() {
                                     borderColor: "gray",
                                     borderWidth: 1,
                                 },
-                                selected: { backgroundColor: "gray" },
+                                selected: { backgroundColor: "#00AA86" },
                                 selected_label: { color: "white" },
                             }}
                         />
@@ -823,7 +878,7 @@ const styles = StyleSheet.create({
         fontWeight: "600",
     },
     submitBtn: {
-        backgroundColor: "#009C7A",
+        // backgroundColor: "#009C7A",
         borderWidth: 2,
         borderColor: "transparent",
         padding: 12,
@@ -831,8 +886,8 @@ const styles = StyleSheet.create({
         justifyContent: "flex-end",
         position: "absolute",
         bottom: 32,
-        left: 16,
-        right: 16,
+        left: 24,
+        right: 24,
         zIndex: 30,
         alignItems: "center",
     },

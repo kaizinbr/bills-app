@@ -15,6 +15,7 @@ import { BottomSheetInput } from "@/components/core/input";
 import { DateType, useDefaultStyles } from "react-native-ui-datepicker";
 
 import { formatCurrency } from "@/lib/format-currency";
+import { useGroups, useGroupMembers } from "@/hooks/use-group";
 
 export default function EditPurchaseBottomSheet({
     initialData,
@@ -24,12 +25,13 @@ export default function EditPurchaseBottomSheet({
     onFinish: () => void;
 }) {
     const router = useRouter();
-    // console.log("initialData", initialData);
+
+    const { data: membersData, refetch, isFetching } = useGroupMembers(initialData.invoice.group.id);
 
     const { session } = useAuth();
     const currentUserId = session?.user?.id;
     const insets = useSafeAreaInsets();
-
+    console.log("membersData", membersData);
     const [loading, setLoading] = useState(true);
 
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -45,10 +47,14 @@ export default function EditPurchaseBottomSheet({
         invoiceId: initialData.invoiceId || null,
         groupId: initialData.groupId || null,
         categoryId: initialData.categoryId || null,
+        userId: initialData.userId || null,
     });
 
     const [cardName, setCardName] = useState(data.description || "");
     const [amountCents, setAmountCents] = useState(data.amount);
+    const [selectedMemberId, setSelectedMemberId] = useState<string | null>(
+        data.userId || null,
+    );
     const [purchasedToday, setPurchasedToday] = useState<boolean>(true);
     const [purchaseDate, setPurchaseDate] = useState<DateType>(today);
 
@@ -57,10 +63,10 @@ export default function EditPurchaseBottomSheet({
         currentUserId!,
     );
 
-    const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+    const [selectedCardId, setSelectedCardId] = useState<string | null>(data.cardId || null);
     const [category, setCategory] = useState<string | null>(null);
 
-    const [users, setUsers] = useState<any[]>([]);
+    const [users, setUsers] = useState<any[]>(membersData || []);
     const [cards, setCards] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
 
@@ -82,7 +88,7 @@ export default function EditPurchaseBottomSheet({
         const fetchCatgories = async () => {
             try {
                 const response = await api.get(
-                    `groups/${initialData.invoice.group.id}`,
+                    `/groups/${initialData.invoice.group.id}`,
                 );
                 setData((prevData) => ({
                     ...prevData,
@@ -90,7 +96,7 @@ export default function EditPurchaseBottomSheet({
                 }));
                 setCards(response.data.group?.cards ?? []);
 
-                const categoriesResponse = await api.get(`categories`);
+                const categoriesResponse = await api.get(`/categories`);
                 setCategories(categoriesResponse.data.categories);
                 setCategory(initialData.categoryId);
 
@@ -100,7 +106,18 @@ export default function EditPurchaseBottomSheet({
             }
         };
 
+        const fetchUsers = async () => {
+            try {
+                const response = await api.get("/users");
+                setUsers(response.data.users);
+                console.log("users", response.data.users);
+            } catch (error) {
+                console.error("Error fetching users:", error);
+            }
+        };
+
         fetchCatgories();
+        // fetchUsers();
     }, []);
 
     const [error, setError] = useState<string | null>(null);
@@ -112,6 +129,7 @@ export default function EditPurchaseBottomSheet({
                 amount: parseInt(amountCents) || 0,
                 cardId: selectedCardId,
                 categoryId: category,
+                userId: selectedMemberId,
             });
             console.log("Purchase updated successfully:", response.data);
             onFinish();
@@ -131,7 +149,7 @@ export default function EditPurchaseBottomSheet({
                         alignItems: "center",
                     }}
                 >
-                    <ActivityIndicator color={"#fff"} size={"large"} />
+                    <ActivityIndicator color={"#00c89b"} size={"large"} />
                 </View>
             ) : (
                 <ScrollView
@@ -283,35 +301,97 @@ export default function EditPurchaseBottomSheet({
                                 </Pressable>
                             ))}
                         </ScrollView>
-                        <View
+                    </View>
+                    <View
+                        style={[
+                            styles.inputContainer,
+                            { paddingHorizontal: 0 },
+                        ]}
+                    >
+                        <TextDefault
+                            style={[styles.label, { paddingHorizontal: 24 }]}
+                        >
+                            Usuário que fez a compra
+                        </TextDefault>
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
                             style={{
-                                padding: 16,
-                                paddingBottom: 0,
                                 width: "100%",
+                                flexDirection: "row",
+                                gap: 8,
+                            }}
+                            contentContainerStyle={{
+                                flexDirection: "row",
+                                gap: 8,
+                                paddingHorizontal: 24,
+                                justifyContent: "flex-start",
+                                alignItems: "center",
                             }}
                         >
                             <Pressable
-                                onPress={handleUpdatePurchase}
-                                style={({ pressed }) => [
-                                    styles.submitBtn,
-                                    {
-                                        // bottom: insets.bottom + 16,
-                                        opacity: canSubmit ? 1 : 0.5,
-
-                                        backgroundColor: pressed
-                                            ? "#007B5E"
-                                            : "#009C7A",
-                                    },
+                                onPress={() => setSelectedMemberId(null)}
+                                style={[
+                                    styles.cardButton,
+                                    selectedMemberId === null &&
+                                        styles.cardButtonSelected,
                                 ]}
-                                disabled={!canSubmit}
                             >
-                                <TextDefault
-                                    style={{ color: "#fff", fontWeight: "700" }}
-                                >
-                                    Salvar alterações
+                                <TextDefault style={styles.cardButtonText}>
+                                    Sem usuário
                                 </TextDefault>
                             </Pressable>
-                        </View>
+                            {users.length > 0 &&
+                                users.map((member) => (
+                                    <Pressable
+                                        key={member.id}
+                                        onPress={() => {
+                                            setSelectedMemberId(member.user.id);
+                                        }}
+                                        style={[
+                                            styles.cardButton,
+                                            selectedMemberId === member.user.id &&
+                                                styles.cardButtonSelected,
+                                        ]}
+                                    >
+                                        <TextDefault
+                                            style={styles.cardButtonText}
+                                        >
+                                            {member.user.name || member.email || "Usuário"}
+                                        </TextDefault>
+                                    </Pressable>
+                                ))}
+                        </ScrollView>
+                    </View>
+
+                    <View
+                        style={{
+                            padding: 16,
+                            paddingBottom: 0,
+                            width: "100%",
+                        }}
+                    >
+                        <Pressable
+                            onPress={handleUpdatePurchase}
+                            style={({ pressed }) => [
+                                styles.submitBtn,
+                                {
+                                    // bottom: insets.bottom + 16,
+                                    opacity: canSubmit ? 1 : 0.5,
+
+                                    backgroundColor: pressed
+                                        ? "#007B5E"
+                                        : "#009C7A",
+                                },
+                            ]}
+                            disabled={!canSubmit}
+                        >
+                            <TextDefault
+                                style={{ color: "#fff", fontWeight: "700" }}
+                            >
+                                Salvar alterações
+                            </TextDefault>
+                        </Pressable>
                     </View>
                 </ScrollView>
             )}
@@ -411,8 +491,8 @@ const styles = StyleSheet.create({
         borderColor: "transparent",
         padding: 12,
         borderRadius: 16,
-        height: 86,
-        aspectRatio: 4 / 3,
+        height: 64,
+        aspectRatio: 5 / 3,
         justifyContent: "flex-end",
     },
     catButtonSelected: {

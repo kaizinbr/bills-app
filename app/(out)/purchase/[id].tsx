@@ -32,6 +32,8 @@ import BackBtn from "@/components/core/back-btn";
 import EditPurchaseBottomSheet from "@/components/purchases/edit-purchase-bottomsheet";
 import { useGroups } from "@/hooks/use-group";
 import { useDefaultStyles } from "react-native-ui-datepicker";
+import { AvatarGeneric } from "@/components/user/avatar";
+import { AltArrowRightIcon } from "@solar-icons/react-native/linear/alt-arrow-right";
 
 export default function PurchasePage() {
     const router = useRouter();
@@ -130,7 +132,7 @@ export default function PurchasePage() {
                         alignItems: "center",
                     }}
                 >
-                    <ActivityIndicator color={"#fff"} size={"large"} />
+                    <ActivityIndicator color={"#00c89b"} size={"large"} />
                 </View>
             )}
             {purchaseData && (
@@ -247,12 +249,55 @@ export default function PurchasePage() {
                             </TextDefault>
                         </View>
                     )}
+                    {purchaseData.user && (
+                        <View style={styles.section}>
+                            <TextDefault style={styles.label}>
+                                Compra feita por
+                            </TextDefault>
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    gap: 8,
+                                }}
+                            >
+                                <AvatarGeneric
+                                    user={purchaseData.user}
+                                    size={24}
+                                />
+                                <TextDefault style={styles.description}>
+                                    {purchaseData.user.name}
+                                </TextDefault>
+                            </View>
+                        </View>
+                    )}
+                    {purchaseData.subscription && (
+                        <View style={styles.section}>
+                            <Pressable
+                                onPress={() => {
+                                    router.push(
+                                        `/subscription/${purchaseData.subscription.id}`,
+                                    );
+                                }}
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    gap: 4,
+                                }}
+                            >
+                                <TextDefault style={styles.label}>
+                                    Ver assinatura
+                                </TextDefault>
+                                <AltArrowRightIcon size={14} color="#fff" />
+                            </Pressable>
+                        </View>
+                    )}
                     <View
                         style={{
                             position: "absolute",
                             bottom: insets.bottom + 16,
-                            left: 16,
-                            right: 16,
+                            left: 24,
+                            right: 24,
                             gap: 8,
                         }}
                     >

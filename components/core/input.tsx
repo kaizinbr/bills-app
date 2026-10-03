@@ -32,6 +32,7 @@ export default function Input({
             value={value}
             onChangeText={onChangeText}
             
+            
             {...props}
         />
     );
@@ -96,6 +97,6 @@ const styles = StyleSheet.create({
     },
     error: {
         borderColor: "#ff4d4f",
-        backgroundColor: "#ff4d4f22",
+        // backgroundColor: "#ff4d4f22",
     },
 });

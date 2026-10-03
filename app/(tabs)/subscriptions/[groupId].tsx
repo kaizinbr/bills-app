@@ -22,8 +22,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BackBtn from "@/components/core/back-btn";
 
 import { SubscriptionItem } from "@/components/subscriptions/subscription-item";
+import { formatCurrency } from "@/lib/format-currency";
 import { useDefaultStyles } from "react-native-ui-datepicker";
-
 
 export default function CreateSubscription() {
     const router = useRouter();
@@ -36,12 +36,20 @@ export default function CreateSubscription() {
 
     const [loading, setLoading] = useState(true);
     const [subscriptions, setSubscriptions] = useState<any>(null);
+    const [subscriptionsTotalValue, setSubscriptionsTotalValue] =
+        useState<number>(0);
     const [error, setError] = useState<string | null>(null);
 
     const fetchData = async () => {
         try {
             const response = await api.get(`/groups/${groupId}/subscriptions`);
             setSubscriptions(response.data.subscriptions);
+
+            const totalValue = response.data.subscriptions.reduce(
+                (acc: number, subscription: any) => acc + subscription.amount,
+                0,
+            );
+            setSubscriptionsTotalValue(totalValue);
 
             setLoading(false);
         } catch (error) {
@@ -56,6 +64,7 @@ export default function CreateSubscription() {
     return (
         <View style={styles.main}>
             <StatusBar />
+            <BackBtn />
             {loading ? (
                 <View
                     style={{
@@ -64,7 +73,7 @@ export default function CreateSubscription() {
                         alignItems: "center",
                     }}
                 >
-                    <ActivityIndicator color={"#fff"} size={"large"} />
+                    <ActivityIndicator color={"#00c89b"} size={"large"} />
                 </View>
             ) : (
                 <ScrollView
@@ -73,7 +82,7 @@ export default function CreateSubscription() {
                         paddingBottom: 32,
                         alignItems: "flex-start",
                         justifyContent: "flex-start",
-                        gap: 8,
+                        gap: 0,
                         paddingTop: insets.top + 64,
                     }}
                     showsVerticalScrollIndicator={false}
@@ -94,10 +103,7 @@ export default function CreateSubscription() {
                         />
                     }
                 >
-                    <BackBtn />
-                    <TextDefault style={styles.title}>
-                        Suas assinaturas
-                    </TextDefault>
+                    <TextDefault style={styles.title}>Assinaturas</TextDefault>
                     {subscriptions.length === 0 ? (
                         <TextDefault
                             style={{ color: "#fff", paddingHorizontal: 24 }}
@@ -106,17 +112,33 @@ export default function CreateSubscription() {
                             assinatura.
                         </TextDefault>
                     ) : (
-                        subscriptions.map((subscription: any) => (
-                            <SubscriptionItem
-                                key={subscription.id}
-                                id={subscription.id}
-                                name={subscription.name}
-                                amount={subscription.amount}
-                                chargeDay={subscription.chargeDay}
-                                category={subscription.category}
-                                card={subscription.card}
-                            />
-                        ))
+                        <View
+                            style={{
+                                width: "100%",
+                                gap: 0,
+                                paddingBottom: 32,
+                            }}
+                        >
+                            <View style={styles.detailBox}>
+                                <TextDefault style={styles.detailTitle}>
+                                    {formatCurrency(subscriptionsTotalValue)}
+                                </TextDefault>
+                                <TextDefault style={styles.detailText}>
+                                    Gastos mensais com assinaturas
+                                </TextDefault>
+                            </View>
+                            {subscriptions.map((subscription: any) => (
+                                <SubscriptionItem
+                                    key={subscription.id}
+                                    id={subscription.id}
+                                    name={subscription.name}
+                                    amount={subscription.amount}
+                                    chargeDay={subscription.chargeDay}
+                                    category={subscription.category}
+                                    card={subscription.card}
+                                />
+                            ))}
+                        </View>
                     )}
                 </ScrollView>
             )}
@@ -231,7 +253,11 @@ const styles = StyleSheet.create({
         borderColor: "#009C7A",
         backgroundColor: "#0B3D22",
     },
-    catButtonText: { color: "#fff", fontSize: 14, fontWeight: "600" },
+    catButtonText: {
+        color: "#fff",
+        fontSize: 14,
+        fontWeight: "600",
+    },
     submitBtn: {
         backgroundColor: "#009C7A",
         borderWidth: 2,
@@ -240,9 +266,26 @@ const styles = StyleSheet.create({
         borderRadius: 9999,
         position: "absolute",
         bottom: 32,
-        left: 16,
-        right: 16,
+        left: 24,
+        right: 24,
         zIndex: 10,
         alignItems: "center",
+    },
+    detailBox: {
+        backgroundColor: "#212223",
+        borderRadius: 16,
+        padding: 16,
+        marginHorizontal: 24,
+        marginBottom: 16,
+    },
+    detailTitle: {
+        color: "#fff",
+        fontSize: 20,
+        fontWeight: "900",
+    },
+    detailText: {
+        color: "#fff",
+        fontSize: 14,
+        fontWeight: "600",
     },
 });

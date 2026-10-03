@@ -21,12 +21,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import BackBtn from "@/components/core/back-btn";
 
-import { SubscriptionItem } from "@/components/subscriptions/subscription-item";
-import { useDefaultStyles } from "react-native-ui-datepicker";
-import { CardIcon } from "@solar-icons/react-native/linear/card";
-import { DollarIcon } from "@solar-icons/react-native/bold/dollar";
-import { formatCurrency } from "@/lib/format-currency";
 import { AvatarGeneric } from "@/components/user/avatar";
+import { formatCurrency } from "@/lib/format-currency";
+import { DollarIcon } from "@solar-icons/react-native/bold/dollar";
+import { useDefaultStyles } from "react-native-ui-datepicker";
 
 export default function CreateSubscription() {
     const router = useRouter();
@@ -74,7 +72,7 @@ export default function CreateSubscription() {
                         alignItems: "center",
                     }}
                 >
-                    <ActivityIndicator color={"#fff"} size={"large"} />
+                    <ActivityIndicator color={"#00c89b"} size={"large"} />
                 </View>
             ) : (
                 <ScrollView
@@ -181,13 +179,15 @@ export default function CreateSubscription() {
                                     <AvatarGeneric
                                         size={36}
                                         name={member.user.name}
+                                        user={member.user}
                                     />
                                     <View>
                                         <TextDefault style={styles.cardTitle}>
                                             {member.user.name}
                                         </TextDefault>
                                         <TextDefault style={styles.description}>
-                                            {formatCurrency(member.total)} + {formatCurrency(sharedAmount)}{" "}
+                                            {formatCurrency(member.total)} +{" "}
+                                            {formatCurrency(sharedAmount)}{" "}
                                         </TextDefault>
                                     </View>
                                 </View>
@@ -338,8 +338,8 @@ const styles = StyleSheet.create({
         borderRadius: 9999,
         position: "absolute",
         bottom: 32,
-        left: 16,
-        right: 16,
+        left: 24,
+        right: 24,
         zIndex: 10,
         alignItems: "center",
     },

@@ -6,12 +6,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/core/auth-provider";
 
 import TextDefault from "@/components/core/text-core";
-import {
-    ActivityIndicator,
-    Pressable,
-    StyleSheet,
-    View
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -132,7 +127,7 @@ export default function EditCardBottomSheet({
                         alignItems: "center",
                     }}
                 >
-                    <ActivityIndicator color={"#fff"} size={"large"} />
+                    <ActivityIndicator color={"#00c89b"} size={"large"} />
                 </View>
             ) : (
                 <ScrollView

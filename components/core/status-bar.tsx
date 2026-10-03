@@ -30,13 +30,21 @@ export default function StatusBar() {
                 style={[
                     styles.statusBarBg,
                     {
-                        height: insets.top + 24,
+                        height: insets.top + 8,
                     },
                 ]}
             >
                 <LinearGradient
-                    colors={["#161718", "transparent"]}
+                    colors={[
+                        "rgba(22, 23, 24, 1)",
+                        "rgba(22, 23, 24, 0.8)",
+                        "rgba(22, 23, 24, 0.6)",
+                        "rgba(22, 23, 24, 0.4)",
+                        "rgba(22, 23, 24, 0.2)",
+                        "transparent",
+                    ]}
                     style={StyleSheet.absoluteFill}
+                    locations={[0.2, 0.4, 0.6, 0.7, 0.8, 1]}
                 />
             </View>
         </>
