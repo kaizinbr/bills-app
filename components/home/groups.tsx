@@ -169,23 +169,6 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
 
         return (
             <View style={styles.container}>
-                <View style={styles.infoRow}>
-                    {invoices.length > 0 && (
-                        <InvoiceSelectMenu
-                            invoices={invoices}
-                            isSelected={!!selectedInvoice}
-                            selectedInvoice={selectedInvoice}
-                            setSelectedInvoiceId={setSelectedInvoiceId}
-                        />
-                    )}
-                    <TextDefault style={styles.updateText}>
-                        Atualizado:{" "}
-                        {new Date(updatedAt).toLocaleTimeString("pt-BR", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                        })}
-                    </TextDefault>
-                </View>
                 <View style={{ paddingHorizontal: 24 }}>
                     <LinearGradient
                         colors={["#00C89B", "#0B3D22"]}
@@ -398,6 +381,25 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                         </TextDefault>
                     </Pressable>
                 </ScrollView>
+                    {invoices.length > 0 && (
+                        <InvoiceSelectMenu
+                            invoices={invoices}
+                            isSelected={!!selectedInvoice}
+                            selectedInvoice={selectedInvoice}
+                            setSelectedInvoiceId={setSelectedInvoiceId}
+                        />
+                    )}
+
+                
+                {/* <View style={styles.infoRow}>
+                    <TextDefault style={styles.updateText}>
+                        Atualizado:{" "}
+                        {new Date(updatedAt).toLocaleTimeString("pt-BR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        })}
+                    </TextDefault>
+                </View> */}
 
                 <View
                     style={[

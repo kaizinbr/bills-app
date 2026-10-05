@@ -12,6 +12,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AltArrowDownIcon } from "@solar-icons/react-native/linear/alt-arrow-down";
+import { AltArrowRightIcon } from "@solar-icons/react-native/linear/alt-arrow-right";
+import { AltArrowLeftIcon } from "@solar-icons/react-native/linear/alt-arrow-left";
 
 import { type Invoice } from "@/hooks/use-group-invoices";
 
@@ -51,20 +53,26 @@ export default function InvoiceSelectMenu({
     isSelected,
     selectedInvoice,
     setSelectedInvoiceId,
+    style
 }: {
     invoices: Invoice[];
     isSelected: boolean;
     selectedInvoice?: Invoice | null;
     setSelectedInvoiceId: (id: string) => void;
+    style?: object;
 }) {
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const { data: profile, isLoading } = useProfile();
     const snapPoints = useMemo(() => ["80%", "100%"], []);
+    const sortedInvoices = useMemo(
+        () => sortInvoicesDesc(invoices),
+        [invoices],
+    );
 
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-    const handlePresentModalPress = useCallback(() => {
+    const handleInvoicesList = useCallback(() => {
         bottomSheetModalRef.current?.present();
     }, []);
     const handleSheetChanges = useCallback((index: number) => {
@@ -75,15 +83,52 @@ export default function InvoiceSelectMenu({
 
     return (
         <>
-            <Pressable
-                onPress={handlePresentModalPress}
-                style={styles.headerButton}
-            >
-                <TextDefault style={styles.headerButtonTitle} numberOfLines={1}>
-                    {formatFaturaLabel(selectedInvoice!) ?? "Selecionar fatura"}
-                </TextDefault>
-                <AltArrowDownIcon size={12} color="#B6B6B6" />
-            </Pressable>
+            <View style={[styles.headerButton, style]}>
+                <Pressable
+                    onPress={() => {
+                        const selectedIndex = sortedInvoices.findIndex(
+                            (invoice) => invoice.id === selectedInvoice?.id,
+                        );
+                        const previousInvoice =
+                            selectedIndex >= 0
+                                ? sortedInvoices[selectedIndex + 1]
+                                : undefined;
+
+                        if (previousInvoice) {
+                            setSelectedInvoiceId(previousInvoice.id);
+                        }
+                    }}
+                >
+                    <AltArrowLeftIcon color="#eee" size={24} />
+                </Pressable>
+                <Pressable onPress={handleInvoicesList}>
+                    <TextDefault
+                        style={styles.headerButtonTitle}
+                        numberOfLines={1}
+                    >
+                        {formatFaturaLabel(selectedInvoice!) ??
+                            "Selecionar fatura"}
+                    </TextDefault>
+                </Pressable>
+                <Pressable
+                    onPress={() => {
+                        const selectedIndex = sortedInvoices.findIndex(
+                            (invoice) => invoice.id === selectedInvoice?.id,
+                        );
+                        const nextInvoice =
+                            selectedIndex > 0
+                                ? sortedInvoices[selectedIndex - 1]
+                                : undefined;
+
+                        if (nextInvoice) {
+                            setSelectedInvoiceId(nextInvoice.id);
+                        }
+                    }}
+                >
+                    <AltArrowRightIcon color="#eee" size={24} />
+                </Pressable>
+                {/* <AltArrowDownIcon size={12} color="#B6B6B6" /> */}
+            </View>
             <BottomSheetModal
                 ref={bottomSheetModalRef}
                 onChange={handleSheetChanges}
@@ -153,17 +198,24 @@ const styles = StyleSheet.create({
         justifyContent: "flex-start",
     },
     headerButton: {
-        maxWidth: "50%",
+        width: "100%",
         backgroundColor: "transparent",
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "flex-start",
+        justifyContent: "space-between",
         gap: 4,
+        marginTop: 8,
+        paddingVertical: 16,
+        paddingHorizontal: 24,
+        borderBottomWidth: 1,
+        borderBottomColor: "#232323",
+        borderTopWidth: 1,
+        borderTopColor: "#232323",
     },
     headerButtonTitle: {
         flexShrink: 1,
-        color: "#B6B6B6",
-        fontSize: 12,
+        color: "#eee",
+        fontSize: 14,
         // fontWeight: "600",
         textAlign: "center",
     },

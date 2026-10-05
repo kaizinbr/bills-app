@@ -154,23 +154,17 @@ const Charts = forwardRef<GroupsHandle, GroupsProps>(
 
         return (
             <View style={styles.container}>
-                <View style={styles.infoRow}>
-                    {invoices.length > 0 && (
-                        <InvoiceSelectMenu
-                            invoices={invoices}
-                            isSelected={!!selectedInvoice}
-                            selectedInvoice={selectedInvoice}
-                            setSelectedInvoiceId={setSelectedInvoiceId}
-                        />
-                    )}
-                    <TextDefault style={styles.updateText}>
-                        Atualizado:{" "}
-                        {new Date(updatedAt).toLocaleTimeString("pt-BR", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                        })}
-                    </TextDefault>
-                </View>
+                {invoices.length > 0 && (
+                    <InvoiceSelectMenu
+                        invoices={invoices}
+                        isSelected={!!selectedInvoice}
+                        selectedInvoice={selectedInvoice}
+                        setSelectedInvoiceId={setSelectedInvoiceId}
+                        style={{
+                            marginTop: 0,
+                        }}
+                    />
+                )}
 
                 <View style={{ paddingHorizontal: 24 }}>
                     <View style={styles.groupCard}>
