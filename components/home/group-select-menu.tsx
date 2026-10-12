@@ -114,12 +114,12 @@ export default function GroupSelectMenu({
                 topInset={insets.top}
                 backgroundStyle={{ backgroundColor: "#161718" }}
                 handleIndicatorStyle={{ backgroundColor: "#555" }}
-                enableDynamicSizing={false}
+                // enableDynamicSizing={false}
             >
                 <BottomSheetView style={styles.contentContainer}>
                     <View style={styles.content}>
                         <TextDefault style={styles.headerText}>
-                            Selecione a conta que deseja visualizar:
+                            Suas contas
                         </TextDefault>
                         <View style={styles.menu}>
                             {allGroups.map((group) => (
@@ -148,6 +148,10 @@ export default function GroupSelectMenu({
                                 </Pressable>
                             ))}
 
+
+                        <TextDefault style={[styles.headerText, { marginTop: 16 }]}>
+                            Opções
+                        </TextDefault>
                             <Pressable
                                 style={styles.options}
                                 onPress={() => {
@@ -215,7 +219,8 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         flex: 1,
-        padding: 0,
+        paddingVertical: 24,
+        paddingBottom: 64,
         alignItems: "center",
     },
     content: {
@@ -226,24 +231,26 @@ const styles = StyleSheet.create({
     },
     headerText: {
         fontSize: 14,
-        marginTop: 8,
         paddingHorizontal: 24,
+        borderBottomWidth: 0.5,
+        borderBottomColor: "#555",
+        paddingVertical: 8,
+        width: "100%",
     },
     menu: {
         width: "100%",
         flexDirection: "column",
-        marginTop: 16,
+        // marginTop: 16,
     },
     options: {
         width: "100%",
-        padding: 16,
+        paddingVertical: 16,
+        paddingHorizontal: 24,
+        borderBottomWidth: 0.5,
+        borderBottomColor: "#555",
         flexDirection: "row",
         alignItems: "center",
         gap: 8,
-        // borderBottomWidth: 1,
-        // borderBottomColor: "#555",
-        borderBottomWidth: 0.5,
-        borderBottomColor: "#555",
     },
     optionsText: {
         color: "#fff",

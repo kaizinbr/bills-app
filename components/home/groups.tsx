@@ -37,6 +37,7 @@ import { UserCircleIcon } from "@solar-icons/react-native/linear/user-circle";
 import { WalletIcon } from "@solar-icons/react-native/linear/wallet";
 
 import { UsersGroupTwoRoundedIcon } from "@solar-icons/react-native/linear/users-group-two-rounded";
+import Avatar, { AvatarGeneric } from "@/components/user/avatar";
 
 type GroupsProps = {
     groupId: string | null;
@@ -72,7 +73,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
     ({ groupId, updatedAt }, ref) => {
         const router = useRouter();
         const queryClient = useQueryClient();
-        const { data } = useGroups();
+        const { data, refetch } = useGroups();
 
         const { width, height } = useWindowDimensions();
         const insets = useSafeAreaInsets();
@@ -106,6 +107,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
         }, [groupId]);
 
         const selectedInvoice = useMemo(() => {
+            // purchasesRefetch();
             if (selectedInvoiceId) {
                 return (
                     invoices.find((inv) => inv.id === selectedInvoiceId) ??
@@ -113,6 +115,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                 );
             }
             setSelectedInvoiceId(currentInvoice?.id ?? null);
+            
             return currentInvoice;
         }, [invoices, selectedInvoiceId, currentInvoice]);
 
@@ -122,11 +125,17 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
 
         const {
             data: purchasesData,
+            refetch: purchasesRefetch,
             fetchNextPage,
             hasNextPage,
             isFetchingNextPage,
             isLoading: purchasesLoading,
         } = useInvoicePurchases(selectedInvoice?.id ?? null);
+
+        useEffect(() => {
+            purchasesRefetch();
+            console.log("atualizou as compras");
+        }, [selectedInvoice?.id, purchasesRefetch]);
 
         const purchases = useMemo(
             () => purchasesData?.pages.flatMap((page) => page.purchases) ?? [],
@@ -179,15 +188,20 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                         <View
                             style={{
                                 flexDirection: "row",
-                                justifyContent: "space-between",
+                                // justifyContent: "space-between",
+                                alignItems: "center",
+                                gap: 4,
                             }}
                         >
-                            <TextDefault
-                                style={styles.invoiceText}
-                                numberOfLines={1}
-                            >
-                                {group.name}
-                            </TextDefault>
+                            {group.members?.slice(0, 3).map((member, index) => (
+                                <AvatarGeneric
+                                    name={member.user.name}
+                                    user={member.user}
+                                    key={member.id}
+                                    size={20}
+                                    fontSize={12}
+                                />
+                            ))}
                             <TextDefault
                                 style={styles.invoiceText}
                                 numberOfLines={1}
@@ -292,7 +306,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                             <Bag3Icon size={24} color="white" />
                         </View>
                         <TextDefault style={styles.infoChipText}>
-                            {totalPurchases} compras
+                            {totalPurchases} compra{totalPurchases !== 1 ? "s" : ""}
                         </TextDefault>
                     </View>
                     <Pressable
@@ -325,7 +339,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                             <CardIcon size={24} color="white" />
                         </View>
                         <TextDefault style={styles.infoChipText}>
-                            {group._count?.cards} cartões
+                            {group._count?.cards} {group._count?.cards !== 1 ? "cartões" : "cartão"}
                         </TextDefault>
                     </Pressable>
 
@@ -381,16 +395,15 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                         </TextDefault>
                     </Pressable>
                 </ScrollView>
-                    {invoices.length > 0 && (
-                        <InvoiceSelectMenu
-                            invoices={invoices}
-                            isSelected={!!selectedInvoice}
-                            selectedInvoice={selectedInvoice}
-                            setSelectedInvoiceId={setSelectedInvoiceId}
-                        />
-                    )}
+                {invoices.length > 0 && (
+                    <InvoiceSelectMenu
+                        invoices={invoices}
+                        isSelected={!!selectedInvoice}
+                        selectedInvoice={selectedInvoice}
+                        setSelectedInvoiceId={setSelectedInvoiceId}
+                    />
+                )}
 
-                
                 {/* <View style={styles.infoRow}>
                     <TextDefault style={styles.updateText}>
                         Atualizado:{" "}
@@ -453,6 +466,7 @@ const styles = StyleSheet.create({
     invoiceText: {
         fontSize: 14,
         color: "#fff",
+        fontWeight: "500",
     },
     invoiceValue: {
         fontSize: 32,
@@ -462,7 +476,9 @@ const styles = StyleSheet.create({
     },
     invoiceClosingText: {
         fontSize: 14,
-        color: "#eaeaea",
+        color: "#fff",
+        
+        fontWeight: "500",
     },
     assetCard: {
         padding: 16,
@@ -472,6 +488,7 @@ const styles = StyleSheet.create({
     assetText: {
         fontSize: 14,
         color: "#fff",
+        fontWeight: "500",
     },
     assetValue: {
         fontSize: 18,

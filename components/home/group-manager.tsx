@@ -28,7 +28,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { authClient } from "@/lib/auth-client";
 
 import * as Application from "expo-application";
-
+import { SettingsIcon } from '@solar-icons/react-native/linear/settings'
 import { Logout2Icon } from "@solar-icons/react-native/linear/logout-2";
 import { UserIcon } from "@solar-icons/react-native/linear/user";
 import { LockPasswordIcon } from "@solar-icons/react-native/linear/lock-password";
@@ -116,7 +116,7 @@ export default function GroupManager({
                 style={styles.iconButton}
                 onPress={handleManageModalPress}
             >
-                <Tuning2Icon size={24} color="#fff" />
+                <SettingsIcon  size={24} color="#fff" />
             </Pressable>
             <BottomSheetModal
                 ref={bottomSheetManageRef}
@@ -136,7 +136,7 @@ export default function GroupManager({
                 topInset={insets.top}
                 backgroundStyle={{ backgroundColor: "#161718" }}
                 handleIndicatorStyle={{ backgroundColor: "#555" }}
-                enableDynamicSizing={false}
+                // enableDynamicSizing={false}
             >
                 <BottomSheetView style={styles.contentContainer}>
                     <View style={styles.content}>
@@ -348,6 +348,8 @@ const styles = StyleSheet.create({
     contentContainer: {
         flex: 1,
         padding: 0,
+        paddingVertical: 24,
+        paddingBottom: 64,
         alignItems: "center",
     },
     content: {

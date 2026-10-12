@@ -189,7 +189,6 @@ export default function Home() {
                     />
                 </View>
             </Animated.View>
-            {/* <ScrollToTopBtn scrollRef={scrollRef} scrollY={scrollY} /> */}
             <CreatePurchase
                 selectedGroupId={selectedGroupId}
                 floatbBtnTranslateY={floatbBtnTranslateY}
@@ -198,7 +197,7 @@ export default function Home() {
                 style={styles.container}
                 ref={scrollRef}
                 contentContainerStyle={{
-                    paddingTop: HEADER_HEIGHT,
+                    paddingTop: 64 + insets.top,
                     paddingBottom: 64,
                     alignItems: "flex-start",
                     justifyContent: "flex-start",
@@ -284,9 +283,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#161718",
-        gap: 8,
-        // padding: 16,
-        paddingTop: 64,
         flexDirection: "column",
     },
     title: {

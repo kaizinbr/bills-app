@@ -207,12 +207,14 @@ export default function Home() {
                 selectedGroupId={selectedGroupId}
                 floatbBtnTranslateY={floatbBtnTranslateY}
             />
+
+            
             <Animated.ScrollView
                 style={styles.container}
                 ref={scrollRef}
                 contentContainerStyle={{
                     paddingTop: HEADER_HEIGHT,
-                    // paddingBottom: 64,
+                    paddingBottom: 64,
                     alignItems: "flex-start",
                     justifyContent: "flex-start",
                     gap: 8,

@@ -63,7 +63,7 @@ export default function AvatarHeader() {
                 onPress={handlePresentModalPress}
                 style={styles.headerSlotLeft}
             >
-                <Avatar />
+                <Avatar size={28} />
             </Pressable>
             <BottomSheetModal
                 ref={bottomSheetModalRef}
@@ -83,11 +83,11 @@ export default function AvatarHeader() {
                 topInset={insets.top}
                 backgroundStyle={{ backgroundColor: "#161718" }}
                 handleIndicatorStyle={{ backgroundColor: "#555" }}
-                enableDynamicSizing={false}
+                // enableDynamicSizing={false}
             >
                 <BottomSheetView style={styles.contentContainer}>
                     <View style={styles.content}>
-                        <AvatarNoPress size={64} fontSize={28} />
+                        <AvatarNoPress size={116} fontSize={28} />
                         <TextDefault style={styles.nameText}>
                             {profile?.name}
                         </TextDefault>
@@ -210,7 +210,8 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         flex: 1,
-        padding: 0,
+        paddingVertical: 24,
+        paddingBottom: 64,
         alignItems: "center",
     },
     content: {
@@ -236,7 +237,8 @@ const styles = StyleSheet.create({
     },
     options: {
         width: "100%",
-        padding: 16,
+        paddingVertical: 16,
+        paddingHorizontal: 24,
         borderBottomWidth: 0.5,
         borderBottomColor: "#555",
         flexDirection: "row",
@@ -253,7 +255,8 @@ const styles = StyleSheet.create({
     modalBox: {
         backgroundColor: "#161718",
         borderRadius: 12,
-        padding: 16,
+        paddingVertical: 16,
+        paddingHorizontal: 24,
         width: "100%",
         maxWidth: 400,
         zIndex: 5,

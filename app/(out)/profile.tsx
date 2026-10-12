@@ -107,7 +107,7 @@ export default function CreateGroup() {
                                 paddingHorizontal: 24,
                             }}
                         >
-                            <AvatarNoPress size={64} fontSize={28} />
+                            <AvatarNoPress size={116} fontSize={28} />
                             <TextDefault style={styles.title}>
                                 {profile?.name}
                             </TextDefault>

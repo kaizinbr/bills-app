@@ -10,12 +10,10 @@ import {
 } from "react-native";
 
 export default function Avatar({
-    data,
     style,
     size,
     fontSize,
 }: {
-    data?: UserProfile;
     style?: any;
     size?: number;
     fontSize?: number;
@@ -158,7 +156,7 @@ export function AvatarGeneric({
         id: string;
         name: string;
         image: string | null;
-        color: string | null;
+        color?: string | null;
     };
     size?: number;
     fontSize?: number;

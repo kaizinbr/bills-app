@@ -1,5 +1,9 @@
 import TextDefault from "@/components/core/text-core";
 import { useProfile } from "@/hooks/use-profile";
+import { useInvoice } from "@/hooks/use-invoice";
+import { useGroups } from "@/hooks/use-group";
+import { useInvoicePurchases } from "@/hooks/use-invoice-purchases";
+
 import { useRouter } from "expo-router";
 import { useCallback, useMemo, useRef } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
@@ -8,6 +12,7 @@ import {
     BottomSheetBackdrop,
     BottomSheetModal,
     BottomSheetView,
+    BottomSheetScrollView
 } from "@gorhom/bottom-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -53,7 +58,7 @@ export default function InvoiceSelectMenu({
     isSelected,
     selectedInvoice,
     setSelectedInvoiceId,
-    style
+    style,
 }: {
     invoices: Invoice[];
     isSelected: boolean;
@@ -64,6 +69,12 @@ export default function InvoiceSelectMenu({
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const { data: profile, isLoading } = useProfile();
+    const {
+        data: purchasesData,
+        refetch,
+        isLoading: purchasesLoading,
+    } = useInvoicePurchases(selectedInvoice?.id ?? null);
+
     const snapPoints = useMemo(() => ["80%", "100%"], []);
     const sortedInvoices = useMemo(
         () => sortInvoicesDesc(invoices),
@@ -98,10 +109,18 @@ export default function InvoiceSelectMenu({
                             setSelectedInvoiceId(previousInvoice.id);
                         }
                     }}
+                    style={{
+                        // backgroundColor: "red",
+                        paddingVertical: 16,
+                        paddingHorizontal: 24,
+                    }}
                 >
                     <AltArrowLeftIcon color="#eee" size={24} />
                 </Pressable>
-                <Pressable onPress={handleInvoicesList}>
+                <Pressable
+                    onPress={handleInvoicesList}
+                    style={{ paddingVertical: 16 }}
+                >
                     <TextDefault
                         style={styles.headerButtonTitle}
                         numberOfLines={1}
@@ -124,6 +143,11 @@ export default function InvoiceSelectMenu({
                             setSelectedInvoiceId(nextInvoice.id);
                         }
                     }}
+                    style={{
+                        // backgroundColor: "red",
+                        paddingVertical: 16,
+                        paddingHorizontal: 24,
+                    }}
                 >
                     <AltArrowRightIcon color="#eee" size={24} />
                 </Pressable>
@@ -135,7 +159,7 @@ export default function InvoiceSelectMenu({
                 onDismiss={() => {
                     // fecthData(true);
                 }}
-                snapPoints={snapPoints}
+                // snapPoints={snapPoints}
                 backdropComponent={(backdropProps) => (
                     <BottomSheetBackdrop
                         {...backdropProps}
@@ -147,9 +171,9 @@ export default function InvoiceSelectMenu({
                 topInset={insets.top}
                 backgroundStyle={{ backgroundColor: "#161718" }}
                 handleIndicatorStyle={{ backgroundColor: "#555" }}
-                enableDynamicSizing={false}
+                // enableDynamicSizing={false}
             >
-                <BottomSheetView style={styles.contentContainer}>
+                <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>
                     <View style={styles.content}>
                         <TextDefault style={styles.headerText}>
                             Selecione a fatura que deseja visualizar:
@@ -184,7 +208,7 @@ export default function InvoiceSelectMenu({
                             })}
                         </View>
                     </View>
-                </BottomSheetView>
+                </BottomSheetScrollView>
             </BottomSheetModal>
         </>
     );
@@ -205,8 +229,8 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         gap: 4,
         marginTop: 8,
-        paddingVertical: 16,
-        paddingHorizontal: 24,
+        paddingVertical: 0,
+        // paddingHorizontal: 24,
         borderBottomWidth: 1,
         borderBottomColor: "#232323",
         borderTopWidth: 1,
@@ -216,13 +240,14 @@ const styles = StyleSheet.create({
         flexShrink: 1,
         color: "#eee",
         fontSize: 14,
-        // fontWeight: "600",
+        fontWeight: "600",
         textAlign: "center",
     },
     contentContainer: {
         flex: 1,
         padding: 0,
         alignItems: "center",
+        paddingBottom: 64,
     },
     content: {
         flex: 1,
@@ -242,7 +267,8 @@ const styles = StyleSheet.create({
     },
     options: {
         width: "100%",
-        padding: 16,
+        paddingVertical: 16,
+        paddingHorizontal: 24,
         // borderBottomWidth: 0.5,
         // borderBottomColor: "#555",
     },
