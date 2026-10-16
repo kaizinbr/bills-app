@@ -3,7 +3,7 @@ import { useGroups } from "@/hooks/use-group";
 import { useGroupInvoices, type Invoice } from "@/hooks/use-group-invoices";
 import { useInvoicePurchases } from "@/hooks/use-invoice-purchases";
 import { useInvoiceTotal } from "@/hooks/use-invoice-total";
-import { colorForIndex } from "@/lib/category-colors";
+import { colorForCategoryKey, colorForIndex } from "@/lib/category-colors";
 import { formatCurrency } from "@/lib/format-currency";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -125,7 +125,7 @@ const Charts = forwardRef<GroupsHandle, GroupsProps>(
                     key,
                     label,
                     value,
-                    color: colorForIndex(index),
+                    color: colorForCategoryKey(key),
                 }))
                 .sort((a, b) => b.value - a.value);
         }, [purchases]);
@@ -206,9 +206,17 @@ const Charts = forwardRef<GroupsHandle, GroupsProps>(
                             gap: 8,
                         }}
                     >
-                        <TextDefault style={styles.title}>
-                            Uso do limite
-                        </TextDefault>
+                        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                            <TextDefault style={[styles.title, { marginBottom: 0 }]}>
+                                Uso do limite
+                            </TextDefault>
+                            <TextDefault style={[styles.limit]}>
+                                {((totalData.total / Number(group.limit)) * 100)
+                                    .toFixed(0)
+                                    .replace(".", ",")}
+                                % utilizado
+                            </TextDefault>
+                        </View>
                         <View style={styles.track}>
                             <View
                                 style={[
@@ -228,13 +236,11 @@ const Charts = forwardRef<GroupsHandle, GroupsProps>(
                                 ]}
                             />
                         </View>
+                        
+                            <TextDefault style={[styles.limit]}>
+                                Gastou {formatCurrency(totalData.total)} de {formatCurrency(Number(group.limit))}
+                            </TextDefault>
 
-                        <TextDefault style={[styles.limit]}>
-                            {((totalData.total / Number(group.limit)) * 100)
-                                .toFixed(0)
-                                .replace(".", ",")}
-                            % utilizado
-                        </TextDefault>
                     </View>
                 )}
             </View>

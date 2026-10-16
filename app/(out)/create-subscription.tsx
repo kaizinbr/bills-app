@@ -113,6 +113,7 @@ export default function CreateSubscription() {
     return (
         <View style={styles.main}>
             <StatusBar />
+                        <BackBtn />
             {loading ? (
                 <View
                     style={{
@@ -140,7 +141,6 @@ export default function CreateSubscription() {
                         showsVerticalScrollIndicator={false}
                         style={styles.container}
                     >
-                        <BackBtn />
                         <TextDefault style={styles.title}>
                             Criar Assinatura
                         </TextDefault>
@@ -450,8 +450,8 @@ const styles = StyleSheet.create({
         borderColor: "transparent",
         padding: 12,
         borderRadius: 16,
-        height: 86,
-        aspectRatio: 4 / 3,
+        height: 64,
+        aspectRatio: 5 / 3,
         justifyContent: "flex-end",
     },
     catButtonSelected: {

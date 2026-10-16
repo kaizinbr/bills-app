@@ -206,6 +206,7 @@ export default function CreateCard() {
                     : "Erro ao criar a compra.",
             );
             console.error("Error creating purchase:", error);
+            setFinalLoading(false);
         }
     };
 
@@ -622,7 +623,7 @@ export default function CreateCard() {
                     style={[
                         styles.overlay,
                         StyleSheet.absoluteFill,
-                        { zIndex: 10 },
+                        { zIndex: 50 },
                     ]}
                 >
                     <View style={styles.modalBox}>

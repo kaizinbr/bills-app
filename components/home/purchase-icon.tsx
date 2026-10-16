@@ -12,6 +12,7 @@ import { PillIcon } from '@solar-icons/react-native/linear/pill'
 import { BusIcon } from '@solar-icons/react-native/linear/bus'
 import { ClapperboardOpenIcon } from '@solar-icons/react-native/linear/clapperboard-open'
 import { MusicNote3Icon } from '@solar-icons/react-native/linear/music-note-3'
+import { HouseIcon } from '@solar-icons/react-native/linear/house'
 
 type PurchaseIconProps = {
     categoryKey?: string | null;
@@ -65,6 +66,10 @@ export function PurchaseIcon({ categoryKey, style, iconSize }: PurchaseIconProps
             break;
         case "emprestimo":
             Icon = WalletIcon;
+            break;
+        case "casa":
+        case "aluguel":
+            Icon = HouseIcon;
             break;
     }
 

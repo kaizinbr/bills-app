@@ -121,6 +121,7 @@ export default function PurchasePage() {
     return (
         <View style={styles.main}>
             <StatusBar />
+                    <BackBtn />
             {loading && (
                 <View
                     style={{
@@ -165,9 +166,8 @@ export default function PurchasePage() {
                         />
                     }
                 >
-                    <BackBtn />
                     <TextDefault style={styles.title}>
-                        {data.description ||
+                        {(data.name).trim() ||
                             data.category?.label ||
                             "Sem descrição"}{" "}
                         · {formatCurrency(data.amount)}

@@ -124,6 +124,7 @@ export default function PurchasePage() {
     return (
         <View style={styles.main}>
             <StatusBar />
+                    <BackBtn />
             {loading && (
                 <View
                     style={{
@@ -168,10 +169,9 @@ export default function PurchasePage() {
                         />
                     }
                 >
-                    <BackBtn />
                     <TextDefault style={styles.title}>
-                        {purchaseData.description ||
-                            purchaseData.category?.label ||
+                        {(purchaseData.description).trim() ||
+                            (purchaseData.category?.label).trim() ||
                             "Sem descrição"}{" "}
                         · {formatCurrency(purchaseData.amount)}
                     </TextDefault>
@@ -185,7 +185,7 @@ export default function PurchasePage() {
                         ]}
                     >
                         {purchaseData.subscription
-                            ? "Compra recorrente"
+                            ? "Assinatura mensal"
                             : "Compra única"}
                     </TextDefault>
 

@@ -249,7 +249,14 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                                 },
                             ]}
                         >
-                            <Pressable style={[styles.assetCard]}>
+                            <Pressable 
+                            onPress={() => {
+                                router.push({
+                                    pathname: `/(tabs)/chart`,
+                                    // params: { invoiceId: selectedInvoiceId! },
+                                });
+                            }}
+                            style={[styles.assetCard]}>
                                 <View
                                     style={{
                                         flexDirection: "row",
