@@ -32,6 +32,12 @@ import DateTimePicker, {
 import { useGroups } from "@/hooks/use-group";
 
 import { formatCurrency } from "@/lib/format-currency";
+import { PurchaseIcon } from "@/components/home/purchase-icon";
+import { border, width } from "@expo/ui/jetpack-compose/modifiers";
+import { AvatarGeneric } from "@/components/user/avatar";
+
+import { UserCircleIcon } from "@solar-icons/react-native/linear/user-circle";
+import { SaleSquareIcon } from "@solar-icons/react-native/linear/sale-square";
 
 // Divide o valor total em `installments` parcelas iguais (em centavos),
 // jogando o resto do arredondamento na 1ª parcela — mesma regra usada no
@@ -139,7 +145,7 @@ export default function CreateCard() {
                 const groupsResponse = await api.get(`groups/${groupId}`);
                 setGroupData(groupsResponse.data.group);
                 setCards(groupsResponse.data.group?.cards ?? []);
-                setMembers(groupsResponse.data.group?.members ?? []);
+                setMembers(groupsResponse.data.group?.groupMembers ?? []);
 
                 const categoriesResponse = await api.get(`categories`);
                 setCategories(categoriesResponse.data.categories);
@@ -166,7 +172,7 @@ export default function CreateCard() {
                 setLoadingMessage("Criando as parcelas da sua compra...");
                 setFinalLoading(true);
                 await api.post(
-                    "/parcelado",
+                    "/installments",
                     {
                         description: cardName,
                         totalAmount: totalCents,
@@ -235,7 +241,7 @@ export default function CreateCard() {
                             alignItems: "flex-start",
                             justifyContent: "flex-start",
                             gap: 8,
-                            paddingTop: insets.top + 64,
+                            paddingTop: insets.top + 24,
                             paddingBottom: insets.bottom + 86,
                         }}
                         showsVerticalScrollIndicator={false}
@@ -244,7 +250,7 @@ export default function CreateCard() {
                         <TextDefault style={styles.title}>
                             Criar Compra
                         </TextDefault>
-                        <View
+                        {/* <View
                             style={{
                                 paddingHorizontal: 24,
                             }}
@@ -261,21 +267,11 @@ export default function CreateCard() {
                             >
                                 {groupData?.name}
                             </TextDefault>
-                        </View>
+                        </View> */}
                         <View style={[styles.inputContainer]}>
-                            <TextDefault style={styles.label}>
-                                Título da compra
-                            </TextDefault>
-                            <Input
-                                placeholder="Lanche no dêssa"
-                                value={cardName}
-                                onChangeText={setCardName}
-                            />
-                        </View>
-                        <View style={[styles.inputContainer]}>
-                            <TextDefault style={styles.label}>
+                            {/* <TextDefault style={styles.label}>
                                 {isInstallment ? "Valor total" : "Valor"}
-                            </TextDefault>
+                            </TextDefault> */}
                             <Input
                                 placeholder="R$ 0,00"
                                 value={formatCurrency(amountCents)}
@@ -291,6 +287,21 @@ export default function CreateCard() {
                                 }}
                                 keyboardType="number-pad"
                                 inputMode="numeric"
+                                style={{
+                                    fontSize: 24,
+                                    fontWeight: "700",
+                                    textAlign: "center",
+                                }}
+                            />
+                        </View>
+                        <View style={[styles.inputContainer]}>
+                            <TextDefault style={styles.label}>
+                                Título da compra
+                            </TextDefault>
+                            <Input
+                                placeholder="Lanche no dêssa"
+                                value={cardName}
+                                onChangeText={setCardName}
                             />
                         </View>
 
@@ -317,7 +328,6 @@ export default function CreateCard() {
                                             checkedThumbColor: "#0B3D22",
                                             checkedTrackColor: "#009C7A",
                                         }}
-
                                     />
                                 </Host>
                                 <TextDefault style={{ marginLeft: 8 }}>
@@ -396,6 +406,15 @@ export default function CreateCard() {
                                                 styles.catButtonSelected,
                                         ]}
                                     >
+                                        <PurchaseIcon
+                                            categoryKey={cat.key}
+                                            style={{
+                                                width: 24,
+                                                height: 24,
+                                                borderRadius: 8,
+                                            }}
+                                            iconSize={14}
+                                        />
                                         <TextDefault
                                             style={styles.catButtonText}
                                         >
@@ -487,7 +506,7 @@ export default function CreateCard() {
                             >
                                 {isInstallment
                                     ? "Dono do parcelamento"
-                                    : "Usuário que fez a compra"}
+                                    : "Quem paga"}
                             </TextDefault>
                             <ScrollView
                                 horizontal
@@ -511,10 +530,22 @@ export default function CreateCard() {
                                         styles.cardButton,
                                         selectedMemberId === null &&
                                             styles.cardButtonSelected,
+                                        {
+                                            height: 80,
+                                            aspectRatio: 4 / 3,
+                                        },
                                     ]}
                                 >
+                                    <SaleSquareIcon
+                                        size={28}
+                                        color="#fff"
+                                        style={{
+                                            marginRight: 8,
+                                            marginBottom: 4,
+                                        }}
+                                    />
                                     <TextDefault style={styles.cardButtonText}>
-                                        Sem usuário
+                                        Dividido
                                     </TextDefault>
                                 </Pressable>
                                 {members.map((member) => (
@@ -525,10 +556,27 @@ export default function CreateCard() {
                                         }}
                                         style={[
                                             styles.cardButton,
-                                            selectedMemberId === member.user.id &&
+                                            selectedMemberId ===
+                                                member.user.id &&
                                                 styles.cardButtonSelected,
+
+                                            {
+                                                height: 80,
+                                                aspectRatio: 4 / 3,
+                                            },
                                         ]}
                                     >
+                                        <AvatarGeneric
+                                            name={
+                                                member.user?.name || member.id
+                                            }
+                                            user={member.user}
+                                            size={28}
+                                            style={{
+                                                marginRight: 8,
+                                                marginBottom: 4,
+                                            }}
+                                        />
                                         <TextDefault
                                             style={styles.cardButtonText}
                                         >
@@ -558,7 +606,7 @@ export default function CreateCard() {
                                         />
                                     </Host>
                                     <TextDefault style={{ marginLeft: 8 }}>
-                                        Comprado hoje
+                                        Compra feita hoje
                                     </TextDefault>
                                 </View>
                             </View>
@@ -723,7 +771,6 @@ export default function CreateCard() {
                                 setPurchaseDate(date);
                             }}
                             mode="single"
-                            
                             style={{ width: "100%" }}
                             locale="pt-br"
                             timeZone="America/Fortaleza"
@@ -787,10 +834,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
     },
     title: {
-        fontSize: 24,
+        fontSize: 14,
         fontWeight: "bold",
         marginBottom: 16,
         paddingHorizontal: 24,
+        textAlign: "center",
+        width: "100%",
     },
     description: {
         fontSize: 16,
@@ -862,11 +911,12 @@ const styles = StyleSheet.create({
         backgroundColor: "#212223",
         borderWidth: 2,
         borderColor: "transparent",
-        padding: 12,
-        borderRadius: 16,
-        height: 64,
-        aspectRatio: 5 / 3,
-        justifyContent: "flex-end",
+        padding: 6,
+        borderRadius: 12,
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "row",
+        gap: 4,
     },
     catButtonSelected: {
         borderWidth: 2,

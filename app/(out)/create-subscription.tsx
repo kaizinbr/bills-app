@@ -30,6 +30,7 @@ import DateTimePicker, {
 } from "react-native-ui-datepicker";
 
 import { formatCurrency } from "@/lib/format-currency";
+import { PurchaseIcon } from "@/components/home/purchase-icon";
 
 export default function CreateSubscription() {
     const router = useRouter();
@@ -66,8 +67,7 @@ export default function CreateSubscription() {
         setCanSubmit(
             name.trim() !== "" &&
                 amountCents.trim() !== "" &&
-                category !== null &&
-                selectedCardId !== null,
+                category !== null,
         );
     }, [name, amountCents, category, selectedCardId]);
 
@@ -113,7 +113,7 @@ export default function CreateSubscription() {
     return (
         <View style={styles.main}>
             <StatusBar />
-                        <BackBtn />
+            <BackBtn />
             {loading ? (
                 <View
                     style={{
@@ -136,7 +136,7 @@ export default function CreateSubscription() {
                             alignItems: "flex-start",
                             justifyContent: "flex-start",
                             gap: 8,
-                            paddingTop: insets.top + 64,
+                            paddingTop: insets.top + 24,
                         }}
                         showsVerticalScrollIndicator={false}
                         style={styles.container}
@@ -145,36 +145,7 @@ export default function CreateSubscription() {
                             Criar Assinatura
                         </TextDefault>
 
-                        <View style={{ paddingHorizontal: 24 }}>
-                            <TextDefault
-                                style={{
-                                    paddingHorizontal: 24,
-                                    paddingVertical: 6,
-                                    fontWeight: "600",
-                                    color: "#eeeeee",
-                                    backgroundColor: "#009C7A",
-                                    borderRadius: 999,
-                                }}
-                            >
-                                {groupData?.name}
-                            </TextDefault>
-                        </View>
-
                         <View style={styles.inputContainer}>
-                            <TextDefault style={styles.label}>
-                                Nome da assinatura
-                            </TextDefault>
-                            <Input
-                                placeholder="Netflix, Spotify..."
-                                value={name}
-                                onChangeText={setName}
-                            />
-                        </View>
-
-                        <View style={styles.inputContainer}>
-                            <TextDefault style={styles.label}>
-                                Valor mensal
-                            </TextDefault>
                             <Input
                                 placeholder="R$ 0,00"
                                 value={formatCurrency(amountCents)}
@@ -189,6 +160,22 @@ export default function CreateSubscription() {
                                 }}
                                 keyboardType="number-pad"
                                 inputMode="numeric"
+                                style={{
+                                    fontSize: 24,
+                                    fontWeight: "700",
+                                    textAlign: "center",
+                                }}
+                            />
+                        </View>
+
+                        <View style={styles.inputContainer}>
+                            <TextDefault style={styles.label}>
+                                Nome da assinatura
+                            </TextDefault>
+                            <Input
+                                placeholder="Netflix, Spotify..."
+                                value={name}
+                                onChangeText={setName}
                             />
                         </View>
 
@@ -225,6 +212,15 @@ export default function CreateSubscription() {
                                                 styles.catButtonSelected,
                                         ]}
                                     >
+                                        <PurchaseIcon
+                                            categoryKey={cat.key}
+                                            style={{
+                                                width: 24,
+                                                height: 24,
+                                                borderRadius: 8,
+                                            }}
+                                            iconSize={14}
+                                        />
                                         <TextDefault
                                             style={styles.catButtonText}
                                         >
@@ -258,6 +254,18 @@ export default function CreateSubscription() {
                                     paddingHorizontal: 24,
                                 }}
                             >
+                                <Pressable
+                                    onPress={() => setSelectedCardId(null)}
+                                    style={[
+                                        styles.cardButton,
+                                        selectedCardId === null &&
+                                            styles.cardButtonSelected,
+                                    ]}
+                                >
+                                    <TextDefault style={styles.cardButtonText}>
+                                        Sem cartão
+                                    </TextDefault>
+                                </Pressable>
                                 {cards.map((card) => (
                                     <Pressable
                                         key={card.id}
@@ -282,17 +290,6 @@ export default function CreateSubscription() {
                                     </Pressable>
                                 ))}
                             </ScrollView>
-                            {cards.length === 0 && (
-                                <TextDefault
-                                    style={{
-                                        paddingHorizontal: 24,
-                                        color: "#888",
-                                    }}
-                                >
-                                    Essa conta ainda não tem cartões. Crie um
-                                    cartão primeiro.
-                                </TextDefault>
-                            )}
                         </View>
 
                         <View style={styles.inputContainer}>
@@ -401,10 +398,12 @@ const styles = StyleSheet.create({
     keyboardContainer: { flex: 1, zIndex: 1 },
     container: { flex: 1, zIndex: 1 },
     title: {
-        fontSize: 24,
+        fontSize: 14,
         fontWeight: "bold",
         marginBottom: 16,
         paddingHorizontal: 24,
+        textAlign: "center",
+        width: "100%",
     },
     inputContainer: {
         marginTop: 16,
@@ -412,7 +411,11 @@ const styles = StyleSheet.create({
         minWidth: "100%",
         paddingHorizontal: 24,
     },
-    label: { color: "#eeeeee", fontSize: 12, marginBottom: 8 },
+    label: {
+        color: "#eeeeee",
+        fontSize: 12,
+        marginBottom: 8,
+    },
     overlay: {
         flex: 1,
         backgroundColor: "rgba(0, 0, 0, 0.6)",
@@ -443,23 +446,32 @@ const styles = StyleSheet.create({
         borderColor: "#009C7A",
         backgroundColor: "#0B3D22",
     },
-    cardButtonText: { color: "#fff", fontSize: 14, fontWeight: "600" },
+    cardButtonText: {
+        color: "#fff",
+        fontSize: 14,
+        fontWeight: "600",
+    },
     catButton: {
         backgroundColor: "#212223",
         borderWidth: 2,
         borderColor: "transparent",
-        padding: 12,
-        borderRadius: 16,
-        height: 64,
-        aspectRatio: 5 / 3,
-        justifyContent: "flex-end",
+        padding: 6,
+        borderRadius: 12,
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "row",
+        gap: 4,
     },
     catButtonSelected: {
         borderWidth: 2,
         borderColor: "#009C7A",
         backgroundColor: "#0B3D22",
     },
-    catButtonText: { color: "#fff", fontSize: 14, fontWeight: "600" },
+    catButtonText: {
+        color: "#fff",
+        fontSize: 14,
+        fontWeight: "600",
+    },
     submitBtn: {
         backgroundColor: "#009C7A",
         borderWidth: 2,

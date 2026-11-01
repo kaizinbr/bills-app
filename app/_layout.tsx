@@ -19,6 +19,8 @@ import { AppThemeProvider } from '@/theme/theme-context';
 
 SplashScreen.preventAutoHideAsync();
 
+
+
 export default function RootLayout() {
     const colorScheme = useColorScheme();
     // console.log("RootLayout colorScheme", colorScheme);

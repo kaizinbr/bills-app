@@ -36,7 +36,7 @@ export default function PurchasePage() {
     const router = useRouter();
     const local = useLocalSearchParams();
     const subscriptionId = local.id as string; // id da compra, se for edição
-    console.log("Local search params:", local.id);
+    // console.log("Local search params:", local.id);
 
     const { session } = useAuth();
     const currentUserId = session?.user?.id;

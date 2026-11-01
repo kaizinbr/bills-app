@@ -59,12 +59,12 @@ export default function GroupSelectMenu({
     const [anchor, setAnchor] = useState({ x: 0, y: 0, width: 0, height: 0 });
     const buttonRef = useRef<View>(null);
 
-    const openMenu = () => {
-        buttonRef.current?.measureInWindow((x, y, width, height) => {
-            setAnchor({ x, y, width, height });
-            setOpen(true);
-        });
-    };
+    // const openMenu = () => {
+    //     buttonRef.current?.measureInWindow((x, y, width, height) => {
+    //         setAnchor({ x, y, width, height });
+    //         setOpen(true);
+    //     });
+    // };
 
     // const selectedItem = items.find((item) => item.id === selectedId);
 
@@ -195,20 +195,20 @@ const styles = StyleSheet.create({
     },
     headerButton: {
         maxWidth: "33%",
-        backgroundColor: "#2b2b2b",
+        // backgroundColor: "rgba(40, 40, 40, 0.5)",
         paddingHorizontal: 12,
         paddingVertical: 8,
-        borderRadius: 10,
+        // borderRadius: 10,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "flex-start",
         gap: 2,
-        borderWidth: 1,
-        borderColor: "#3a3a3a",
-        shadowColor: "#000",
-        shadowOpacity: 0.15,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 3 },
+        // borderWidth: 1,
+        // borderColor: "rgba(40, 40, 40, 0.5)",
+        // shadowColor: "#000",
+        // shadowOpacity: 0.15,
+        // shadowRadius: 6,
+        // shadowOffset: { width: 0, height: 3 },
     },
     headerButtonTitle: {
         flexShrink: 1,

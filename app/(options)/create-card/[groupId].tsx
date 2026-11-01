@@ -23,7 +23,7 @@ import { useDefaultStyles } from "react-native-ui-datepicker";
 
 export default function CreateCard() {
     const local = useLocalSearchParams();
-    console.log("Local search params:", local.groupId);
+    // console.log("Local search params:", local.groupId);
     const groupId = local.groupId as string;
 
     const { session } = useAuth();

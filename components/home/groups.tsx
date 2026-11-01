@@ -1,4 +1,3 @@
-// components/home/groups.tsx
 import TextDefault from "@/components/core/text-core";
 import { PurchaseSection } from "@/components/home/purchase-section";
 import { useGroups } from "@/hooks/use-group";
@@ -33,11 +32,12 @@ import { Bag3Icon } from "@solar-icons/react-native/linear/bag-3";
 import { BagCheckIcon } from "@solar-icons/react-native/linear/bag-check";
 import { CardIcon } from "@solar-icons/react-native/linear/card";
 import { RefreshCircleIcon } from "@solar-icons/react-native/linear/refresh-circle";
-import { UserCircleIcon } from "@solar-icons/react-native/linear/user-circle";
+import { SaleSquareIcon } from '@solar-icons/react-native/linear/sale-square'
 import { WalletIcon } from "@solar-icons/react-native/linear/wallet";
 
 import { UsersGroupTwoRoundedIcon } from "@solar-icons/react-native/linear/users-group-two-rounded";
 import Avatar, { AvatarGeneric } from "@/components/user/avatar";
+import GroupMembers from "@/components/home/group-members";
 
 type GroupsProps = {
     groupId: string | null;
@@ -115,7 +115,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                 );
             }
             setSelectedInvoiceId(currentInvoice?.id ?? null);
-            
+
             return currentInvoice;
         }, [invoices, selectedInvoiceId, currentInvoice]);
 
@@ -177,62 +177,36 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
         const canCreateInSelected = selectedInvoice?.status === "OPEN";
 
         return (
-            <View style={styles.container}>
+            <View style={[styles.container, { marginTop: insets.top + 80 }]}>
                 <View style={{ paddingHorizontal: 24 }}>
-                    <LinearGradient
-                        colors={["#00C89B", "#0B3D22"]}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={styles.invoiceCard}
-                    >
-                        <View
-                            style={{
-                                flexDirection: "row",
-                                // justifyContent: "space-between",
-                                alignItems: "center",
-                                gap: 4,
-                            }}
-                        >
-                            {group.members?.slice(0, 3).map((member, index) => (
-                                <AvatarGeneric
-                                    name={member.user.name}
-                                    user={member.user}
-                                    key={member.id}
-                                    size={20}
-                                    fontSize={12}
-                                />
-                            ))}
-                            <TextDefault
-                                style={styles.invoiceText}
-                                numberOfLines={1}
-                            >
-                                {group.members?.length} membro
-                                {group.members?.length !== 1 ? "s" : ""}
-                            </TextDefault>
-                        </View>
-                        {/* <TextDefault style={styles.groupName} numberOfLines={1}>
-                            Total da conta {group.name}:
-                        </TextDefault> */}
-                        <View>
-                            <TextDefault style={[styles.invoiceValue]}>
-                                {formatCurrency(totalData?.total)}
-                            </TextDefault>
+                    <View style={styles.invoiceCard}>
+                        <TextDefault style={styles.groupName} numberOfLines={1}>
+                            Total da fatura:
+                        </TextDefault>
+                        <TextDefault style={[styles.invoiceValue]}>
+                            {formatCurrency(totalData?.total)}
+                        </TextDefault>
+                        <View style={{ flexDirection: "column", gap: 8 }}>
+                            <GroupMembers groupMembers={group.groupMembers} />
                             <TextDefault style={styles.invoiceClosingText}>
                                 Fecha dia {group.closingDay}{" "}
                                 {group.limit
-                                    ? `• Limite ${formatCurrency(group.limit)}`
+                                    ? `• Limite mensal de ${formatCurrency(group.limit)}`
                                     : ""}
                             </TextDefault>
                         </View>
-                    </LinearGradient>
+                    </View>
                 </View>
-                <View
-                    style={{
-                        paddingHorizontal: 24,
-                        gap: 14,
+                <ScrollView
+                    contentContainerStyle={{
                         flexDirection: "row",
                         alignItems: "center",
+                        paddingVertical: 16,
+                        paddingHorizontal: 24,
+                        gap: 14,
                     }}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
                 >
                     {selectedInvoiceId && (
                         <Incomes invoiceId={selectedInvoiceId} />
@@ -244,19 +218,21 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                             end={{ x: 1, y: 1 }}
                             style={[
                                 {
-                                    width: (width - 64) / 2,
-                                    borderRadius: 16,
+                                    padding: 16,
+                                    width: width - 48,
+                                    borderRadius: 18,
                                 },
                             ]}
                         >
-                            <Pressable 
-                            onPress={() => {
-                                router.push({
-                                    pathname: `/(tabs)/chart`,
-                                    // params: { invoiceId: selectedInvoiceId! },
-                                });
-                            }}
-                            style={[styles.assetCard]}>
+                            <Pressable
+                                onPress={() => {
+                                    router.push({
+                                        pathname: `/(tabs)/chart`,
+                                        // params: { invoiceId: selectedInvoiceId! },
+                                    });
+                                }}
+                                style={[styles.assetCard]}
+                            >
                                 <View
                                     style={{
                                         flexDirection: "row",
@@ -278,12 +254,17 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                                     )
                                         .toFixed(0)
                                         .replace(".", ",")}
-                                    %
+                                    % <TextDefault style={{
+                                        fontSize: 14,
+                                        color: "#fff",
+                                    }}>
+                                        ({formatCurrency(totalData.total)} de {formatCurrency(group.limit)})
+                                    </TextDefault>
                                 </TextDefault>
                             </Pressable>
                         </LinearGradient>
                     )}
-                </View>
+                </ScrollView>
 
                 {/* credor, cartões e ações da conta */}
                 <ScrollView
@@ -294,7 +275,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                     <Pressable
                         onPress={() => {
                             router.push({
-                                pathname: `/(tabs)/values/[invoiceId]`,
+                                pathname: `/(options)/values/[invoiceId]`,
                                 params: { invoiceId: selectedInvoiceId! },
                             });
                         }}
@@ -313,14 +294,15 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                             <Bag3Icon size={24} color="white" />
                         </View>
                         <TextDefault style={styles.infoChipText}>
-                            {totalPurchases} compra{totalPurchases !== 1 ? "s" : ""}
+                            {totalPurchases} compra
+                            {totalPurchases !== 1 ? "s" : ""}
                         </TextDefault>
                     </View>
                     <Pressable
                         style={styles.buttons}
                         onPress={() => {
-                            router.push({
-                                pathname: `/(tabs)/subscriptions/[groupId]`,
+                            router.navigate({
+                                pathname: `/(options)/subscriptions/[groupId]`,
                                 params: { groupId: group.id },
                             });
                         }}
@@ -333,11 +315,32 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                             {group._count?.subscriptions !== 1 ? "s" : ""}
                         </TextDefault>
                     </Pressable>
+
                     <Pressable
                         style={styles.buttons}
                         onPress={() => {
+                            console.log("group", group.id);
                             router.push({
-                                pathname: `/(tabs)/cards/[groupId]`,
+                                pathname: `/(options)/installments/[groupId]`,
+                                params: { groupId: group.id },
+                            });
+                        }}
+                    >
+                        <View style={styles.itemIcon}>
+                            <SaleSquareIcon size={24} color="white" />
+                        </View>
+                        <TextDefault style={styles.infoChipText}>
+                            {group._count?.installmentPlans}{" "}
+                            {group._count?.installmentPlans !== 1 ? "parcelamentos" : "parcelamento"}
+                        </TextDefault>
+                    </Pressable>
+
+                    <Pressable
+                        style={styles.buttons}
+                        onPress={() => {
+                            console.log("group", group.id);
+                            router.push({
+                                pathname: `/(options)/cards/[groupId]`,
                                 params: { groupId: group.id },
                             });
                         }}
@@ -346,7 +349,8 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                             <CardIcon size={24} color="white" />
                         </View>
                         <TextDefault style={styles.infoChipText}>
-                            {group._count?.cards} {group._count?.cards !== 1 ? "cartões" : "cartão"}
+                            {group._count?.cards}{" "}
+                            {group._count?.cards !== 1 ? "cartões" : "cartão"}
                         </TextDefault>
                     </Pressable>
 
@@ -462,13 +466,20 @@ const styles = StyleSheet.create({
     container: {
         width: "100%",
         gap: 16,
+        marginTop: 64,
+    },
+    groupName: {
+        fontSize: 14,
+        color: "#fff",
+        fontWeight: "500",
     },
     invoiceCard: {
-        padding: 16,
-        borderRadius: 16,
+        // padding: 16,
+        // borderRadius: 16,
         width: "100%",
-        aspectRatio: 5 / 2,
+        // aspectRatio: 5 / 2,
         justifyContent: "space-between",
+        // backgroundColor: "rgba(40, 40, 40, 0.8)",
     },
     invoiceText: {
         fontSize: 14,
@@ -478,18 +489,16 @@ const styles = StyleSheet.create({
     invoiceValue: {
         fontSize: 32,
         color: "#fff",
-        fontWeight: "800",
-        marginBottom: 16,
+        fontWeight: "900",
+        // marginBottom: 16,
     },
     invoiceClosingText: {
         fontSize: 14,
         color: "#fff",
-        
+
         fontWeight: "500",
     },
     assetCard: {
-        padding: 16,
-        borderRadius: 16,
         justifyContent: "space-between",
     },
     assetText: {

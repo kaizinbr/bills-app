@@ -16,6 +16,8 @@ import { StarIcon as StarBoldIcon } from "@solar-icons/react-native/bold/star";
 
 import { LinearGradient } from "expo-linear-gradient";
 
+
+
 export default function TabsLayout() {
     const { session, isPending } = useAuth();
 
@@ -25,7 +27,7 @@ export default function TabsLayout() {
     return (
         <View style={styles.container}>
             <Tabs
-                initialRouteName="home"
+                // initialRouteName=";"
                 screenOptions={{
                     headerShown: false,
                     tabBarActiveTintColor: "#009C7A",
@@ -100,35 +102,6 @@ export default function TabsLayout() {
 
                 <Tabs.Screen
                     name="create-card/[groupId]"
-                    options={{
-                        title: "Create Card",
-                        href: null,
-                    }}
-                />
-
-                <Tabs.Screen
-                    name="subscriptions/[groupId]"
-                    options={{
-                        title: "Create Card",
-                        href: null,
-                    }}
-                />
-                <Tabs.Screen
-                    name="incomes/[invoiceId]"
-                    options={{
-                        title: "Create Card",
-                        href: null,
-                    }}
-                />
-                <Tabs.Screen
-                    name="values/[invoiceId]"
-                    options={{
-                        title: "Create Card",
-                        href: null,
-                    }}
-                />
-                <Tabs.Screen
-                    name="cards/[groupId]"
                     options={{
                         title: "Create Card",
                         href: null,

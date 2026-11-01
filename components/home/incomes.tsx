@@ -5,12 +5,7 @@ import { formatCurrency } from "@/lib/format-currency";
 import { useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import {
-    Pressable,
-    StyleSheet,
-    View,
-    useWindowDimensions
-} from "react-native";
+import { Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useIncomesFromInvoice } from "@/hooks/use-income-total";
@@ -50,7 +45,7 @@ export default function Incomes({ invoiceId }: { invoiceId: string | null }) {
     const queryClient = useQueryClient();
     const { data, isLoading, isError, refetch } =
         useIncomesFromInvoice(invoiceId);
-    console.log("Incomes data:", invoiceId, data);
+    // console.log("Incomes data:", invoiceId, data);
 
     const { width, height } = useWindowDimensions();
     const insets = useSafeAreaInsets();
@@ -62,8 +57,9 @@ export default function Incomes({ invoiceId }: { invoiceId: string | null }) {
             end={{ x: 1, y: 1 }}
             style={[
                 {
-                    width: (width - 64) / 2,
-                    borderRadius: 16,
+                    padding: 16,
+                    width: width - 48,
+                    borderRadius: 18,
                 },
             ]}
         >
@@ -71,7 +67,7 @@ export default function Incomes({ invoiceId }: { invoiceId: string | null }) {
                 style={[
                     styles.assetCard,
                     {
-                        width: (width - 64) / 2,
+                        width: "100%",
                     },
                 ]}
                 onPress={() => {
@@ -125,8 +121,6 @@ const styles = StyleSheet.create({
         color: "#eaeaea",
     },
     assetCard: {
-        padding: 16,
-        borderRadius: 16,
         justifyContent: "space-between",
     },
     assetText: {

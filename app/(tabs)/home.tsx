@@ -1,5 +1,12 @@
 import { useAuth } from "@/components/core/auth-provider";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    type ComponentRef,
+} from "react";
 import {
     Animated,
     Platform,
@@ -11,19 +18,11 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import StatusBar from "@/components/core/status-bar";
 import Groups from "@/components/home/groups";
 import { useGroups } from "@/hooks/use-group";
 import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 
 import type { GroupsHandle } from "@/components/home/groups";
-import {
-    Extrapolation,
-    interpolate,
-    useAnimatedScrollHandler,
-    useAnimatedStyle,
-    useSharedValue,
-} from "react-native-reanimated";
 
 import CreatePurchase from "@/components/home/float-btn";
 import AvatarHeader from "@/components/home/header-avatar";
@@ -31,20 +30,29 @@ import FromTheStart from "@/components/home/start";
 
 import GroupManager from "@/components/home/group-manager";
 import GroupSelectMenu from "@/components/home/group-select-menu";
-import { useIncomesFromInvoice } from "@/hooks/use-income-total";
+
+import { LinearGradient } from "expo-linear-gradient";
 
 import { useSelectedGroup } from "@/components/core/select-group-context";
+import StatusBar from "@/components/core/status-bar";
 
 const HEADER_HEIGHT = 64;
+
+const BG_START = 100;
+const BG_END = 160;
+const PAGE_BG = "#161718";
+const PAGE_BG_TRANSPARENT = "#16171800";
+const GRADIENT_LEFT = "#00C89B";
+const GRADIENT_LEFT_FADE = "transparent";
+const GRADIENT_RIGHT = "#0AAEB0";
+const GRADIENT_RIGHT_FADE = "transparent";
 
 export default function Home() {
     const { session } = useAuth();
     const queryClient = useQueryClient();
     const { data, refetch, isFetching } = useGroups();
-    // const { refetch: refetchIncomes } = useIncomesFromInvoice("some-invoice-id");
 
     const [updatedAt, setUpdatedAt] = useState(Date.now());
-    // const {}
     const [showHeader, setShowHeader] = useState(false);
 
     const groupsRef = useRef<GroupsHandle>(null);
@@ -54,26 +62,11 @@ export default function Home() {
     const { height } = useWindowDimensions();
     const HEADER_MAX_HEIGHT = height * 0.4;
 
-    const scrollOffsetY = useSharedValue(0);
     const insets = useSafeAreaInsets();
 
-    const handleScroll = useAnimatedScrollHandler({
-        onScroll: (event) => {
-            scrollOffsetY.value = event.contentOffset.y;
-        },
-    });
+    const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
 
-    const statusBarOpacityStyle = useAnimatedStyle(() => ({
-        opacity: interpolate(
-            scrollOffsetY.value,
-            [100, 160],
-            [0, 1],
-            Extrapolation.CLAMP,
-        ),
-    }));
-
-    const scrollRef = useRef<ScrollView>(null);
-
+    // Distância de scroll até o topo do conteúdo
     const scrollY = useRef(new Animated.Value(0)).current;
     const { selectedGroupId, setSelectedGroupId, isLoaded } =
         useSelectedGroup();
@@ -132,6 +125,20 @@ export default function Home() {
         extrapolate: "clamp",
     });
 
+    // 0 = transparente (topo), 1 = fundo sólido (depois de BG_END de scroll)
+    // Usado tanto no fundo do menu quanto na status bar.
+    const bgOpacity = scrollY.interpolate({
+        inputRange: [BG_START, BG_END],
+        outputRange: [0, 1],
+        extrapolate: "clamp",
+    });
+
+    const headerBorder = scrollY.interpolate({
+        inputRange: [BG_START, BG_END],
+        outputRange: [0, 1],
+        extrapolate: "clamp",
+    });
+
     const isFetchingGroupData = useIsFetching({
         predicate: (query) =>
             query.queryKey[0] === "groups" ||
@@ -145,7 +152,7 @@ export default function Home() {
 
         setShowHeader(false);
         setMenuOpen(false);
-        // refetchIncomes();
+
         requestAnimationFrame(() => {
             scrollRef.current?.scrollTo({ y: 0, animated: false });
             scrollY.setValue(0);
@@ -155,7 +162,6 @@ export default function Home() {
     const onRefresh = useCallback(() => {
         setShowHeader(true);
         refetch(); // groups
-        // refetchIncomes(); // incomes
         groupsRef.current?.refreshInvoiceData(); // invoices + purchases + total da fatura selecionada
         setUpdatedAt(Date.now());
         setTimeout(() => {
@@ -165,7 +171,20 @@ export default function Home() {
 
     return (
         <View style={styles.box}>
-            <StatusBar />
+            {/* Fundo da status bar: invisível no topo, aparece após BG_START */}
+            <Animated.View
+                pointerEvents="none"
+                style={[
+                    styles.statusBarBg,
+                    {
+                        height: insets.top,
+                        opacity: bgOpacity,
+                    },
+                ]}
+            >
+                <StatusBar />
+            </Animated.View>
+
             <Animated.View
                 style={[
                     styles.header,
@@ -184,6 +203,23 @@ export default function Home() {
                     },
                 ]}
             >
+                {/* Camada de fundo do menu: transparente no topo, sólida após BG_START */}
+                <Animated.View
+                    pointerEvents="none"
+                    style={[
+                        StyleSheet.absoluteFill,
+                        {
+                            backgroundColor: "#161718",
+                            opacity: bgOpacity,
+                            borderBottomWidth: 1,
+                            borderBottomColor: headerBorder.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: ["transparent", "rgba(40, 40, 40, 0.1)"],
+                            }),
+                        },
+                    ]}
+                />
+
                 <View style={styles.headerTop}>
                     <AvatarHeader />
 
@@ -202,18 +238,16 @@ export default function Home() {
                     )}
                 </View>
             </Animated.View>
-            {/* <ScrollToTopBtn scrollRef={scrollRef} scrollY={scrollY} /> */}
             <CreatePurchase
                 selectedGroupId={selectedGroupId}
                 floatbBtnTranslateY={floatbBtnTranslateY}
             />
 
-            
             <Animated.ScrollView
                 style={styles.container}
                 ref={scrollRef}
+                overScrollMode="never"
                 contentContainerStyle={{
-                    paddingTop: HEADER_HEIGHT,
                     paddingBottom: 64,
                     alignItems: "flex-start",
                     justifyContent: "flex-start",
@@ -269,6 +303,30 @@ export default function Home() {
                     />
                 }
             >
+                <View
+                    pointerEvents="none"
+                    style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        zIndex: 0,
+                        height: HEADER_MAX_HEIGHT,
+                    }}
+                >
+                    <LinearGradient
+                        colors={[GRADIENT_LEFT, GRADIENT_RIGHT]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={StyleSheet.absoluteFill}
+                    />
+                    <LinearGradient
+                        colors={[PAGE_BG_TRANSPARENT, PAGE_BG]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 0, y: 1 }}
+                        style={StyleSheet.absoluteFill}
+                    />
+                </View>
                 <Groups
                     ref={groupsRef}
                     groupId={selectedGroupId}
@@ -300,8 +358,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#161718",
         gap: 8,
-        // padding: 16,
-        paddingTop: 64,
         flexDirection: "column",
     },
     title: {
@@ -309,13 +365,15 @@ const styles = StyleSheet.create({
         fontSize: 20,
     },
 
+    // Fica por cima do header (zIndex maior) e fixa no topo da tela
     statusBarBg: {
         position: "absolute",
         top: 0,
         left: 0,
         right: 0,
         backgroundColor: "transparent",
-        zIndex: 0,
+        zIndex: 101,
+        elevation: 11,
     },
 
     header: {
@@ -324,10 +382,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         zIndex: 100,
-        elevation: 10,
-        backgroundColor: "#161718",
-        borderBottomWidth: 0.5,
-        borderBottomColor: "#282828",
+        // elevation: 10,
     },
     headerTop: {
         paddingHorizontal: 24,
@@ -358,11 +413,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         gap: 8,
         borderWidth: 1,
-        borderColor: "#3a3a3a",
-        shadowColor: "#000",
-        shadowOpacity: 0.15,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 3 },
     },
     headerButtonActive: {
         borderColor: "#5E8C61",
@@ -427,7 +477,6 @@ const styles = StyleSheet.create({
         justifyContent: "flex-end",
         gap: 12,
         width: "33%",
-        // backgroundColor: "red",
     },
 
     iconButton: {

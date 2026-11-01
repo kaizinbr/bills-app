@@ -1,15 +1,128 @@
 import api from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 
+type UserSummary = {
+    id: string;
+    name: string;
+    image: string | null;
+};
+
+type Card = {
+    id: string;
+    name: string;
+    color: string | null;
+    digits: string | null;
+    closingDay: number | null;
+    ownerId: string;
+    createdById: string;
+    archived: boolean;
+    groupId: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+type Subscription = {
+    id: string;
+    name: string;
+    amount: number;
+    chargeDay: number;
+    startDate: string;
+    canceledAt: string | null;
+    categoryId: string | null;
+    cardId: string | null;
+    groupId: string;
+    userId: string | null;
+    createdById: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+type Category = {
+    id: string;
+    key: string;
+    label: string;
+    icon: string | null;
+    type:
+        | "FOOD"
+        | "TRANSPORT"
+        | "SHOPPING"
+        | "HEALTH"
+        | "ENTERTAINMENT"
+        | "SUBSCRIPTION"
+        | "INSTALLMENT"
+        | "LOAN"
+        | "BILLS"
+        | "OTHER";
+    createdById: string | null;
+    archived: boolean;
+    createdAt: string;
+};
+
+type Purchase = {
+    id: string;
+    description: string;
+    amount: number;
+    purchasedAt: string;
+    categoryId: string | null;
+    invoiceId: string | null;
+    cardId: string | null;
+    userId: string | null;
+    installmentPlanId: string | null;
+    installmentNumber: number | null;
+    subscriptionId: string | null;
+    createdById: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+type InstallmentPlan = {
+    id: string;
+    description: string;
+    totalAmount: number;
+    installments: number;
+    dayOfMonth: number;
+    startDate: string;
+    cancelledAt: string | null;
+    categoryId: string | null;
+    cardId: string | null;
+    groupId: string;
+    userId: string | null;
+    createdById: string;
+    createdAt: string;
+    category: Category | null;
+    card: Card | null;
+    purchases: Purchase[];
+};
+
 export type Group = {
     id: string;
     name: string;
-    limit: string;
-    closingDay: number;
+    debtorId: string | null;
+    creditorId: string | null;
+    creditorName: string | null;
+    limit: number | null;
+    inviteCode: string;
+    closingDay: number | null;
     archived: boolean;
-    cards: { id: string; name: string; color: string }[];
-    debtor?: { id: string; name: string; image: string | null } | null;
-    invoices: {
+    createdAt: string;
+    updatedAt: string;
+    cards: Card[];
+    subscriptions?: Subscription[];
+    userDebtorId?: UserSummary | null;
+    groupMembers?: {
+        id: string;
+        groupId: string;
+        userId: string;
+        role: "OWNER" | "MEMBER";
+        joinedAt: string;
+        user: UserSummary;
+    }[];
+    _count?: {
+        subscriptions: number;
+        cards: number;
+        installmentPlans: number;
+    };
+    invoices?: {
         id: string;
         groupId: string;
         cardId: string | null;
@@ -19,26 +132,16 @@ export type Group = {
         paidAt: string | null;
         createdAt: string;
         updatedAt: string;
-    }[];
-    _count?: {
-        subscriptions: number;
-        cards: number;
-    };
-    members?: {
-        id: string;
-        groupId: string;
-        userId: string;
-        role: "OWNER" | "MEMBER";
-        user: {
-            id: string;
-            name: string;
-            image: string | null;
-        };
-    }[];
+    }[]; 
+    installmentPlans?: InstallmentPlan[];
 };
 
 export type GroupsResponse = {
     groups: Group[];
+};
+
+export type GroupResponse = {
+    group: Group;
 };
 
 async function fetchGroups(): Promise<GroupsResponse> {
@@ -93,7 +196,7 @@ export function useGroupPurchases(groupId: string) {
 async function fetchGroupMembers(groupId: string) {
     try {
         const response = await api.get(`/groups/${groupId}/members`);
-        return response.data.members;
+        return response.data.groupMembers;
     } catch (error) {
         console.error("Error fetching group Members:", error);
         throw error;

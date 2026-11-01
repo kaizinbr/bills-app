@@ -245,7 +245,18 @@ export default function EditSubscriptionBottomSheet({
                                 justifyContent: "flex-start",
                                 alignItems: "center",
                             }}
-                        >
+                        ><Pressable
+                                    onPress={() => setSelectedCardId(null)}
+                                    style={[
+                                        styles.cardButton,
+                                        selectedCardId === null &&
+                                            styles.cardButtonSelected,
+                                    ]}
+                                >
+                                    <TextDefault style={styles.cardButtonText}>
+                                        Sem cartão
+                                    </TextDefault>
+                                </Pressable>
                             {cards.map((card) => (
                                 <Pressable
                                     key={card.id}

@@ -92,7 +92,7 @@ export default function AvatarHeader() {
                             {profile?.name}
                         </TextDefault>
                         <TextDefault>
-                            v{Application.nativeApplicationVersion}
+                            {Application.nativeApplicationVersion}
                         </TextDefault>
                         <View style={styles.menu}>
                             <Pressable style={styles.options} onPress={() => {

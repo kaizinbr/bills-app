@@ -52,7 +52,7 @@ const CARDCOLORS = [
 export default function CreateCard() {
     const router = useRouter();
     const local = useLocalSearchParams();
-    console.log("Local search params:", local.groupId);
+    // console.log("Local search params:", local.groupId);
     const groupId = local.groupId as string;
 
     const { data, refetch, isFetching } = useGroups();
@@ -103,7 +103,7 @@ export default function CreateCard() {
                 const response = await api.get("/users");
                 setUsers(response.data.users);
 
-                const groupsResponse = await api.get(`groups/${groupId}`);
+                const groupsResponse = await api.get(`/groups/${groupId}`);
                 setGroupData(groupsResponse.data.group);
 
                 setLoading(false);
@@ -173,7 +173,7 @@ export default function CreateCard() {
                             alignItems: "flex-start",
                             justifyContent: "flex-start",
                             gap: 8,
-                            paddingTop: insets.top + 64,
+                            paddingTop: insets.top + 24,
                         }}
                         showsVerticalScrollIndicator={false}
                         style={[styles.container]}
@@ -181,26 +181,16 @@ export default function CreateCard() {
                         <TextDefault style={styles.title}>
                             Criar cartão
                         </TextDefault>
+
                         <View
                             style={{
                                 paddingHorizontal: 24,
+                                marginTop: 16,
+                                width: "100%",
+                                justifyContent: "center",
+                                alignItems: "center",
                             }}
                         >
-                            <TextDefault
-                                style={{
-                                    paddingHorizontal: 24,
-                                    paddingVertical: 6,
-                                    fontWeight: "600",
-                                    color: "#eeeeee",
-                                    backgroundColor: "#009C7A",
-                                    borderRadius: 999,
-                                }}
-                            >
-                                {groupData?.name}
-                            </TextDefault>
-                        </View>
-
-                        <View style={{ paddingHorizontal: 24, marginTop: 16 }}>
                             <View
                                 style={{
                                     aspectRatio: 5 / 3,
@@ -337,10 +327,12 @@ const styles = StyleSheet.create({
         zIndex: 1,
     },
     title: {
-        fontSize: 24,
+        fontSize: 14,
         fontWeight: "bold",
-        // marginVertical: 16,
+        marginBottom: 16,
         paddingHorizontal: 24,
+        textAlign: "center",
+        width: "100%",
     },
     description: {
         fontSize: 16,

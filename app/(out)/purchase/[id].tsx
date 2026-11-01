@@ -40,7 +40,7 @@ export default function PurchasePage() {
     const { data, refetch, isFetching } = useGroups();
     const local = useLocalSearchParams();
     const purchaseId = local.id as string; // id da compra, se for edição
-    console.log("Local search params:", local.id);
+    // console.log("Local search params:", local.id);
 
     const { session } = useAuth();
     const currentUserId = session?.user?.id;
@@ -124,7 +124,7 @@ export default function PurchasePage() {
     return (
         <View style={styles.main}>
             <StatusBar />
-                    <BackBtn />
+            <BackBtn />
             {loading && (
                 <View
                     style={{
@@ -170,7 +170,7 @@ export default function PurchasePage() {
                     }
                 >
                     <TextDefault style={styles.title}>
-                        {(purchaseData.description).trim() ||
+                        {purchaseData.description.trim() ||
                             (purchaseData.category?.label).trim() ||
                             "Sem descrição"}{" "}
                         · {formatCurrency(purchaseData.amount)}
@@ -236,6 +236,28 @@ export default function PurchasePage() {
                                 {formatCurrency(purchaseData.amount)}
                             </TextDefault>
                         </View>
+                    )}
+
+                    {purchaseData.installmentPlanId && (
+                        <Pressable
+                            style={styles.section}
+                            onPress={() => {
+                                router.push({
+                                    pathname: "/(out)/installment/[id]",
+                                    params: {
+                                        id: purchaseData.installmentPlanId,
+                                    },
+                                });
+                            }}
+                        >
+                            <TextDefault style={styles.label}>
+                                Parcelamento
+                            </TextDefault>
+                            <TextDefault style={styles.description}>
+                                Parcela {purchaseData.installmentNumber} de{" "}
+                                {purchaseData.installmentPlan.installments}
+                            </TextDefault>
+                        </Pressable>
                     )}
 
                     {purchaseData.cardId && (

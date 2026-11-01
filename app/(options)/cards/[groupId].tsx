@@ -1,6 +1,6 @@
-// app/create-subscription.tsx
+console.log("módulo cards carregado");
+
 import api from "@/lib/api";
-import "dayjs/locale/pt-br";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 
@@ -21,35 +21,25 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import BackBtn from "@/components/core/back-btn";
 
-import { AvatarGeneric } from "@/components/user/avatar";
-import { formatCurrency } from "@/lib/format-currency";
-import { DollarIcon } from "@solar-icons/react-native/bold/dollar";
-import { useDefaultStyles } from "react-native-ui-datepicker";
+import { CardIcon } from "@solar-icons/react-native/linear/card";
 
-export default function CreateSubscription() {
+export default function Cards() {
+    console.log("groupId",);
     const router = useRouter();
     const local = useLocalSearchParams();
-    const invoiceId = local.invoiceId as string;
-    console.log("invoiceId", invoiceId);
+    const groupId = local.groupId as string;
 
     const { session } = useAuth();
     const insets = useSafeAreaInsets();
-    const defaultStyles = useDefaultStyles();
 
     const [loading, setLoading] = useState(true);
     const [cards, setCards] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
 
-    const [members, setMembers] = useState<any>(null);
-    const [unassignedTotal, setUnassignedTotal] = useState<number>(0);
-    const [sharedAmount, setSharedAmount] = useState<number>(0);
-
     const fetchData = async () => {
         try {
-            const response = await api.get(`/invoices/${invoiceId}/members`);
-            setMembers(response.data.members);
-            setUnassignedTotal(response.data.unassignedTotal);
-            setSharedAmount(response.data.sharedAmount);
+            const response = await api.get(`/groups/${groupId}/cards`);
+            setCards(response.data.cards);
 
             setLoading(false);
         } catch (error) {
@@ -59,7 +49,7 @@ export default function CreateSubscription() {
 
     useEffect(() => {
         fetchData();
-    }, [invoiceId]);
+    }, [groupId]);
 
     return (
         <View style={styles.main}>
@@ -81,7 +71,7 @@ export default function CreateSubscription() {
                         paddingBottom: 32,
                         alignItems: "flex-start",
                         justifyContent: "flex-start",
-                        gap: 8,
+                        gap: 0,
                         paddingTop: insets.top + 64,
                     }}
                     showsVerticalScrollIndicator={false}
@@ -104,99 +94,50 @@ export default function CreateSubscription() {
                 >
                     <BackBtn />
                     <TextDefault style={styles.title}>
-                        Valores da fatura
+                        Cartões da conta
                     </TextDefault>
-                    <TextDefault style={styles.label}>
-                        Aqui você pode ver os valores gastos por cada membro
-                        nessa fatura e o valor que será dividido entre todos os
-                        membros.
-                    </TextDefault>
-                    <Pressable
-                        style={[styles.item]}
-                        // onPress={() =>
-                        //     router.push({
-                        //         pathname: `/card/[id]`,
-                        //         params: { id: member.id },
-                        //     })
-                        // }
-                    >
-                        <View
-                            style={[
-                                styles.cardIconContainer,
-                                {
-                                    backgroundColor: "#282828",
-                                },
-                            ]}
-                        >
-                            <DollarIcon size={20} color="white" />
-                        </View>
-                        <View>
-                            <TextDefault style={styles.cardTitle}>
-                                Valores não atribuídos
-                            </TextDefault>
-                            <TextDefault style={styles.description}>
-                                {formatCurrency(unassignedTotal)}{" "}
-                                <TextDefault style={styles.label}>
-                                    ({formatCurrency(sharedAmount)} para cada
-                                    membro)
-                                </TextDefault>
-                            </TextDefault>
-                        </View>
-                    </Pressable>
-                    {members.length === 0 ? (
+                    {cards.length === 0 ? (
                         <TextDefault
                             style={{ color: "#fff", paddingHorizontal: 24 }}
                         >
-                            Nenhum membro encontrado. Adicione um novo membro.
+                            Nenhum cartão encontrado. Adicione um novo cartão.
                         </TextDefault>
                     ) : (
-                        members.map((member: any) => (
+                        cards.map((card: any) => (
                             <Pressable
-                                key={member.id}
-                                style={[
+                                key={card.id}
+                                style={({ pressed }) => [
                                     styles.item,
                                     {
-                                        flexDirection: "row",
-                                        gap: 8,
-                                        alignItems: "center",
-                                        justifyContent: "space-between",
+                                        backgroundColor: pressed
+                                            ? "#282828"
+                                            : "#161718",
                                     },
                                 ]}
-                                // onPress={() =>
-                                //     router.push({
-                                //         pathname: `/card/[id]`,
-                                //         params: { id: member.id },
-                                //     })
-                                // }
+                                onPress={() =>
+                                    router.push({
+                                        pathname: `/card/[id]`,
+                                        params: { id: card.id },
+                                    })
+                                }
                             >
                                 <View
-                                    style={{
-                                        flexDirection: "row",
-                                        gap: 8,
-                                        alignItems: "center",
-                                    }}
+                                    style={[
+                                        styles.cardIconContainer,
+                                        {
+                                            backgroundColor:
+                                                card.color || "#282828",
+                                        },
+                                    ]}
                                 >
-                                    <AvatarGeneric
-                                        size={36}
-                                        name={member.user.name}
-                                        user={member.user}
-                                    />
-                                    <View>
-                                        <TextDefault style={styles.cardTitle}>
-                                            {member.user.name}
-                                        </TextDefault>
-                                        <TextDefault style={styles.description}>
-                                            {formatCurrency(member.total)} +{" "}
-                                            {formatCurrency(sharedAmount)}{" "}
-                                        </TextDefault>
-                                    </View>
+                                    <CardIcon size={20} color="white" />
                                 </View>
-                                <View style={{ alignItems: "flex-end" }}>
+                                <View>
                                     <TextDefault style={styles.cardTitle}>
-                                        Total:
+                                        {card.name}
                                     </TextDefault>
-                                    <TextDefault style={styles.total}>
-                                        {formatCurrency(member.totalWithShared)}
+                                    <TextDefault style={styles.description}>
+                                        {card.digits}
                                     </TextDefault>
                                 </View>
                             </Pressable>
@@ -253,18 +194,9 @@ export default function CreateSubscription() {
 }
 
 const styles = StyleSheet.create({
-    main: {
-        flex: 1,
-        backgroundColor: "#161718",
-    },
-    keyboardContainer: {
-        flex: 1,
-        zIndex: 1,
-    },
-    container: {
-        flex: 1,
-        zIndex: 1,
-    },
+    main: { flex: 1, backgroundColor: "#161718" },
+    keyboardContainer: { flex: 1, zIndex: 1 },
+    container: { flex: 1, zIndex: 1 },
     title: {
         fontSize: 24,
         fontWeight: "bold",
@@ -277,12 +209,7 @@ const styles = StyleSheet.create({
         minWidth: "100%",
         paddingHorizontal: 24,
     },
-    label: {
-        color: "#fff",
-        fontSize: 12,
-        // marginBottom: 8,
-        paddingHorizontal: 24,
-    },
+    label: { color: "#eeeeee", fontSize: 12, marginBottom: 8 },
     overlay: {
         flex: 1,
         backgroundColor: "rgba(0, 0, 0, 0.6)",
@@ -367,17 +294,11 @@ const styles = StyleSheet.create({
     },
     cardTitle: {
         fontSize: 14,
-        color: "#ffffff",
+        color: "#eee",
     },
     description: {
         fontSize: 12,
-        color: "#eee",
-        fontWeight: "400",
-    },
-    total: {
-        fontSize: 12,
-        color: "#ffffff",
-        fontWeight: "700",
+        color: "#aaa",
     },
     cardIconContainer: {
         width: 36,
