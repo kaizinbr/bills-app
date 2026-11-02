@@ -413,6 +413,11 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         gap: 8,
         borderWidth: 1,
+        borderColor: "#3a3a3a",
+        shadowColor: "#000",
+        shadowOpacity: 0.15,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 3 },
     },
     headerButtonActive: {
         borderColor: "#5E8C61",

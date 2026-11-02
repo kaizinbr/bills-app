@@ -14,7 +14,10 @@ import { BottomSheetInput } from "@/components/core/input";
 
 import { DateType, useDefaultStyles } from "react-native-ui-datepicker";
 
+import { PurchaseIcon } from "@/components/home/purchase-icon";
 import { formatCurrency } from "@/lib/format-currency";
+import { SaleSquareIcon } from "@solar-icons/react-native/linear/sale-square";
+import { AvatarGeneric } from "@/components/user/avatar";
 
 export default function EditSubscriptionBottomSheet({
     initialData,
@@ -46,18 +49,15 @@ export default function EditSubscriptionBottomSheet({
 
     const [cardName, setCardName] = useState(data.name || "");
     const [amountCents, setAmountCents] = useState(data.amount);
-    const [purchasedToday, setPurchasedToday] = useState<boolean>(true);
-    const [purchaseDate, setPurchaseDate] = useState<DateType>(today);
-
-    const [myPurchase, setMyPurchase] = useState<boolean>(true);
-    const [purchaseOwner, setPurchaseOwner] = useState<string | null>(
-        currentUserId!,
-    );
 
     const [selectedCardId, setSelectedCardId] = useState<string | null>(
         data.cardId,
     );
     const [category, setCategory] = useState<string | null>(null);
+    const [members, setMembers] = useState<any[]>([]);
+    const [selectedMemberId, setSelectedMemberId] = useState<string | null>(
+        currentUserId!,
+    );
 
     const [users, setUsers] = useState<any[]>([]);
     const [cards, setCards] = useState<any[]>([]);
@@ -82,6 +82,7 @@ export default function EditSubscriptionBottomSheet({
                     groupId: response.data.group.id,
                 }));
                 setCards(response.data.group?.cards ?? []);
+                setMembers(response.data.group?.groupMembers ?? []);
 
                 const categoriesResponse = await api.get(`categories`);
                 setCategories(categoriesResponse.data.categories);
@@ -107,6 +108,7 @@ export default function EditSubscriptionBottomSheet({
                     amount: parseInt(amountCents) || 0,
                     cardId: selectedCardId,
                     categoryId: category,
+                    userId: selectedMemberId,
                 },
             );
             console.log("Subscription updated successfully:", response.data);
@@ -202,15 +204,22 @@ export default function EditSubscriptionBottomSheet({
                             {categories.map((cat) => (
                                 <Pressable
                                     key={cat.key}
-                                    onPress={() => {
-                                        setCategory(cat.id);
-                                    }}
+                                    onPress={() => setCategory(cat.id)}
                                     style={[
                                         styles.catButton,
                                         category === cat.id &&
                                             styles.catButtonSelected,
                                     ]}
                                 >
+                                    <PurchaseIcon
+                                        categoryKey={cat.key}
+                                        style={{
+                                            width: 24,
+                                            height: 24,
+                                            borderRadius: 8,
+                                        }}
+                                        iconSize={14}
+                                    />
                                     <TextDefault style={styles.catButtonText}>
                                         {cat.label}
                                     </TextDefault>
@@ -245,18 +254,19 @@ export default function EditSubscriptionBottomSheet({
                                 justifyContent: "flex-start",
                                 alignItems: "center",
                             }}
-                        ><Pressable
-                                    onPress={() => setSelectedCardId(null)}
-                                    style={[
-                                        styles.cardButton,
-                                        selectedCardId === null &&
-                                            styles.cardButtonSelected,
-                                    ]}
-                                >
-                                    <TextDefault style={styles.cardButtonText}>
-                                        Sem cartão
-                                    </TextDefault>
-                                </Pressable>
+                        >
+                            <Pressable
+                                onPress={() => setSelectedCardId(null)}
+                                style={[
+                                    styles.cardButton,
+                                    selectedCardId === null &&
+                                        styles.cardButtonSelected,
+                                ]}
+                            >
+                                <TextDefault style={styles.cardButtonText}>
+                                    Sem cartão
+                                </TextDefault>
+                            </Pressable>
                             {cards.map((card) => (
                                 <Pressable
                                     key={card.id}
@@ -278,31 +288,117 @@ export default function EditSubscriptionBottomSheet({
                                 </Pressable>
                             ))}
                         </ScrollView>
-                        <View
+                    </View>
+
+                    <View
+                        style={[
+                            styles.inputContainer,
+                            { paddingHorizontal: 0 },
+                        ]}
+                    >
+                        <TextDefault
+                            style={[styles.label, { paddingHorizontal: 24 }]}
+                        >
+                            Dono da assinatura
+                        </TextDefault>
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
                             style={{
-                                padding: 16,
-                                paddingBottom: 0,
                                 width: "100%",
+                                flexDirection: "row",
+                                gap: 8,
+                            }}
+                            contentContainerStyle={{
+                                flexDirection: "row",
+                                gap: 8,
+                                paddingHorizontal: 24,
+                                justifyContent: "flex-start",
+                                alignItems: "center",
                             }}
                         >
                             <Pressable
-                                onPress={handleUpdatePurchase}
+                                onPress={() => setSelectedMemberId(null)}
                                 style={[
-                                    styles.submitBtn,
+                                    styles.cardButton,
+                                    selectedMemberId === null &&
+                                        styles.cardButtonSelected,
                                     {
-                                        // bottom: insets.bottom + 16,
-                                        opacity: canSubmit ? 1 : 0.5,
+                                        height: 80,
+                                        aspectRatio: 4 / 3,
                                     },
                                 ]}
-                                disabled={!canSubmit}
                             >
-                                <TextDefault
-                                    style={{ color: "#fff", fontWeight: "700" }}
-                                >
-                                    Salvar alterações
+                                <SaleSquareIcon
+                                    size={28}
+                                    color="#fff"
+                                    style={{
+                                        marginRight: 8,
+                                        marginBottom: 4,
+                                    }}
+                                />
+                                <TextDefault style={styles.cardButtonText}>
+                                    Dividido
                                 </TextDefault>
                             </Pressable>
-                        </View>
+                            {members.map((member) => (
+                                <Pressable
+                                    key={member.id}
+                                    onPress={() => {
+                                        setSelectedMemberId(member.user.id);
+                                    }}
+                                    style={[
+                                        styles.cardButton,
+                                        selectedMemberId === member.user.id &&
+                                            styles.cardButtonSelected,
+
+                                        {
+                                            height: 80,
+                                            aspectRatio: 4 / 3,
+                                        },
+                                    ]}
+                                >
+                                    <AvatarGeneric
+                                        name={member.user?.name || member.id}
+                                        user={member.user}
+                                        size={28}
+                                        style={{
+                                            marginRight: 8,
+                                            marginBottom: 4,
+                                        }}
+                                    />
+                                    <TextDefault style={styles.cardButtonText}>
+                                        {member.user?.name || member.id}
+                                    </TextDefault>
+                                </Pressable>
+                            ))}
+                        </ScrollView>
+                    </View>
+
+                    <View
+                        style={{
+                            padding: 16,
+                            paddingBottom: 0,
+                            width: "100%",
+                        }}
+                    >
+                        <Pressable
+                            onPress={handleUpdatePurchase}
+                            style={[
+                                styles.submitBtn,
+                                {
+                                    // bottom: insets.bottom + 16,
+                                    opacity: canSubmit ? 1 : 0.5,
+                                },
+                            ]}
+                            disabled={!canSubmit}
+                        >
+                            <TextDefault
+                                style={{ color: "#fff", fontWeight: "700" }}
+                            >
+                                Salvar alterações
+                            </TextDefault>
+                        </Pressable>
                     </View>
                 </ScrollView>
             )}
@@ -400,11 +496,12 @@ const styles = StyleSheet.create({
         backgroundColor: "#212223",
         borderWidth: 2,
         borderColor: "transparent",
-        padding: 12,
-        borderRadius: 16,
-        height: 86,
-        aspectRatio: 4 / 3,
-        justifyContent: "flex-end",
+        padding: 6,
+        borderRadius: 12,
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "row",
+        gap: 4,
     },
     catButtonSelected: {
         borderWidth: 2,

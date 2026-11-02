@@ -375,7 +375,8 @@ const styles = StyleSheet.create({
     },
     options: {
         width: "100%",
-        padding: 16,
+        paddingVertical: 16,
+        paddingHorizontal: 24,
         borderBottomWidth: 0.5,
         borderBottomColor: "#555",
         flexDirection: "row",

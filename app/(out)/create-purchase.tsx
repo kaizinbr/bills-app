@@ -100,7 +100,6 @@ export default function CreateCard() {
     );
     const [category, setCategory] = useState<string | null>(null);
 
-    const [users, setUsers] = useState<any[]>([]);
     const [cards, setCards] = useState<any[]>([]);
     const [members, setMembers] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
@@ -139,9 +138,6 @@ export default function CreateCard() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await api.get("/users");
-                setUsers(response.data.users);
-
                 const groupsResponse = await api.get(`groups/${groupId}`);
                 setGroupData(groupsResponse.data.group);
                 setCards(groupsResponse.data.group?.cards ?? []);

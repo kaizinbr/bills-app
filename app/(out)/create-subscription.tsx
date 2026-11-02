@@ -31,6 +31,8 @@ import DateTimePicker, {
 
 import { formatCurrency } from "@/lib/format-currency";
 import { PurchaseIcon } from "@/components/home/purchase-icon";
+import { SaleSquareIcon } from "@solar-icons/react-native/linear/sale-square";
+import { AvatarGeneric } from "@/components/user/avatar";
 
 export default function CreateSubscription() {
     const router = useRouter();
@@ -49,7 +51,11 @@ export default function CreateSubscription() {
     const [name, setName] = useState("");
     const [amountCents, setAmountCents] = useState("");
     const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+    const [selectedMemberId, setSelectedMemberId] = useState<string | null>(
+        null,
+    );
     const [category, setCategory] = useState<string | null>(null);
+    const [members, setMembers] = useState<any[]>([]);
 
     // dia 1 do mês atual, pra nunca abrir num dia já desabilitado (>28)
     const [chargeDate, setChargeDate] = useState<DateType>(
@@ -69,7 +75,7 @@ export default function CreateSubscription() {
                 amountCents.trim() !== "" &&
                 category !== null,
         );
-    }, [name, amountCents, category, selectedCardId]);
+    }, [name, amountCents, category, selectedCardId, selectedMemberId]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -77,6 +83,7 @@ export default function CreateSubscription() {
                 const groupsResponse = await api.get(`groups/${groupId}`);
                 setGroupData(groupsResponse.data.group);
                 setCards(groupsResponse.data.group?.cards ?? []);
+                setMembers(groupsResponse.data.group?.groupMembers ?? []);
 
                 const categoriesResponse = await api.get(`categories`);
                 setCategories(categoriesResponse.data.categories);
@@ -100,6 +107,7 @@ export default function CreateSubscription() {
                 categoryId: category,
                 chargeDay,
                 groupId,
+                userId: selectedMemberId,
             });
 
             refetch();
@@ -286,6 +294,99 @@ export default function CreateSubscription() {
                                             style={styles.cardButtonText}
                                         >
                                             {card.name}
+                                        </TextDefault>
+                                    </Pressable>
+                                ))}
+                            </ScrollView>
+                        </View>
+
+                        <View
+                            style={[
+                                styles.inputContainer,
+                                { paddingHorizontal: 0 },
+                            ]}
+                        >
+                            <TextDefault
+                                style={[
+                                    styles.label,
+                                    { paddingHorizontal: 24 },
+                                ]}
+                            >
+                                Dono da assinatura
+                            </TextDefault>
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                style={{
+                                    width: "100%",
+                                    flexDirection: "row",
+                                    gap: 8,
+                                }}
+                                contentContainerStyle={{
+                                    flexDirection: "row",
+                                    gap: 8,
+                                    paddingHorizontal: 24,
+                                    justifyContent: "flex-start",
+                                    alignItems: "center",
+                                }}
+                            >
+                                <Pressable
+                                    onPress={() => setSelectedMemberId(null)}
+                                    style={[
+                                        styles.cardButton,
+                                        selectedMemberId === null &&
+                                            styles.cardButtonSelected,
+                                        {
+                                            height: 80,
+                                            aspectRatio: 4 / 3,
+                                        },
+                                    ]}
+                                >
+                                    <SaleSquareIcon
+                                        size={28}
+                                        color="#fff"
+                                        style={{
+                                            marginRight: 8,
+                                            marginBottom: 4,
+                                        }}
+                                    />
+                                    <TextDefault style={styles.cardButtonText}>
+                                        Dividido
+                                    </TextDefault>
+                                </Pressable>
+                                {members.map((member) => (
+                                    <Pressable
+                                        key={member.id}
+                                        onPress={() => {
+                                            setSelectedMemberId(member.user.id);
+                                        }}
+                                        style={[
+                                            styles.cardButton,
+                                            selectedMemberId ===
+                                                member.user.id &&
+                                                styles.cardButtonSelected,
+
+                                            {
+                                                height: 80,
+                                                aspectRatio: 4 / 3,
+                                            },
+                                        ]}
+                                    >
+                                        <AvatarGeneric
+                                            name={
+                                                member.user?.name || member.id
+                                            }
+                                            user={member.user}
+                                            size={28}
+                                            style={{
+                                                marginRight: 8,
+                                                marginBottom: 4,
+                                            }}
+                                        />
+                                        <TextDefault
+                                            style={styles.cardButtonText}
+                                        >
+                                            {member.user?.name || member.id}
                                         </TextDefault>
                                     </Pressable>
                                 ))}

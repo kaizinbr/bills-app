@@ -9,10 +9,12 @@ import { StarIcon } from "@solar-icons/react-native/linear/star";
 
 import { PieChart2Icon as ChartBoldIcon } from "@solar-icons/react-native/bold/pie-chart-2";
 import { PieChart2Icon } from "@solar-icons/react-native/linear/pie-chart-2";
+import { CardIcon } from '@solar-icons/react-native/linear/card'
 
 import { HomeSmileAngleIcon as HomeBoldIcon } from "@solar-icons/react-native/bold/home-smile-angle";
 import { GhostIcon as GhostBoldIcon } from "@solar-icons/react-native/bold/ghost";
 import { StarIcon as StarBoldIcon } from "@solar-icons/react-native/bold/star";
+import { CardIcon as CardBoldIcon } from "@solar-icons/react-native/bold/card";
 
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -79,15 +81,14 @@ export default function TabsLayout() {
                 />
 
                 <Tabs.Screen
-                    name="modal"
+                    name="cards"
                     options={{
-                        title: "Modal",
-                        href: null,
+                        title: "Cards",
                         tabBarIcon: ({ color, focused }) =>
                             focused ? (
-                                <StarBoldIcon color={color as string} />
+                                <CardBoldIcon color={color as string} />
                             ) : (
-                                <StarIcon color={color as string} />
+                                <CardIcon color={color as string} />
                             ),
                     }}
                 />

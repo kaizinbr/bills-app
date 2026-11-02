@@ -93,6 +93,14 @@ const Charts = forwardRef<GroupsHandle, GroupsProps>(
             isFetchingNextPage,
         } = useInvoicePurchases(selectedInvoice?.id ?? null);
 
+        // carrega as páginas restantes sozinho, para o gráfico, a contagem
+        // e a lista de cada categoria ficarem completos
+        useEffect(() => {
+            if (hasNextPage && !isFetchingNextPage) {
+                fetchNextPage();
+            }
+        }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
         // mesma queryKey usada pela lista de compras do Home — reaproveita o
         // cache já carregado ali, sem disparar requisição extra
         const purchases = useMemo(
@@ -188,6 +196,10 @@ const Charts = forwardRef<GroupsHandle, GroupsProps>(
                         <CategoryLegend
                             segments={categoryBreakdown}
                             total={Number(totalData?.total ?? 0)}
+                            purchases={purchases.map((purchase) => ({
+                                ...purchase,
+                                description: purchase.description ?? "",
+                            }))}
                         />
                     ) : (
                         <TextDefault

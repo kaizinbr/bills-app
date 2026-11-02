@@ -376,7 +376,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                         onPress={() => {
                             console.log("group", group.id);
                             router.push({
-                                pathname: `/(options)/cards/[groupId]`,
+                                pathname: `/(tabs)/cards`,
                                 params: { groupId: group.id },
                             });
                         }}
@@ -479,6 +479,7 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                                 key={section.date}
                                 date={section.date}
                                 purchases={section.purchases}
+                                groupId={group.id}
                             />
                         ))
                     )}

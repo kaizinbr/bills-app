@@ -33,6 +33,10 @@ export type Purchase = {
         installments: number;
         dayOfMonth: number;
     } | null;
+    invoice: {
+        id: string;
+        description: string;
+    } | null;
 };
 
 export type Period = {

@@ -285,6 +285,7 @@ export default function PurchasePage() {
                             >
                                 <AvatarGeneric
                                     user={purchaseData.user}
+                                    name={purchaseData.user.name}
                                     size={24}
                                 />
                                 <TextDefault style={styles.description}>

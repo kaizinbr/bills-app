@@ -14,30 +14,35 @@ import { BottomSheetInput } from "@/components/core/input";
 
 import { DateType, useDefaultStyles } from "react-native-ui-datepicker";
 
+import { PurchaseIcon } from "@/components/home/purchase-icon";
 import { formatCurrency } from "@/lib/format-currency";
+import { SaleSquareIcon } from "@solar-icons/react-native/linear/sale-square";
+import { AvatarGeneric } from "@/components/user/avatar";
+
 import { useGroups, useGroupMembers } from "@/hooks/use-group";
 
 export default function EditPurchaseBottomSheet({
     initialData,
     onFinish,
+    groupId
 }: {
     initialData: any;
     onFinish: () => void;
+    groupId?: string;
 }) {
     const router = useRouter();
 
-    const { data: membersData, refetch, isFetching } = useGroupMembers(initialData.invoice.group.id);
 
     const { session } = useAuth();
     const currentUserId = session?.user?.id;
     const insets = useSafeAreaInsets();
-    console.log("membersData", membersData);
     const [loading, setLoading] = useState(true);
 
     const [showDatePicker, setShowDatePicker] = useState(false);
 
     let today = new Date();
     const defaultStyles = useDefaultStyles();
+    console.log("initialData", initialData);
 
     const [data, setData] = useState({
         description: initialData.description || "",
@@ -48,6 +53,7 @@ export default function EditPurchaseBottomSheet({
         groupId: initialData.groupId || null,
         categoryId: initialData.categoryId || null,
         userId: initialData.userId || null,
+        invoice: initialData.invoice || null,
     });
 
     const [cardName, setCardName] = useState(data.description || "");
@@ -55,18 +61,13 @@ export default function EditPurchaseBottomSheet({
     const [selectedMemberId, setSelectedMemberId] = useState<string | null>(
         data.userId || null,
     );
-    const [purchasedToday, setPurchasedToday] = useState<boolean>(true);
-    const [purchaseDate, setPurchaseDate] = useState<DateType>(today);
+    const [members, setMembers] = useState<any[]>([]);
 
-    const [myPurchase, setMyPurchase] = useState<boolean>(true);
-    const [purchaseOwner, setPurchaseOwner] = useState<string | null>(
-        currentUserId!,
+    const [selectedCardId, setSelectedCardId] = useState<string | null>(
+        data.cardId || null,
     );
-
-    const [selectedCardId, setSelectedCardId] = useState<string | null>(data.cardId || null);
     const [category, setCategory] = useState<string | null>(null);
 
-    const [users, setUsers] = useState<any[]>(membersData || []);
     const [cards, setCards] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
 
@@ -88,12 +89,13 @@ export default function EditPurchaseBottomSheet({
         const fetchCatgories = async () => {
             try {
                 const response = await api.get(
-                    `/groups/${initialData.invoice.group.id}`,
+                    `/groups/${groupId ? groupId : initialData.invoice.group.id}`,
                 );
                 setData((prevData) => ({
                     ...prevData,
                     groupId: response.data.group.id,
                 }));
+                setMembers(response.data.group?.groupMembers ?? []);
                 setCards(response.data.group?.cards ?? []);
 
                 const categoriesResponse = await api.get(`/categories`);
@@ -106,18 +108,8 @@ export default function EditPurchaseBottomSheet({
             }
         };
 
-        const fetchUsers = async () => {
-            try {
-                const response = await api.get("/users");
-                setUsers(response.data.users);
-                console.log("users", response.data.users);
-            } catch (error) {
-                console.error("Error fetching users:", error);
-            }
-        };
 
         fetchCatgories();
-        // fetchUsers();
     }, []);
 
     const [error, setError] = useState<string | null>(null);
@@ -224,15 +216,22 @@ export default function EditPurchaseBottomSheet({
                             {categories.map((cat) => (
                                 <Pressable
                                     key={cat.key}
-                                    onPress={() => {
-                                        setCategory(cat.id);
-                                    }}
+                                    onPress={() => setCategory(cat.id)}
                                     style={[
                                         styles.catButton,
                                         category === cat.id &&
                                             styles.catButtonSelected,
                                     ]}
                                 >
+                                    <PurchaseIcon
+                                        categoryKey={cat.key}
+                                        style={{
+                                            width: 24,
+                                            height: 24,
+                                            borderRadius: 8,
+                                        }}
+                                        iconSize={14}
+                                    />
                                     <TextDefault style={styles.catButtonText}>
                                         {cat.label}
                                     </TextDefault>
@@ -302,6 +301,7 @@ export default function EditPurchaseBottomSheet({
                             ))}
                         </ScrollView>
                     </View>
+
                     <View
                         style={[
                             styles.inputContainer,
@@ -335,32 +335,55 @@ export default function EditPurchaseBottomSheet({
                                     styles.cardButton,
                                     selectedMemberId === null &&
                                         styles.cardButtonSelected,
+                                    {
+                                        height: 80,
+                                        aspectRatio: 4 / 3,
+                                    },
                                 ]}
                             >
+                                <SaleSquareIcon
+                                    size={28}
+                                    color="#fff"
+                                    style={{
+                                        marginRight: 8,
+                                        marginBottom: 4,
+                                    }}
+                                />
                                 <TextDefault style={styles.cardButtonText}>
-                                    Sem usuário
+                                    Dividido
                                 </TextDefault>
                             </Pressable>
-                            {users.length > 0 &&
-                                users.map((member) => (
-                                    <Pressable
-                                        key={member.id}
-                                        onPress={() => {
-                                            setSelectedMemberId(member.user.id);
+                            {members.map((member) => (
+                                <Pressable
+                                    key={member.id}
+                                    onPress={() => {
+                                        setSelectedMemberId(member.user.id);
+                                    }}
+                                    style={[
+                                        styles.cardButton,
+                                        selectedMemberId === member.user.id &&
+                                            styles.cardButtonSelected,
+
+                                        {
+                                            height: 80,
+                                            aspectRatio: 4 / 3,
+                                        },
+                                    ]}
+                                >
+                                    <AvatarGeneric
+                                        name={member.user?.name || member.id}
+                                        user={member.user}
+                                        size={28}
+                                        style={{
+                                            marginRight: 8,
+                                            marginBottom: 4,
                                         }}
-                                        style={[
-                                            styles.cardButton,
-                                            selectedMemberId === member.user.id &&
-                                                styles.cardButtonSelected,
-                                        ]}
-                                    >
-                                        <TextDefault
-                                            style={styles.cardButtonText}
-                                        >
-                                            {member.user.name || member.email || "Usuário"}
-                                        </TextDefault>
-                                    </Pressable>
-                                ))}
+                                    />
+                                    <TextDefault style={styles.cardButtonText}>
+                                        {member.user?.name || member.id}
+                                    </TextDefault>
+                                </Pressable>
+                            ))}
                         </ScrollView>
                     </View>
 
@@ -489,11 +512,12 @@ const styles = StyleSheet.create({
         backgroundColor: "#212223",
         borderWidth: 2,
         borderColor: "transparent",
-        padding: 12,
-        borderRadius: 16,
-        height: 64,
-        aspectRatio: 5 / 3,
-        justifyContent: "flex-end",
+        padding: 6,
+        borderRadius: 12,
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "row",
+        gap: 4,
     },
     catButtonSelected: {
         borderWidth: 2,

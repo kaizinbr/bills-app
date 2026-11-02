@@ -5,6 +5,7 @@ import {
     Platform,
     RefreshControl,
     ScrollView,
+    ScrollViewInstance,
     StyleSheet,
     useWindowDimensions,
     View,
@@ -67,10 +68,11 @@ export default function Home() {
         ),
     }));
 
-    const scrollRef = useRef<ScrollView>(null);
+    const scrollRef = useRef<ScrollViewInstance>(null);
 
     const scrollY = useRef(new Animated.Value(0)).current;
-    const { selectedGroupId, setSelectedGroupId, isLoaded } = useSelectedGroup();
+    const { selectedGroupId, setSelectedGroupId, isLoaded } =
+        useSelectedGroup();
     const [menuOpen, setMenuOpen] = useState(false);
 
     const closeMenu = useCallback(() => {
@@ -85,13 +87,13 @@ export default function Home() {
         null;
 
     useEffect(() => {
-    if (!isLoaded) return; // ainda lendo do storage, não decide nada ainda
+        if (!isLoaded) return; // ainda lendo do storage, não decide nada ainda
 
-    const stillExists = groups.some((g) => g.id === selectedGroupId);
-    if ((!selectedGroupId || !stillExists) && groups.length > 0) {
-        setSelectedGroupId(groups[0].id);
-    }
-}, [groups, selectedGroupId, isLoaded]);
+        const stillExists = groups.some((g) => g.id === selectedGroupId);
+        if ((!selectedGroupId || !stillExists) && groups.length > 0) {
+            setSelectedGroupId(groups[0].id);
+        }
+    }, [groups, selectedGroupId, isLoaded]);
 
     useEffect(() => {
         if (!menuOpen) {
@@ -305,10 +307,6 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         zIndex: 100,
-        elevation: 10,
-        backgroundColor: "#161718",
-        borderBottomWidth: 0.5,
-        borderBottomColor: "#282828",
     },
     headerTop: {
         paddingHorizontal: 24,

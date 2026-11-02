@@ -31,6 +31,7 @@ import {
 import BackBtn from "@/components/core/back-btn";
 import EditSubscriptionBottomSheet from "@/components/subscriptions/edit-subscription-bottomsheet";
 import { useDefaultStyles } from "react-native-ui-datepicker";
+import { AvatarGeneric } from "@/components/user/avatar";
 
 export default function PurchasePage() {
     const router = useRouter();
@@ -121,7 +122,7 @@ export default function PurchasePage() {
     return (
         <View style={styles.main}>
             <StatusBar />
-                    <BackBtn />
+            <BackBtn />
             {loading && (
                 <View
                     style={{
@@ -167,7 +168,7 @@ export default function PurchasePage() {
                     }
                 >
                     <TextDefault style={styles.title}>
-                        {(data.name).trim() ||
+                        {data.name.trim() ||
                             data.category?.label ||
                             "Sem descrição"}{" "}
                         · {formatCurrency(data.amount)}
@@ -241,6 +242,29 @@ export default function PurchasePage() {
                             <TextDefault style={styles.description}>
                                 {data.card.name} · {data.card.digits}
                             </TextDefault>
+                        </View>
+                    )}
+                    {data.userUserId && (
+                        <View style={styles.section}>
+                            <TextDefault style={styles.label}>
+                                Assinatura de
+                            </TextDefault>
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    gap: 8,
+                                }}
+                            >
+                                <AvatarGeneric
+                                    user={data.userUserId}
+                                    name={data.userUserId.name}
+                                    size={24}
+                                />
+                                <TextDefault style={styles.description}>
+                                    {data.userUserId.name}
+                                </TextDefault>
+                            </View>
                         </View>
                     )}
                     <View

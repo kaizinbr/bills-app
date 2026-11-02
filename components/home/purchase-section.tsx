@@ -8,9 +8,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 type PurchaseSectionProps = {
     date: string;
     purchases: Purchase[];
+    groupId: string;
 };
 
-export function PurchaseSection({ date, purchases }: PurchaseSectionProps) {
+export function PurchaseSection({ date, purchases, groupId }: PurchaseSectionProps) {
     const { width, height } = useWindowDimensions();
     const insets = useSafeAreaInsets();
 
@@ -39,6 +40,8 @@ export function PurchaseSection({ date, purchases }: PurchaseSectionProps) {
                     createdById={purchase.createdById}
                     subscription={purchase.subscription}
                     installmentPlan={purchase.installmentPlan}
+                    invoice={purchase.invoice}
+                    groupId={groupId}
                 />
             ))}
         </View>
