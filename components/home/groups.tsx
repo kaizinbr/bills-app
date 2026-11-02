@@ -34,6 +34,8 @@ import { CardIcon } from "@solar-icons/react-native/linear/card";
 import { RefreshCircleIcon } from "@solar-icons/react-native/linear/refresh-circle";
 import { SaleSquareIcon } from '@solar-icons/react-native/linear/sale-square'
 import { WalletIcon } from "@solar-icons/react-native/linear/wallet";
+import { FileDownloadIcon } from '@solar-icons/react-native/linear/file-download'
+import { DownloadMinimalisticIcon } from '@solar-icons/react-native/linear/download-minimalistic'
 
 import { UsersGroupTwoRoundedIcon } from "@solar-icons/react-native/linear/users-group-two-rounded";
 import Avatar, { AvatarGeneric } from "@/components/user/avatar";
@@ -49,7 +51,7 @@ export type GroupsHandle = {
     refreshInvoiceData: () => void;
 };
 
-function sortInvoicesDesc(invoices: Invoice[]): Invoice[] {
+export function sortInvoicesDesc(invoices: Invoice[]): Invoice[] {
     return [...invoices].sort(
         (a, b) =>
             new Date(a.periodStart).getTime() -
@@ -288,6 +290,40 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                             Distinção de valores
                         </TextDefault>
                     </Pressable>
+
+                    <Pressable
+                        onPress={() => {
+                            router.push({
+                                pathname: `/(out)/download/[groupId]`,
+                                params: { groupId: group.id, invoiceId: selectedInvoiceId! },
+                            });
+                        }}
+                        style={styles.buttons}
+                    >
+                        <View style={styles.itemIcon}>
+                            <DownloadMinimalisticIcon size={20} color="white" />
+                        </View>
+                        <TextDefault style={styles.infoChipText}>
+                            Exportar dados
+                        </TextDefault>
+                    </Pressable>
+
+                    {/* <Pressable
+                        onPress={() => {
+                            router.push({
+                                pathname: `/(options)/values/[invoiceId]`,
+                                params: { invoiceId: selectedInvoiceId! },
+                            });
+                        }}
+                        style={styles.buttons}
+                    >
+                        <View style={styles.itemIcon}>
+                            <FileDownloadIcon size={20} color="white" />
+                        </View>
+                        <TextDefault style={styles.infoChipText}>
+                            Exportar dados
+                        </TextDefault>
+                    </Pressable> */}
 
                     <View style={styles.buttons}>
                         <View style={styles.itemIcon}>

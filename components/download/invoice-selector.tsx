@@ -1,0 +1,243 @@
+import TextDefault from "@/components/core/text-core";
+import { useProfile } from "@/hooks/use-profile";
+import { useInvoice } from "@/hooks/use-invoice";
+import { useGroups } from "@/hooks/use-group";
+import { useInvoicePurchases } from "@/hooks/use-invoice-purchases";
+
+import { useRouter } from "expo-router";
+import { useCallback, useMemo, useRef } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
+
+import {
+    BottomSheetBackdrop,
+    BottomSheetModal,
+    BottomSheetView,
+    BottomSheetScrollView,
+} from "@gorhom/bottom-sheet";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { AltArrowDownIcon } from "@solar-icons/react-native/linear/alt-arrow-down";
+import { AltArrowRightIcon } from "@solar-icons/react-native/linear/alt-arrow-right";
+import { AltArrowLeftIcon } from "@solar-icons/react-native/linear/alt-arrow-left";
+
+import { type Invoice } from "@/hooks/use-group-invoices";
+
+function sortInvoicesDesc(invoices: Invoice[]): Invoice[] {
+    return [...invoices].sort(
+        (a, b) =>
+            new Date(b.periodStart).getTime() -
+            new Date(a.periodStart).getTime(),
+    );
+}
+
+export function formatFaturaLabel(invoice: Invoice): string {
+    const months = [
+        "Janeiro",
+        "Fevereiro",
+        "Março",
+        "Abril",
+        "Maio",
+        "Junho",
+        "Julho",
+        "Agosto",
+        "Setembro",
+        "Outubro",
+        "Novembro",
+        "Dezembro",
+    ];
+    const referenceMonth = months[invoice.referenceMonth - 1];
+    const referenceYear = invoice.referenceYear.toString();
+
+    return referenceYear === new Date().getFullYear().toString()
+        ? referenceMonth
+        : `${referenceMonth}/${referenceYear}`;
+}
+
+export default function ExportInvoiceSelector({
+    invoices,
+    isSelected,
+    selectedInvoice,
+    setSelectedInvoiceId,
+    style,
+}: {
+    invoices: Invoice[];
+    isSelected: boolean;
+    selectedInvoice?: Invoice | null;
+    setSelectedInvoiceId: (id: string) => void;
+    style?: object;
+}) {
+    const router = useRouter();
+    const insets = useSafeAreaInsets();
+    const { data: profile, isLoading } = useProfile();
+    const {
+        data: purchasesData,
+        refetch,
+        isLoading: purchasesLoading,
+    } = useInvoicePurchases(selectedInvoice?.id ?? null);
+
+    const snapPoints = useMemo(() => ["80%", "100%"], []);
+    const sortedInvoices = useMemo(
+        () => sortInvoicesDesc(invoices),
+        [invoices],
+    );
+
+    const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+    const handleInvoicesList = useCallback(() => {
+        bottomSheetModalRef.current?.present();
+    }, []);
+    const handleSheetChanges = useCallback((index: number) => {
+        console.log("handleSheetChanges", index);
+    }, []);
+
+    // console.log("InvoiceSelectMenu", selectedInvoice);
+
+    return (
+        <>
+            <View
+                style={[
+                    style,
+                    {
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        justifyContent: "flex-start",
+                        gap: 4,
+                    },
+                ]}
+            >
+                <TextDefault style={styles.headerText}>Fatura:</TextDefault>
+                <Pressable
+                    onPress={handleInvoicesList}
+                    style={styles.headerButton}
+                >
+                    <TextDefault
+                        style={styles.headerButtonTitle}
+                        numberOfLines={1}
+                    >
+                        {formatFaturaLabel(selectedInvoice!) ??
+                            "Selecionar fatura"}
+                    </TextDefault>
+                </Pressable>
+            </View>
+            <BottomSheetModal
+                ref={bottomSheetModalRef}
+                onChange={handleSheetChanges}
+                onDismiss={() => {
+                    // fecthData(true);
+                }}
+                // snapPoints={snapPoints}
+                backdropComponent={(backdropProps) => (
+                    <BottomSheetBackdrop
+                        {...backdropProps}
+                        disappearsOnIndex={-1}
+                        appearsOnIndex={0}
+                    />
+                )}
+                enablePanDownToClose
+                topInset={insets.top}
+                backgroundStyle={{ backgroundColor: "#161718" }}
+                handleIndicatorStyle={{ backgroundColor: "#555" }}
+                // enableDynamicSizing={false}
+            >
+                <BottomSheetScrollView
+                    contentContainerStyle={styles.contentContainer}
+                >
+                    <View style={styles.content}>
+                        <TextDefault style={[styles.headerText, { paddingHorizontal: 24 }]}>
+                            Selecione a fatura que deseja exportar:
+                        </TextDefault>
+                        <View style={styles.menu}>
+                            {invoices.map((invoice) => {
+                                const isSelected =
+                                    selectedInvoice?.id === invoice.id;
+                                return (
+                                    <Pressable
+                                        key={invoice.id}
+                                        onPress={() => {
+                                            setSelectedInvoiceId(invoice.id);
+                                            bottomSheetModalRef.current?.dismiss();
+                                        }}
+                                        style={[styles.options]}
+                                    >
+                                        <TextDefault
+                                            style={[
+                                                styles.optionsText,
+                                                {
+                                                    color: isSelected
+                                                        ? "#fff"
+                                                        : "#B3B3B3",
+                                                },
+                                            ]}
+                                        >
+                                            {formatFaturaLabel(invoice)}
+                                        </TextDefault>
+                                    </Pressable>
+                                );
+                            })}
+                        </View>
+                    </View>
+                </BottomSheetScrollView>
+            </BottomSheetModal>
+        </>
+    );
+}
+
+const styles = StyleSheet.create({
+    headerSlotLeft: {
+        width: "33%",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "flex-start",
+    },
+    headerButton: {
+        // width: "100%",
+        backgroundColor: "#232323",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderWidth: 1,
+        borderColor: "#232323",
+        borderRadius: 8,
+    },
+    headerButtonTitle: {
+        flexShrink: 1,
+        color: "#eee",
+        fontSize: 14,
+        fontWeight: "600",
+        textAlign: "center",
+    },
+    contentContainer: {
+        flex: 1,
+        padding: 0,
+        alignItems: "center",
+        paddingBottom: 64,
+    },
+    content: {
+        flex: 1,
+        alignItems: "flex-start",
+        justifyContent: "center",
+        width: "100%",
+    },
+    headerText: {
+        fontSize: 14,
+    },
+    menu: {
+        width: "100%",
+        flexDirection: "column",
+        marginTop: 16,
+    },
+    options: {
+        width: "100%",
+        paddingVertical: 16,
+        paddingHorizontal: 24,
+        // borderBottomWidth: 0.5,
+        // borderBottomColor: "#555",
+    },
+    optionsText: {
+        color: "#fff",
+        fontSize: 13,
+        fontWeight: "500",
+    },
+});

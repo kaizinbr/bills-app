@@ -30,7 +30,7 @@ function sortInvoicesDesc(invoices: Invoice[]): Invoice[] {
     );
 }
 
-function formatFaturaLabel(invoice: Invoice): string {
+export function formatFaturaLabel(invoice: Invoice): string {
     const months = [
         "Janeiro",
         "Fevereiro",
