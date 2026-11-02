@@ -26,7 +26,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import Incomes from "@/components/home/incomes";
+import Incomes from "@/components/home/header-cards/incomes";
 import InvoiceSelectMenu from "@/components/home/invoice-select-menu";
 import { Bag3Icon } from "@solar-icons/react-native/linear/bag-3";
 import { BagCheckIcon } from "@solar-icons/react-native/linear/bag-check";
@@ -40,6 +40,7 @@ import { DownloadMinimalisticIcon } from '@solar-icons/react-native/linear/downl
 import { UsersGroupTwoRoundedIcon } from "@solar-icons/react-native/linear/users-group-two-rounded";
 import Avatar, { AvatarGeneric } from "@/components/user/avatar";
 import GroupMembers from "@/components/home/group-members";
+import LimitCard from "@/components/home/header-cards/limit";
 
 type GroupsProps = {
     groupId: string | null;
@@ -210,62 +211,11 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                     horizontal
                     showsHorizontalScrollIndicator={false}
                 >
+                    <LimitCard group={group} totalData={totalData} />
                     {selectedInvoiceId && (
                         <Incomes invoiceId={selectedInvoiceId} />
                     )}
-                    {Number(group.limit) > 0 && totalData?.total != null && (
-                        <LinearGradient
-                            colors={["#8C85F7", "#413CA4"]}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                            style={[
-                                {
-                                    padding: 16,
-                                    width: width - 48,
-                                    borderRadius: 18,
-                                },
-                            ]}
-                        >
-                            <Pressable
-                                onPress={() => {
-                                    router.push({
-                                        pathname: `/(tabs)/chart`,
-                                        // params: { invoiceId: selectedInvoiceId! },
-                                    });
-                                }}
-                                style={[styles.assetCard]}
-                            >
-                                <View
-                                    style={{
-                                        flexDirection: "row",
-                                        justifyContent: "space-between",
-                                    }}
-                                >
-                                    <TextDefault
-                                        style={styles.assetText}
-                                        numberOfLines={1}
-                                    >
-                                        Uso do limite
-                                    </TextDefault>
-                                </View>
-                                <TextDefault style={[styles.assetValue]}>
-                                    {(
-                                        (totalData.total /
-                                            Number(group.limit)) *
-                                        100
-                                    )
-                                        .toFixed(0)
-                                        .replace(".", ",")}
-                                    % <TextDefault style={{
-                                        fontSize: 14,
-                                        color: "#fff",
-                                    }}>
-                                        ({formatCurrency(totalData.total)} de {formatCurrency(group.limit)})
-                                    </TextDefault>
-                                </TextDefault>
-                            </Pressable>
-                        </LinearGradient>
-                    )}
+                    
                 </ScrollView>
 
                 {/* credor, cartões e ações da conta */}
@@ -274,6 +224,16 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.infoRow}
                 >
+
+                    <View style={styles.buttons}>
+                        <View style={styles.itemIcon}>
+                            <Bag3Icon size={24} color="white" />
+                        </View>
+                        <TextDefault style={styles.infoChipText}>
+                            {totalPurchases} compra
+                            {totalPurchases !== 1 ? "s" : ""}
+                        </TextDefault>
+                    </View>
                     <Pressable
                         onPress={() => {
                             router.push({
@@ -324,16 +284,6 @@ const Groups = forwardRef<GroupsHandle, GroupsProps>(
                             Exportar dados
                         </TextDefault>
                     </Pressable> */}
-
-                    <View style={styles.buttons}>
-                        <View style={styles.itemIcon}>
-                            <Bag3Icon size={24} color="white" />
-                        </View>
-                        <TextDefault style={styles.infoChipText}>
-                            {totalPurchases} compra
-                            {totalPurchases !== 1 ? "s" : ""}
-                        </TextDefault>
-                    </View>
                     <Pressable
                         style={styles.buttons}
                         onPress={() => {

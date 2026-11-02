@@ -295,7 +295,7 @@ export default function Home() {
                                 : 0
                         }
                         progressBackgroundColor="#282828"
-                        colors={["#5E8C61", "#5E8C61"]}
+                        colors={["#00C89B", "#00C89B"]}
                         style={{
                             borderWidth: 0.5,
                             borderColor: "#56595D",

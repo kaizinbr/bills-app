@@ -307,6 +307,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         zIndex: 100,
+        backgroundColor: "#161718",
     },
     headerTop: {
         paddingHorizontal: 24,
@@ -314,6 +315,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
+        height: 64,
     },
     headerSlotLeft: {
         width: "33%",

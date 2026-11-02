@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     headerButton: {
         maxWidth: "33%",
         // backgroundColor: "rgba(40, 40, 40, 0.5)",
-        paddingHorizontal: 12,
+        // paddingHorizontal: 12,
         paddingVertical: 8,
         // borderRadius: 10,
         flexDirection: "row",

@@ -7,7 +7,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
+import { CourseUpIcon } from "@solar-icons/react-native/linear/course-up";
 import { useIncomesFromInvoice } from "@/hooks/use-income-total";
 
 type GroupsProps = {
@@ -52,14 +52,13 @@ export default function Incomes({ invoiceId }: { invoiceId: string | null }) {
 
     return (
         <LinearGradient
-            colors={["#4FB2B9", "#0C737D"]}
+                    colors={["#8C85F7", "#413CA4"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={[
                 {
-                    padding: 16,
                     width: width - 48,
-                    borderRadius: 18,
+                    borderRadius: 22,
                 },
             ]}
         >
@@ -68,6 +67,7 @@ export default function Incomes({ invoiceId }: { invoiceId: string | null }) {
                     styles.assetCard,
                     {
                         width: "100%",
+                        padding: 16,
                     },
                 ]}
                 onPress={() => {
@@ -81,15 +81,26 @@ export default function Incomes({ invoiceId }: { invoiceId: string | null }) {
                     style={{
                         flexDirection: "row",
                         justifyContent: "space-between",
+                                alignItems: "center",
                     }}
                 >
-                    <TextDefault style={styles.assetText} numberOfLines={1}>
-                        Entradas do mês
-                    </TextDefault>
+                    <View>
+                        <TextDefault style={styles.assetText} numberOfLines={1}>
+                            Entradas do mês
+                        </TextDefault>
+                        <TextDefault style={[styles.assetValue]}>
+                            {formatCurrency(data?.total ?? 0)}
+                        </TextDefault>
+                    </View>
+                    <View
+                        style={{
+                            justifyContent: "center",
+                            alignItems: "center", 
+                        }}
+                    >
+                        <CourseUpIcon size={24} color="#fff" strokeWidth={3} />
+                    </View>
                 </View>
-                <TextDefault style={[styles.assetValue]}>
-                    {formatCurrency(data?.total ?? 0)}
-                </TextDefault>
             </Pressable>
         </LinearGradient>
     );

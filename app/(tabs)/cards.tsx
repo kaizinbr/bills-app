@@ -22,7 +22,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import BackBtn from "@/components/core/back-btn";
-
+import { AddIcon } from '@solar-icons/react-native/linear/add'
 import { CardIcon } from "@solar-icons/react-native/linear/card";
 import GroupSelectMenu from "@/components/home/group-select-menu";
 import { useGroups } from "@/hooks/use-group";
@@ -44,10 +44,9 @@ export default function Cards() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [showHeader, setShowHeader] = useState(false);
     const { selectedGroupId, setSelectedGroupId, isLoaded } =
-            useSelectedGroup();
+        useSelectedGroup();
 
-            
-                const scrollRef = useRef<ScrollViewInstance>(null);
+    const scrollRef = useRef<ScrollViewInstance>(null);
     const scrollY = useRef(new Animated.Value(0)).current;
 
     const headerTranslateY = Animated.diffClamp(scrollY, 0, 64).interpolate({
@@ -122,8 +121,9 @@ export default function Cards() {
                         paddingBottom: 32,
                         alignItems: "flex-start",
                         justifyContent: "flex-start",
-                        gap: 0,
+                        gap: 16,
                         paddingTop: insets.top + 64,
+                        paddingHorizontal: 24,
                     }}
                     showsVerticalScrollIndicator={false}
                     style={styles.container}
@@ -150,45 +150,95 @@ export default function Cards() {
                             Nenhum cartão encontrado. Adicione um novo cartão.
                         </TextDefault>
                     ) : (
-                        cards.map((card: any) => (
+                        <>
+                            {cards.map((card: any) => (
+                                <Pressable
+                                    key={card.id}
+                                    style={({ pressed }) => [
+                                        styles.item,
+                                        {
+                                            backgroundColor: pressed
+                                                ? "#282828"
+                                                : "#262829",
+                                        },
+                                    ]}
+                                    onPress={() =>
+                                        router.push({
+                                            pathname: `/card/[id]`,
+                                            params: { id: card.id },
+                                        })
+                                    }
+                                >
+                                    <View
+                                        style={[
+                                            styles.cardIconContainer,
+                                            {
+                                                backgroundColor:
+                                                    card.color || "#282828",
+                                            },
+                                        ]}
+                                    >
+                                        <View
+                                            style={{
+                                                width: 32,
+                                                height: 24,
+                                                backgroundColor: "#DBDBDB",
+                                                borderRadius: 6,
+                                            }}
+                                        />
+                                    </View>
+                                    <View>
+                                        <TextDefault style={styles.cardTitle}>
+                                            {card.name.trim()} ·{" "}
+                                            <TextDefault
+                                                style={styles.description}
+                                            >
+                                                {card.digits}
+                                            </TextDefault>
+                                        </TextDefault>
+                                    </View>
+                                </Pressable>
+                            ))}
+
                             <Pressable
-                                key={card.id}
                                 style={({ pressed }) => [
                                     styles.item,
                                     {
                                         backgroundColor: pressed
                                             ? "#282828"
-                                            : "#161718",
+                                            : "#262829",
+
                                     },
                                 ]}
                                 onPress={() =>
-                                    router.push({
-                                        pathname: `/card/[id]`,
-                                        params: { id: card.id },
-                                    })
+                                    router.push(
+                                        `/create-card?groupId=${selectedGroupId}`,
+                                    )
                                 }
                             >
                                 <View
                                     style={[
                                         styles.cardIconContainer,
                                         {
-                                            backgroundColor:
-                                                card.color || "#282828",
+                                            backgroundColor: "#00C89B",
+                                        alignItems: "center",
+                                        justifyContent: "center",
                                         },
                                     ]}
                                 >
-                                    <CardIcon size={20} color="white" />
+                                    <AddIcon
+                                        size={32}
+                                        color="#fff"
+                                        strokeWidth={4}
+                                    />
                                 </View>
                                 <View>
                                     <TextDefault style={styles.cardTitle}>
-                                        {card.name}
-                                    </TextDefault>
-                                    <TextDefault style={styles.description}>
-                                        {card.digits}
+                                        Criar cartão
                                     </TextDefault>
                                 </View>
                             </Pressable>
-                        ))
+                        </>
                     )}
                 </ScrollView>
             )}
@@ -244,6 +294,7 @@ const styles = StyleSheet.create({
     main: {
         flex: 1,
         backgroundColor: "#161718",
+        paddingTop: 16,
     },
     keyboardContainer: {
         flex: 1,
@@ -265,13 +316,16 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         zIndex: 100,
+        backgroundColor: "#161718",
+        borderBottomWidth: 1,
+        borderBottomColor: "#282828",
     },
     headerTop: {
-        paddingHorizontal: 24,
-        paddingVertical: 8,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
+        height: 64,
+        paddingHorizontal: 24,
     },
     inputContainer: {
         marginTop: 16,
@@ -342,15 +396,14 @@ const styles = StyleSheet.create({
     },
 
     item: {
-        flexDirection: "row",
+        flexDirection: "column",
         // justifyContent: "space-between",
         gap: 8,
         alignItems: "center",
-        paddingVertical: 16,
-        paddingHorizontal: 24,
-        borderBottomWidth: 1,
-        borderBottomColor: "#232323",
+        padding: 8,
         width: "100%",
+        backgroundColor: "#36383A",
+        borderRadius: 24,
     },
 
     buttons: {
@@ -371,10 +424,11 @@ const styles = StyleSheet.create({
         color: "#aaa",
     },
     cardIconContainer: {
-        width: 36,
-        height: 36,
-        alignItems: "center",
+        width: "100%",
+        aspectRatio: 5 / 3,
+        borderRadius: 22,
+        alignItems: "flex-start",
         justifyContent: "center",
-        borderRadius: 999,
+        paddingHorizontal: 32,
     },
 });
