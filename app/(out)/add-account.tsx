@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useAuth } from "@/components/core/auth-provider";
 
@@ -27,6 +27,7 @@ export default function CreateGroup() {
 
     const local = useLocalSearchParams();
     const id = local.id as string; // id da compra, se for edição
+    const codeFromLink = local.code as string | undefined;
     const { data, refetch, isFetching } = useGroups();
 
     const { session } = useAuth();
@@ -38,6 +39,7 @@ export default function CreateGroup() {
     const [error, setError] = useState<string | null>(null);
 
     const [inviteCode, setInviteCode] = useState("");
+    const autoJoinStarted = useRef(false);
 
     useEffect(() => {
         setCanSubmit(inviteCode.length === 6);
@@ -51,10 +53,11 @@ export default function CreateGroup() {
         }
     }, [inviteCode]);
 
-    const handleAddGroup = () => {
+    const handleAddGroup = (code: string) => {
         setLoading(true);
+        setError(null);
 
-        api.post("/groups/join", { inviteCode })
+        api.post("/groups/join", { inviteCode: code })
             .then((res) => {
                 refetch();
                 router.push("/(tabs)/home");
@@ -67,6 +70,15 @@ export default function CreateGroup() {
                 setLoading(false);
             });
     };
+
+    useEffect(() => {
+        if (!codeFromLink || codeFromLink.length !== 6) return;
+        if (autoJoinStarted.current) return;
+
+        autoJoinStarted.current = true;
+        setInviteCode(codeFromLink);
+        handleAddGroup(codeFromLink);
+    }, [codeFromLink]);
 
     return (
         <View style={styles.main}>
@@ -108,10 +120,11 @@ export default function CreateGroup() {
                             letterSpacing: 4,
                         }}
                         maxLength={6}
+                        value={inviteCode}
                         onChangeText={setInviteCode}
                     />
                     <Pressable
-                        onPress={handleAddGroup}
+                        onPress={() => handleAddGroup(inviteCode)}
                         style={({ pressed }) => [
                             styles.submitBtn,
                             {

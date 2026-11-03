@@ -7,8 +7,8 @@ import * as SecureStore from "expo-secure-store";
 
 export const authClient = createAuthClient({
     // baseURL: "https://api.kaizin.work/", 
+    // baseURL: "http://192.168.1.4:3000/api",
     baseURL: "https://financas.kaizin.work", 
-    // baseURL: "http://192.168.18.152:3000",
     plugins: [
         oneTimeTokenClient(),
         emailOTPClient(),

@@ -17,7 +17,21 @@
                 "backgroundColor": "#e9fffa"
             },
             "predictiveBackGestureEnabled": false,
-            "package": "com.kaizinbr.billsapp"
+            "package": "com.kaizinbr.billsapp",
+            "intentFilters": [
+                {
+                    "action": "VIEW",
+                    "autoVerify": true,
+                    "data": [
+                        {
+                            "scheme": "https",
+                            "host": "bills.kaizin.work",
+                            "pathPrefix": "/convite"
+                        }
+                    ],
+                    "category": ["BROWSABLE", "DEFAULT"]
+                }
+            ]
         },
         "web": {
             "output": "static",
@@ -145,6 +159,20 @@
                 {
                     "supportsOpeningDocumentsInPlace": true,
                     "enableFileSharing": true
+                }
+            ],
+            [
+                "react-native-nitro-google-signin",
+                {
+                    "iosUrlScheme": "com.googleusercontent.apps.709046165784-b2nimq4rr51pgg1qik9vd70qijbj7fvc"
+                }
+            ],
+            [
+                "expo-build-properties",
+                {
+                    "android": {
+                        "cmakeVersion": "3.31.6"
+                    }
                 }
             ]
         ],

@@ -6,13 +6,13 @@ import { useAuth } from "@/components/core/auth-provider";
 import StatusBar from "@/components/core/status-bar";
 import TextDefault from "@/components/core/text-core";
 import * as Clipboard from "expo-clipboard";
-import * as Sharing from "expo-sharing";
 import {
     ActivityIndicator,
     KeyboardAvoidingView,
     Platform,
     Pressable,
     ScrollView,
+    Share,
     StyleSheet,
     View,
 } from "react-native";
@@ -94,13 +94,11 @@ export default function CreateGroup() {
 
     const shareInviteCode = async () => {
         try {
-            if (await Sharing.isAvailableAsync()) {
-                await Sharing.shareAsync(inviteCode);
-            } else {
-                console.error("Sharing is not available on this device");
-            }
+            await Share.share({
+                message: `Entre na conta ${groupName} pelo link: https://bills.kaizin.work/convite/${inviteCode}`,
+            });
         } catch (error) {
-            console.error("Error sharing invite code:", error);
+            console.error("Error sharing invite link:", error);
         }
     };
 
@@ -188,6 +186,23 @@ export default function CreateGroup() {
                                     Copiar código
                                 </TextDefault>
                             </Pressable>
+                            <Pressable
+                                onPress={shareInviteCode}
+                                style={({ pressed }) => [
+                                    styles.shareBtn,
+                                    {
+                                        backgroundColor: pressed
+                                            ? "#0b3a31"
+                                            : "transparent",
+                                    },
+                                ]}
+                            >
+                                <TextDefault
+                                    style={{ color: "#fff", fontWeight: "700" }}
+                                >
+                                    Compartilhar link
+                                </TextDefault>
+                            </Pressable>
                         </View>
 
                         {isError && (
@@ -253,6 +268,15 @@ const styles = StyleSheet.create({
         backgroundColor: "#009C7A",
         borderWidth: 2,
         borderColor: "transparent",
+        padding: 12,
+        borderRadius: 9999,
+        justifyContent: "flex-end",
+        width: "100%",
+        alignItems: "center",
+    },
+    shareBtn: {
+        borderWidth: 2,
+        borderColor: "#009C7A",
         padding: 12,
         borderRadius: 9999,
         justifyContent: "flex-end",

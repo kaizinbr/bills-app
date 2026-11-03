@@ -144,11 +144,45 @@ export default function Cards() {
                     }
                 >
                     {cards.length === 0 ? (
-                        <TextDefault
-                            style={{ color: "#fff", paddingHorizontal: 24 }}
-                        >
-                            Nenhum cartão encontrado. Adicione um novo cartão.
-                        </TextDefault>
+                        
+                            <Pressable
+                                style={({ pressed }) => [
+                                    styles.item,
+                                    {
+                                        backgroundColor: pressed
+                                            ? "#282828"
+                                            : "#262829",
+
+                                    },
+                                ]}
+                                onPress={() =>
+                                    router.push(
+                                        `/create-card?groupId=${selectedGroupId}`,
+                                    )
+                                }
+                            >
+                                <View
+                                    style={[
+                                        styles.cardIconContainer,
+                                        {
+                                            backgroundColor: "#00C89B",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        },
+                                    ]}
+                                >
+                                    <AddIcon
+                                        size={32}
+                                        color="#fff"
+                                        strokeWidth={4}
+                                    />
+                                </View>
+                                <View>
+                                    <TextDefault style={styles.cardTitle}>
+                                        Criar cartão
+                                    </TextDefault>
+                                </View>
+                            </Pressable>
                     ) : (
                         <>
                             {cards.map((card: any) => (

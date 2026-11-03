@@ -17,6 +17,7 @@ import {
 
 import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "expo-image";
+import GoogleSignInButton from "@/components/core/google-sign-in-button";
 
 export default function SignIn() {
     const { session, isPending } = useAuth();
@@ -120,6 +121,7 @@ export default function SignIn() {
                     <Button onPress={handleSignIn} loading={loading}>
                         Entrar
                     </Button>
+                    {/* <GoogleSignInButton /> */}
                     <Link href="/sign-up" style={styles.link}>
                         <TextDefault style={styles.linkText}>
                             Não tem conta? Cadastre-se

@@ -50,7 +50,7 @@ export default function Avatar({
                                     width: size || 32,
                                     height: size || 32,
                                     borderRadius: 9999,
-                                    backgroundColor: profile.color || "#009C7A",
+                                    backgroundColor: profile.color || "#00D0A3",
                                 },
                             ]}
                         >
@@ -111,7 +111,7 @@ export function AvatarNoPress({
                             width: size || 32,
                             height: size || 32,
                             borderRadius: 9999,
-                            backgroundColor: profile.color || "#009C7A",
+                            backgroundColor: profile.color || "#00D0A3",
                         },
                     ]}
                 />
@@ -124,7 +124,7 @@ export function AvatarNoPress({
                             width: size || 32,
                             height: size || 32,
                             borderRadius: 9999,
-                            backgroundColor: profile.color || "#009C7A",
+                            backgroundColor: profile.color || "#00D0A3",
                         },
                     ]}
                 >
@@ -195,7 +195,7 @@ export function AvatarGeneric({
                             width: size || 32,
                             height: size || 32,
                             borderRadius: 9999,
-                            backgroundColor: user?.color || "#009C7A",
+                            backgroundColor: user?.color || "#00D0A3",
                         },
                     ]}
                 >
@@ -267,7 +267,7 @@ export function AvatarCurrentUser({
                             width: size || 32,
                             height: size || 32,
                             borderRadius: 9999,
-                            backgroundColor: profile.color || "#009C7A",
+                            backgroundColor: profile.color || "#00D0A3",
                         },
                     ]}
                 >
@@ -300,10 +300,13 @@ const styles = StyleSheet.create({
     cardImage: {
         width: 32,
         height: 32,
-        backgroundColor: "#009C7A",
+        backgroundColor: "#00D0A3",
+        // backgroundColor: "#00D0A3",
         borderRadius: 32 * 0.306,
         alignItems: "center",
         justifyContent: "center",
+        // borderWidth: 1,
+        // borderColor: "#00D0A3",
     },
     cardImageText: {
         color: "#fff",
